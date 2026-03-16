@@ -1,11 +1,12 @@
-require('dotenv').config({ path: '/Users/torder/workspace/salesforce-data-tools/.env' });
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 module.exports = {
   apps: [
     {
       name: 'sf-dashboard-api',
       script: './backend/server.js',
-      cwd: '/Users/torder/workspace/salesforce-data-tools/dashboard',
+      cwd: __dirname,
       env: {
         API_PORT: 4003,
         NODE_ENV: 'development',
