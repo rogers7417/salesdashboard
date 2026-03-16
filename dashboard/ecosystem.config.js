@@ -1,0 +1,24 @@
+require('dotenv').config({ path: '/Users/torder/workspace/salesforce-data-tools/.env' });
+
+module.exports = {
+  apps: [
+    {
+      name: 'sf-dashboard-api',
+      script: './backend/server.js',
+      cwd: '/Users/torder/workspace/salesforce-data-tools/dashboard',
+      env: {
+        API_PORT: 4003,
+        NODE_ENV: 'development',
+        SF_CLIENT_ID: process.env.SF_CLIENT_ID,
+        SF_CLIENT_SECRET: process.env.SF_CLIENT_SECRET,
+        SF_USERNAME: process.env.SF_USERNAME,
+        SF_PASSWORD: process.env.SF_PASSWORD,
+        SF_LOGIN_URL: process.env.SF_LOGIN_URL
+      },
+      watch: false,
+      instances: 1,
+      autorestart: true,
+      max_restarts: 10
+    }
+  ]
+};

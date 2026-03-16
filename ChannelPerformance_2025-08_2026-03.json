@@ -1,0 +1,703 @@
+{
+  "months": [
+    "2025-08",
+    "2025-09",
+    "2025-10",
+    "2025-11",
+    "2025-12",
+    "2026-01",
+    "2026-02",
+    "2026-03"
+  ],
+  "performanceData": {
+    "구준모": {
+      "id": "005IR00000FgbZZYAZ",
+      "months": {
+        "2025-08": {
+          "leads": 28,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-09": {
+          "leads": 28,
+          "mou": 4,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-10": {
+          "leads": 16,
+          "mou": 1,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-11": {
+          "leads": 32,
+          "mou": 2,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-12": {
+          "leads": 22,
+          "mou": 2,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-01": {
+          "leads": 22,
+          "mou": 4,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-02": {
+          "leads": 15,
+          "mou": 3,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-03": {
+          "leads": 1,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        }
+      }
+    },
+    "김보미": {
+      "id": "005TJ000007UcVGYA0",
+      "months": {
+        "2025-08": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-09": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-10": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-11": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-12": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-01": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-02": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-03": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        }
+      }
+    },
+    "김희수": {
+      "id": "005IR00000FgjzAYAR",
+      "months": {
+        "2025-08": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-09": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-10": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-11": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-12": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-01": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-02": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-03": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        }
+      }
+    },
+    "명세준": {
+      "id": "005TJ0000087kccYAA",
+      "months": {
+        "2025-08": {
+          "leads": 1,
+          "mou": 0,
+          "cw": 9,
+          "cwAmount": 652500
+        },
+        "2025-09": {
+          "leads": 1,
+          "mou": 0,
+          "cw": 96,
+          "cwAmount": 24048470
+        },
+        "2025-10": {
+          "leads": 1,
+          "mou": 0,
+          "cw": 9,
+          "cwAmount": 672100
+        },
+        "2025-11": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 16,
+          "cwAmount": 1393300
+        },
+        "2025-12": {
+          "leads": 2,
+          "mou": 0,
+          "cw": 152,
+          "cwAmount": 34414000
+        },
+        "2026-01": {
+          "leads": 2,
+          "mou": 0,
+          "cw": 16,
+          "cwAmount": 1273300
+        },
+        "2026-02": {
+          "leads": 2,
+          "mou": 0,
+          "cw": 11,
+          "cwAmount": 384700
+        },
+        "2026-03": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 53,
+          "cwAmount": 13233200
+        }
+      }
+    },
+    "박해규": {
+      "id": "005TJ00000EY5RpYAL",
+      "months": {
+        "2025-08": {
+          "leads": 42,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-09": {
+          "leads": 57,
+          "mou": 3,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-10": {
+          "leads": 32,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-11": {
+          "leads": 45,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-12": {
+          "leads": 21,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-01": {
+          "leads": 34,
+          "mou": 1,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-02": {
+          "leads": 34,
+          "mou": 1,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-03": {
+          "leads": 1,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        }
+      }
+    },
+    "송슬기": {
+      "id": "005IR00000Fh6QAYAZ",
+      "months": {
+        "2025-08": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-09": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-10": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-11": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 32,
+          "cwAmount": 4439500
+        },
+        "2025-12": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 170,
+          "cwAmount": 43434270
+        },
+        "2026-01": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 5,
+          "cwAmount": 1120400
+        },
+        "2026-02": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 13,
+          "cwAmount": 2916100
+        },
+        "2026-03": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 58,
+          "cwAmount": 15980040
+        }
+      }
+    },
+    "오유정": {
+      "id": "005IR00000FgbZRYAZ",
+      "months": {
+        "2025-08": {
+          "leads": 40,
+          "mou": 0,
+          "cw": 4,
+          "cwAmount": 909700
+        },
+        "2025-09": {
+          "leads": 34,
+          "mou": 5,
+          "cw": 76,
+          "cwAmount": 18947940
+        },
+        "2025-10": {
+          "leads": 57,
+          "mou": 2,
+          "cw": 4,
+          "cwAmount": 65400
+        },
+        "2025-11": {
+          "leads": 74,
+          "mou": 4,
+          "cw": 1,
+          "cwAmount": 277500
+        },
+        "2025-12": {
+          "leads": 108,
+          "mou": 7,
+          "cw": 15,
+          "cwAmount": 3717680
+        },
+        "2026-01": {
+          "leads": 69,
+          "mou": 3,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-02": {
+          "leads": 94,
+          "mou": 2,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-03": {
+          "leads": 9,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        }
+      }
+    },
+    "이광민": {
+      "id": "005IR00000Fh6OEYAZ",
+      "months": {
+        "2025-08": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-09": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-10": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-11": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-12": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-01": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-02": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-03": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        }
+      }
+    },
+    "이은지": {
+      "id": "005IR00000FgeeXYAR",
+      "months": {
+        "2025-08": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 1,
+          "cwAmount": 0
+        },
+        "2025-09": {
+          "leads": 1,
+          "mou": 0,
+          "cw": 3,
+          "cwAmount": 253400
+        },
+        "2025-10": {
+          "leads": 1,
+          "mou": 0,
+          "cw": 3,
+          "cwAmount": 75600
+        },
+        "2025-11": {
+          "leads": 1,
+          "mou": 0,
+          "cw": 3,
+          "cwAmount": 511000
+        },
+        "2025-12": {
+          "leads": 1,
+          "mou": 0,
+          "cw": 7,
+          "cwAmount": 584700
+        },
+        "2026-01": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 1,
+          "cwAmount": 359000
+        },
+        "2026-02": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 1,
+          "cwAmount": 16500
+        },
+        "2026-03": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        }
+      }
+    },
+    "장명진": {
+      "id": "005TJ00000EDLJVYA5",
+      "months": {
+        "2025-08": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-09": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-10": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-11": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-12": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-01": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 1,
+          "cwAmount": 58000
+        },
+        "2026-02": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 3,
+          "cwAmount": 256000
+        },
+        "2026-03": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        }
+      }
+    },
+    "정용현": {
+      "id": "005IR00000FgbZdYAJ",
+      "months": {
+        "2025-08": {
+          "leads": 13,
+          "mou": 1,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-09": {
+          "leads": 16,
+          "mou": 2,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-10": {
+          "leads": 15,
+          "mou": 3,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-11": {
+          "leads": 12,
+          "mou": 2,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-12": {
+          "leads": 14,
+          "mou": 1,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-01": {
+          "leads": 24,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-02": {
+          "leads": 30,
+          "mou": 4,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-03": {
+          "leads": 4,
+          "mou": 1,
+          "cw": 0,
+          "cwAmount": 0
+        }
+      }
+    },
+    "정주희": {
+      "id": "005TJ0000059f4PYAQ",
+      "months": {
+        "2025-08": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 44,
+          "cwAmount": 10970250
+        },
+        "2025-09": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 46,
+          "cwAmount": 10147900
+        },
+        "2025-10": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 20,
+          "cwAmount": 4132800
+        },
+        "2025-11": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 4,
+          "cwAmount": 676000
+        },
+        "2025-12": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 16,
+          "cwAmount": 3451700
+        },
+        "2026-01": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 24,
+          "cwAmount": 5641200
+        },
+        "2026-02": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 31,
+          "cwAmount": 7112400
+        },
+        "2026-03": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 9,
+          "cwAmount": 1876700
+        }
+      }
+    },
+    "최영은": {
+      "id": "005TJ00000BgOafYAF",
+      "months": {
+        "2025-08": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-09": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-10": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2025-11": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 1,
+          "cwAmount": 111000
+        },
+        "2025-12": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 2,
+          "cwAmount": 33300
+        },
+        "2026-01": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-02": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        },
+        "2026-03": {
+          "leads": 0,
+          "mou": 0,
+          "cw": 0,
+          "cwAmount": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4857 @@
+{
+  "month": "2026-01",
+  "totalLeads": 1143,
+  "duplicateSummary": {
+    "totalGroups": 90,
+    "totalRecords": 209
+  },
+  "classification": {
+    "case1_existing_customer": {
+      "groups": 72,
+      "records": 165,
+      "pct": "78.9%"
+    },
+    "case2_open_reinquiry": {
+      "groups": 1,
+      "records": 2,
+      "pct": "1.0%"
+    },
+    "case3_cl_reinquiry": {
+      "groups": 0,
+      "records": 0,
+      "pct": "0.0%"
+    },
+    "case4_spam": {
+      "groups": 7,
+      "records": 17,
+      "pct": "8.1%"
+    },
+    "case5_pure_duplicate": {
+      "groups": 10,
+      "records": 25,
+      "pct": "12.0%"
+    }
+  },
+  "insights": {
+    "savableByAutomation": 182,
+    "improvableByProcess": 2,
+    "estimatedTimeSavedHours": 46
+  },
+  "details": {
+    "case1_existing_customer": [
+      {
+        "phone": "01099908634",
+        "count": 8,
+        "company": "HONG JAGGER",
+        "spanDays": 0.2,
+        "intervals": [
+          {
+            "minutes": 1,
+            "days": 0
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          },
+          {
+            "minutes": 1,
+            "days": 0
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          },
+          {
+            "minutes": 354,
+            "days": 0.2
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 8
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 6
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tgZGE2A2",
+            "name": "null",
+            "company": "HONG JAGGER",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-09T19:57:23.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tgZXx2AM",
+            "name": "null",
+            "company": "홍승중",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-09T19:57:58.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tgTM82AM",
+            "name": "null",
+            "company": "홍승중",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-09T19:58:03.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tgZ1i2AE",
+            "name": "null",
+            "company": "HONG JAGGER",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-09T19:58:03.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tgZcn2AE",
+            "name": "null",
+            "company": "HONG JAGGER",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-09T19:59:25.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tgWGn2AM",
+            "name": "null",
+            "company": "HONG JAGGER",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-09T19:59:26.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tgqsA2AQ",
+            "name": "null",
+            "company": "홍승중",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-10T01:53:25.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000tgvAJ2AY",
+            "name": "null",
+            "company": "홍승중",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-10T01:53:27.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01020508019",
+        "count": 5,
+        "company": "이동성",
+        "spanDays": 11.7,
+        "intervals": [
+          {
+            "minutes": 8292,
+            "days": 5.8
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          },
+          {
+            "minutes": 8597,
+            "days": 6
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 5
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 3,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tzFor2AE",
+            "name": "null",
+            "company": "이동성",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-15T02:56:28.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uKWGQ2A4",
+            "name": "null",
+            "company": "동성",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-20T21:08:21.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uKZuD2AW",
+            "name": "null",
+            "company": "동성",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-20T21:08:22.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000ui6Xh2AI",
+            "name": "null",
+            "company": "동성",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-26T20:25:48.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000ui6ZJ2AY",
+            "name": "null",
+            "company": "동성",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-26T20:25:49.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01030844769",
+        "count": 5,
+        "company": "장시혁",
+        "spanDays": 1.2,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          },
+          {
+            "minutes": 31,
+            "days": 0
+          },
+          {
+            "minutes": 1757,
+            "days": 1.2
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 5
+        },
+        "taskSummary": {
+          "totalTasks": 5,
+          "leadsWithTask": 3,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uHPmX2AW",
+            "name": "null",
+            "company": "장시혁",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-20T04:07:04.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uHPo92AG",
+            "name": "null",
+            "company": "장시혁",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-20T04:07:05.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uHURH2A4",
+            "name": "null",
+            "company": "장시형",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-20T04:37:57.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uO9pt2AC",
+            "name": "null",
+            "company": "장시혁",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-21T09:55:06.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uO1UU2A0",
+            "name": "null",
+            "company": "장시혁",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-21T09:55:07.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01040754042",
+        "count": 4,
+        "company": "티오더",
+        "spanDays": 0.2,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          },
+          {
+            "minutes": 292,
+            "days": 0.2
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 4
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000ueLWv2AM",
+            "name": "null",
+            "company": "티오더",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-26T02:23:27.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000udZwy2AE",
+            "name": "null",
+            "company": "티오더",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-26T02:23:28.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000ug37i2AA",
+            "name": "null",
+            "company": "도입",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-26T07:15:23.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000ug5Sr2AI",
+            "name": "null",
+            "company": "도입",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-26T07:15:25.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01098844714",
+        "count": 4,
+        "company": "섹승호",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 10,
+            "days": 0
+          },
+          {
+            "minutes": 6,
+            "days": 0
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 4
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 3,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uptgX2AQ",
+            "name": "null",
+            "company": "섹승호",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-28T07:11:43.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000upyZl2AI",
+            "name": "null",
+            "company": "석마승호",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-28T07:21:48.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000upqtz2AA",
+            "name": "null",
+            "company": "석마승호",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-28T07:27:41.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000upid52AA",
+            "name": "null",
+            "company": "석마승호",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-28T07:27:42.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01092896333",
+        "count": 3,
+        "company": "조선김해뒷고기",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 1,
+            "days": 0
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 3
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000thFlh2AE",
+            "name": "null",
+            "company": "조선김해뒷고기",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-10T04:13:17.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000th9ze2AA",
+            "name": "null",
+            "company": "조선김해뒷고기",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-10T04:13:54.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000thCRN2A2",
+            "name": "null",
+            "company": "조선김해뒷고기",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-10T04:13:55.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01052938352",
+        "count": 3,
+        "company": "박지용",
+        "spanDays": 1.2,
+        "intervals": [
+          {
+            "minutes": 1790,
+            "days": 1.2
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 3
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uHEWA2A4",
+            "name": "null",
+            "company": "박지용",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-20T04:05:18.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uNi3V2AS",
+            "name": "null",
+            "company": "박지용",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-21T09:54:48.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uNdQG2A0",
+            "name": "null",
+            "company": "박지용",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-21T09:54:49.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01035115504",
+        "count": 3,
+        "company": "울산매곡점",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 1,
+            "days": 0
+          },
+          {
+            "minutes": 2,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 3
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 3,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uSnqM2AS",
+            "name": "null",
+            "company": "울산매곡점",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-22T10:00:32.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uSoZV2A0",
+            "name": "null",
+            "company": "울산매곡점",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-22T10:01:20.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uSokn2AC",
+            "name": "null",
+            "company": "울산매곡점",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-22T10:02:57.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01099550017",
+        "count": 3,
+        "company": "곽진영",
+        "spanDays": 5.4,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          },
+          {
+            "minutes": 7795,
+            "days": 5.4
+          }
+        ],
+        "statusDistribution": {
+          "종료": 3
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uYUoD2AW",
+            "name": "null",
+            "company": "곽진영",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-23T21:59:54.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uYUpp2AG",
+            "name": "null",
+            "company": "곽진영",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-23T21:59:56.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uucta2AA",
+            "name": "null",
+            "company": "곽진영",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-29T07:54:51.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01043975210",
+        "count": 3,
+        "company": "토크뮤직타운",
+        "spanDays": 2.3,
+        "intervals": [
+          {
+            "minutes": 2863,
+            "days": 2
+          },
+          {
+            "minutes": 478,
+            "days": 0.3
+          }
+        ],
+        "statusDistribution": {
+          "종료": 3
+        },
+        "taskSummary": {
+          "totalTasks": 6,
+          "leadsWithTask": 3,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000umKVd2AM",
+            "name": "김필균",
+            "company": "토크뮤직타운",
+            "status": "종료",
+            "owner": "정주희",
+            "createdDate": "2026-01-27T12:18:00.000+0000",
+            "taskCount": 4
+          },
+          {
+            "id": "00QTJ00000uvkPF2AY",
+            "name": "김필균",
+            "company": "토크뮤직타운",
+            "status": "종료",
+            "owner": "정주희",
+            "createdDate": "2026-01-29T12:00:38.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uwQ8L2AU",
+            "name": "김필균",
+            "company": "토크뮤직타운",
+            "status": "종료",
+            "owner": "정주희",
+            "createdDate": "2026-01-29T19:58:11.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01093883521",
+        "count": 2,
+        "company": "여래밥상",
+        "spanDays": 18.3,
+        "intervals": [
+          {
+            "minutes": 26342,
+            "days": 18.3
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tCHJy2AO",
+            "name": "여래밥상",
+            "company": "여래밥상",
+            "status": "Qualified",
+            "owner": "명세준",
+            "createdDate": "2026-01-02T02:37:22.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uIsL52AK",
+            "name": "null",
+            "company": "여래밥상",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-20T09:39:14.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"여래밥상\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000aBMi3YAG",
+          "name": "여래밥상",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "이혜선"
+        }
+      },
+      {
+        "phone": "01084183265",
+        "count": 2,
+        "company": "한백기업",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tDigH2AS",
+            "name": "null",
+            "company": "한백기업",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-02T06:58:10.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tDhPG2A0",
+            "name": "null",
+            "company": "한백기업",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-02T06:58:11.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01083103992",
+        "count": 2,
+        "company": "애위치",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tENuj2AG",
+            "name": "null",
+            "company": "애위치",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-02T09:37:27.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tENwL2AW",
+            "name": "null",
+            "company": "애위치",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-02T09:37:29.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01042289966",
+        "count": 2,
+        "company": "상담중",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 13,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tF4bV2AS",
+            "name": "null",
+            "company": "상담중",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-02T15:55:00.000+0000",
+            "taskCount": 11
+          },
+          {
+            "id": "00QTJ00000tF4d72AC",
+            "name": "null",
+            "company": "상담중",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-02T15:55:01.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01086912422",
+        "count": 2,
+        "company": "마시조아",
+        "spanDays": 1.4,
+        "intervals": [
+          {
+            "minutes": 1947,
+            "days": 1.4
+          }
+        ],
+        "statusDistribution": {
+          "종료": 1,
+          "Qualified": 1
+        },
+        "taskSummary": {
+          "totalTasks": 5,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tF7BB2A0",
+            "name": "null",
+            "company": "마시조아",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-02T16:30:25.000+0000",
+            "taskCount": 5
+          },
+          {
+            "id": "00QTJ00000tHXsj2AG",
+            "name": "강신혁",
+            "company": "마시조아",
+            "status": "Qualified",
+            "owner": "조아라",
+            "createdDate": "2026-01-04T00:57:12.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"마시조아\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000aJpGmYAK",
+          "name": "마시조아",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "강신혁"
+        }
+      },
+      {
+        "phone": "01040079551",
+        "count": 2,
+        "company": "포베이",
+        "spanDays": 27.3,
+        "intervals": [
+          {
+            "minutes": 39338,
+            "days": 27.3
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tFVLb2AO",
+            "name": "null",
+            "company": "포베이",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-03T00:23:57.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uzTha2AE",
+            "name": "-",
+            "company": "포베이",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-30T08:01:52.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"포베이\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000aG6knYAC",
+          "name": "포베이",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "점주님"
+        }
+      },
+      {
+        "phone": "01093257997",
+        "count": 2,
+        "company": "애국",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tGLjx2AG",
+            "name": "null",
+            "company": "애국",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-03T07:33:55.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tGJJy2AO",
+            "name": "null",
+            "company": "애국",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-03T07:33:56.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01057012596",
+        "count": 2,
+        "company": "장정욱",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 4,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 6,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tGxCX2A0",
+            "name": "null",
+            "company": "장정욱",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-03T15:41:44.000+0000",
+            "taskCount": 6
+          },
+          {
+            "id": "00QTJ00000tGxPR2A0",
+            "name": "null",
+            "company": "장정욱",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-03T15:45:51.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01064402507",
+        "count": 2,
+        "company": "주심",
+        "spanDays": 0.5,
+        "intervals": [
+          {
+            "minutes": 690,
+            "days": 0.5
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tHFML2A4",
+            "name": "서하늬",
+            "company": "주심",
+            "status": "Qualified",
+            "owner": "조아라",
+            "createdDate": "2026-01-03T19:25:52.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tHpHr2AK",
+            "name": "null",
+            "company": "전포주심",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-04T06:55:35.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01052782493",
+        "count": 2,
+        "company": "정식탁",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 66,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tHMR52AO",
+            "name": "null",
+            "company": "정식탁",
+            "status": "Qualified",
+            "owner": "조아라",
+            "createdDate": "2026-01-03T23:15:47.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tHSbK2AW",
+            "name": "null",
+            "company": "정식탁",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-04T00:22:05.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"정식탁\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000aJYkTYAW",
+          "name": "정식탁",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "null"
+        }
+      },
+      {
+        "phone": "01062591971",
+        "count": 2,
+        "company": "민순이네",
+        "spanDays": 17.1,
+        "intervals": [
+          {
+            "minutes": 24611,
+            "days": 17.1
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tIoTL2A0",
+            "name": "null",
+            "company": "민순이네",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-05T00:00:33.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uQJpy2AG",
+            "name": "null",
+            "company": "민술",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-22T02:11:07.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01055975274",
+        "count": 2,
+        "company": "송부장연탄갈비",
+        "spanDays": 22,
+        "intervals": [
+          {
+            "minutes": 31644,
+            "days": 22
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tKELh2AO",
+            "name": "송부장연탄갈비",
+            "company": "송부장연탄갈비",
+            "status": "Qualified",
+            "owner": "명세준",
+            "createdDate": "2026-01-05T02:12:49.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uj6dh2AA",
+            "name": "송부장연탄갈비",
+            "company": "송부장연탄갈비",
+            "status": "Qualified",
+            "owner": "명세준",
+            "createdDate": "2026-01-27T01:36:55.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"송부장연탄갈비\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000aNrdQYAS",
+          "name": "송부장연탄갈비",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "송부장연탄갈비"
+        }
+      },
+      {
+        "phone": "01091183837",
+        "count": 2,
+        "company": "황토가든",
+        "spanDays": 2,
+        "intervals": [
+          {
+            "minutes": 2814,
+            "days": 2
+          }
+        ],
+        "statusDistribution": {
+          "종료": 1,
+          "Qualified": 1
+        },
+        "taskSummary": {
+          "totalTasks": 5,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tLdF82AK",
+            "name": "null",
+            "company": "황토가든",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-05T07:15:22.000+0000",
+            "taskCount": 5
+          },
+          {
+            "id": "00QTJ00000tVSA12AO",
+            "name": "-",
+            "company": "황토가든",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-07T06:09:51.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01095547219",
+        "count": 2,
+        "company": "달빛정원",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tMyh02AC",
+            "name": "null",
+            "company": "달빛정원",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-05T09:40:14.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tMynR2AS",
+            "name": "null",
+            "company": "달빛정원",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-05T09:40:15.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01042796080",
+        "count": 2,
+        "company": "sky sports",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 1,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 14,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tNFTJ2A4",
+            "name": "고박사",
+            "company": "sky sports",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-05T11:00:54.000+0000",
+            "taskCount": 11
+          },
+          {
+            "id": "00QTJ00000tNDHq2AO",
+            "name": "null",
+            "company": "LG",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-05T11:01:52.000+0000",
+            "taskCount": 3
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01033253942",
+        "count": 2,
+        "company": "냉삼짚",
+        "spanDays": 0.1,
+        "intervals": [
+          {
+            "minutes": 160,
+            "days": 0.1
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tNIRB2A4",
+            "name": "null",
+            "company": "냉삼짚",
+            "status": "Qualified",
+            "owner": "조아라",
+            "createdDate": "2026-01-05T11:18:01.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tNOBe2AO",
+            "name": "-",
+            "company": "냉삼짚",
+            "status": "Qualified",
+            "owner": "조아라",
+            "createdDate": "2026-01-05T13:57:56.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"냉삼짚\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000aRlNLYA0",
+          "name": "냉삼짚",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "김영빈"
+        }
+      },
+      {
+        "phone": "01095541693",
+        "count": 2,
+        "company": "이석희",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tWUeP2AW",
+            "name": "null",
+            "company": "이석희",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-07T08:59:06.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tWPek2AG",
+            "name": "null",
+            "company": "이석희",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-07T08:59:07.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01046964505",
+        "count": 2,
+        "company": "Lg u+",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 8,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tXWZK2A4",
+            "name": "null",
+            "company": "Lg u+",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-07T17:01:37.000+0000",
+            "taskCount": 8
+          },
+          {
+            "id": "00QTJ00000tXXf32AG",
+            "name": "null",
+            "company": "Lg u+",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-07T17:01:39.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01092175502",
+        "count": 2,
+        "company": "한신포차",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 7,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tZ1w12AC",
+            "name": "null",
+            "company": "한신포차",
+            "status": "Qualified",
+            "owner": "장순지",
+            "createdDate": "2026-01-08T02:31:46.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tZ4tt2AC",
+            "name": "null",
+            "company": "새마을식당",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-08T02:38:53.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"한신포차\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001IR00001q1kUcYAI",
+          "name": "한신포차",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "null"
+        }
+      },
+      {
+        "phone": "01043681323",
+        "count": 2,
+        "company": "공주얼큰이칼국수",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 1,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 1,
+          "Qualified": 1
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tZJT72AO",
+            "name": "null",
+            "company": "공주얼큰이칼국수",
+            "status": "종료",
+            "owner": "정주희",
+            "createdDate": "2026-01-08T03:25:27.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000tYuo72AC",
+            "name": "강소선",
+            "company": "공주얼큰이칼국수쭈꾸미",
+            "status": "Qualified",
+            "owner": "정주희",
+            "createdDate": "2026-01-08T03:26:17.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01073507577",
+        "count": 2,
+        "company": "기깔분식",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 5,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tYvyg2AC",
+            "name": "null",
+            "company": "기깔분식",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-08T05:55:17.000+0000",
+            "taskCount": 4
+          },
+          {
+            "id": "00QTJ00000tZUI82AO",
+            "name": "null",
+            "company": "기깔분식",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-08T05:55:18.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01031036306",
+        "count": 2,
+        "company": "한뚝수육국밥",
+        "spanDays": 16.8,
+        "intervals": [
+          {
+            "minutes": 24158,
+            "days": 16.8
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000taJvj2AE",
+            "name": "null",
+            "company": "한뚝수육국밥",
+            "status": "Qualified",
+            "owner": "장순지",
+            "createdDate": "2026-01-08T07:10:58.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000ubNDV2A2",
+            "name": "null",
+            "company": "한뚝수육국밥",
+            "status": "Qualified",
+            "owner": "장순지",
+            "createdDate": "2026-01-25T01:48:42.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"한뚝수육국밥\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000alElzYAE",
+          "name": "한뚝수육국밥",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "정준형"
+        }
+      },
+      {
+        "phone": "01038196131",
+        "count": 2,
+        "company": "아리미",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tgHWD2A2",
+            "name": "null",
+            "company": "아리미",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-09T14:57:54.000+0000",
+            "taskCount": 3
+          },
+          {
+            "id": "00QTJ00000tgHXp2AM",
+            "name": "null",
+            "company": "아리미",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-09T14:57:55.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01026235752",
+        "count": 2,
+        "company": "스탠다드피자클럽",
+        "spanDays": 0.3,
+        "intervals": [
+          {
+            "minutes": 431,
+            "days": 0.3
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tgHUc2AM",
+            "name": "null",
+            "company": "스탠다드피자클럽",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-09T15:35:22.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tgYbv2AE",
+            "name": "null",
+            "company": "스탠다드피자클럽",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-09T22:46:31.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01088075959",
+        "count": 2,
+        "company": "외갓집칼국수",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tglNr2AI",
+            "name": "null",
+            "company": "외갓집칼국수",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-10T02:31:54.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tgyg22AA",
+            "name": "null",
+            "company": "외갓집칼국수",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-10T02:31:55.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01051303020",
+        "count": 2,
+        "company": "상상순대국",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tgRkA2AU",
+            "name": "null",
+            "company": "상상순대국",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-10T02:44:38.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000th6KE2AY",
+            "name": "null",
+            "company": "상상순대국",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-10T02:44:39.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01031801203",
+        "count": 2,
+        "company": "박재철",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000thJir2AE",
+            "name": "null",
+            "company": "박재철",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-10T04:44:22.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000thBS02AM",
+            "name": "null",
+            "company": "박재철",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-10T04:44:23.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01050679625",
+        "count": 2,
+        "company": "스게",
+        "spanDays": 17.3,
+        "intervals": [
+          {
+            "minutes": 24898,
+            "days": 17.3
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tjr3i2AA",
+            "name": "null",
+            "company": "스게",
+            "status": "Qualified",
+            "owner": "장순지",
+            "createdDate": "2026-01-11T18:17:18.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000usYhC2AU",
+            "name": "null",
+            "company": "호테이",
+            "status": "Qualified",
+            "owner": "장순지",
+            "createdDate": "2026-01-29T01:15:25.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정 (CX)\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000B4YCsYAN",
+          "name": "거래처 미지정 (CX)",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "김인수"
+        }
+      },
+      {
+        "phone": "01027260656",
+        "count": 2,
+        "company": "부흥집",
+        "spanDays": 3.1,
+        "intervals": [
+          {
+            "minutes": 4515,
+            "days": 3.1
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tmSjt2AE",
+            "name": "부흥집",
+            "company": "부흥집",
+            "status": "Qualified",
+            "owner": "송슬기",
+            "createdDate": "2026-01-12T05:45:51.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000u0vNq2AI",
+            "name": "null",
+            "company": "산해진미",
+            "status": "Qualified",
+            "owner": "송슬기",
+            "createdDate": "2026-01-15T09:00:26.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01068146614",
+        "count": 2,
+        "company": "라이브카르마7080",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 18,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tqiYL2AY",
+            "name": "-",
+            "company": "라이브카르마7080",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-13T05:10:22.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tqpzd2AA",
+            "name": "null",
+            "company": "라이브카르마7080",
+            "status": "Qualified",
+            "owner": "정주희",
+            "createdDate": "2026-01-13T05:28:29.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"라이브카르마7080\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000bH1vOYAS",
+          "name": "라이브카르마7080",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "-"
+        }
+      },
+      {
+        "phone": "01050401156",
+        "count": 2,
+        "company": "상호미정",
+        "spanDays": 1,
+        "intervals": [
+          {
+            "minutes": 1415,
+            "days": 1
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tr1Xl2AI",
+            "name": "null",
+            "company": "상호미정",
+            "status": "Qualified",
+            "owner": "장순지",
+            "createdDate": "2026-01-13T05:57:40.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tvQJ42AM",
+            "name": "족발",
+            "company": "족발",
+            "status": "종료",
+            "owner": "명세준",
+            "createdDate": "2026-01-14T05:32:13.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"담소족발\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000bHo8DYAS",
+          "name": "담소족발",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "null"
+        }
+      },
+      {
+        "phone": "01050084897",
+        "count": 2,
+        "company": "오픈예정",
+        "spanDays": 7.2,
+        "intervals": [
+          {
+            "minutes": 10366,
+            "days": 7.2
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000ts1tw2AA",
+            "name": "오픈예정",
+            "company": "오픈예정",
+            "status": "Qualified",
+            "owner": "명세준",
+            "createdDate": "2026-01-13T09:32:15.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uK1hF2AS",
+            "name": "null",
+            "company": "고기집오픈예정",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-20T14:18:29.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"한강백탄\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000bJtF3YAK",
+          "name": "한강백탄",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "오픈예정"
+        }
+      },
+      {
+        "phone": "01049680181",
+        "count": 2,
+        "company": "조현우",
+        "spanDays": 0.9,
+        "intervals": [
+          {
+            "minutes": 1304,
+            "days": 0.9
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 5,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tv0oP2AQ",
+            "name": "null",
+            "company": "조현우",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-14T04:14:48.000+0000",
+            "taskCount": 3
+          },
+          {
+            "id": "00QTJ00000tytYD2AY",
+            "name": "null",
+            "company": "대지농자재",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-15T01:58:46.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01094938983",
+        "count": 2,
+        "company": "태평족",
+        "spanDays": 0.2,
+        "intervals": [
+          {
+            "minutes": 231,
+            "days": 0.2
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000u2wXX2AY",
+            "name": "태평족",
+            "company": "태평족",
+            "status": "Qualified",
+            "owner": "명세준",
+            "createdDate": "2026-01-16T01:37:03.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000u43x02AA",
+            "name": "태평족",
+            "company": "태평족",
+            "status": "Qualified",
+            "owner": "명세준",
+            "createdDate": "2026-01-16T05:28:00.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"역전할머니맥주\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001IR00001q1iSdYAI",
+          "name": "역전할머니맥주",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "오덕용"
+        }
+      },
+      {
+        "phone": "01037369265",
+        "count": 2,
+        "company": "항이리 마늘보쌈",
+        "spanDays": 1.9,
+        "intervals": [
+          {
+            "minutes": 2723,
+            "days": 1.9
+          }
+        ],
+        "statusDistribution": {
+          "종료": 1,
+          "Qualified": 1
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000u5dBl2AI",
+            "name": "null",
+            "company": "항이리 마늘보쌈",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-16T10:09:47.000+0000",
+            "taskCount": 3
+          },
+          {
+            "id": "00QTJ00000u9LOP2A2",
+            "name": "원성우",
+            "company": "항아리마늘보쌈",
+            "status": "Qualified",
+            "owner": "조아라",
+            "createdDate": "2026-01-18T07:33:05.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"항아리마늘보쌈\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000blzlNYAQ",
+          "name": "항아리마늘보쌈",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "원성우"
+        }
+      },
+      {
+        "phone": "01045352748",
+        "count": 2,
+        "company": "대복술집",
+        "spanDays": 1,
+        "intervals": [
+          {
+            "minutes": 1436,
+            "days": 1
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 6,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000u9nJ02AI",
+            "name": "null",
+            "company": "대복술집",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-18T09:37:49.000+0000",
+            "taskCount": 5
+          },
+          {
+            "id": "00QTJ00000uE8yg2AC",
+            "name": "null",
+            "company": "대복",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-19T09:33:19.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01053662110",
+        "count": 2,
+        "company": "개인 택시",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 2,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uBQJv2AO",
+            "name": "null",
+            "company": "개인 택시",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-19T02:49:10.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uBwYH2A0",
+            "name": "null",
+            "company": "개인 택시",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-19T02:50:50.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01065793817",
+        "count": 2,
+        "company": "김순남",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uDpnh2AC",
+            "name": "null",
+            "company": "김순남",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-19T08:48:23.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uE3sD2AS",
+            "name": "null",
+            "company": "김순남",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-19T08:48:24.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01022363388",
+        "count": 2,
+        "company": "천안탑정형외과",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 5,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 9,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uEkKU2A0",
+            "name": "null",
+            "company": "천안탑정형외과",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-19T12:52:52.000+0000",
+            "taskCount": 8
+          },
+          {
+            "id": "00QTJ00000uEZaO2AW",
+            "name": "null",
+            "company": "고든 정형외과",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-19T12:58:13.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01097936974",
+        "count": 2,
+        "company": "오주영",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uFNaL2AW",
+            "name": "null",
+            "company": "오주영",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-19T18:24:10.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uFNbx2AG",
+            "name": "null",
+            "company": "오주영",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-19T18:24:11.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01086853232",
+        "count": 2,
+        "company": "석기정부대찌개",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 6,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uFnTB2A0",
+            "name": "null",
+            "company": "석기정부대찌개",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-19T23:02:02.000+0000",
+            "taskCount": 5
+          },
+          {
+            "id": "00QTJ00000uFnUn2AK",
+            "name": "null",
+            "company": "석기정부대찌개",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-19T23:02:04.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01037542590",
+        "count": 2,
+        "company": "생생오리",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uINAn2AO",
+            "name": "null",
+            "company": "생생오리",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-20T06:42:50.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uIKEY2A4",
+            "name": "null",
+            "company": "생생오리",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-20T06:42:51.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01086495475",
+        "count": 2,
+        "company": "맘스터치 강남점",
+        "spanDays": 8.7,
+        "intervals": [
+          {
+            "minutes": 12554,
+            "days": 8.7
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uIdkE2AS",
+            "name": "null",
+            "company": "맘스터치 강남점",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-20T07:37:23.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000usSGn2AM",
+            "name": "null",
+            "company": "게이조이기",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-29T00:51:10.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01053582915",
+        "count": 2,
+        "company": "한일사",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uLXSA2A4",
+            "name": "null",
+            "company": "한일사",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-21T01:36:04.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uLXAW2A4",
+            "name": "null",
+            "company": "한일사",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-21T01:36:05.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정 (CX)\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000B4YCsYAN",
+          "name": "거래처 미지정 (CX)",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Caller:010****2915"
+        }
+      },
+      {
+        "phone": "01049006056",
+        "count": 2,
+        "company": "남강순대국",
+        "spanDays": 6.9,
+        "intervals": [
+          {
+            "minutes": 9925,
+            "days": 6.9
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uNuUH2A0",
+            "name": "곽도권",
+            "company": "남강순대국",
+            "status": "Qualified",
+            "owner": "장순지",
+            "createdDate": "2026-01-21T08:58:42.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000upcxR2AQ",
+            "name": "null",
+            "company": "남강순대국",
+            "status": "종료",
+            "owner": "명세준",
+            "createdDate": "2026-01-28T06:23:18.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정 (CX)\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000B4YCsYAN",
+          "name": "거래처 미지정 (CX)",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Caller:010****6056"
+        }
+      },
+      {
+        "phone": "01088386545",
+        "count": 2,
+        "company": "우리농장",
+        "spanDays": 1.2,
+        "intervals": [
+          {
+            "minutes": 1742,
+            "days": 1.2
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uQnjB2AS",
+            "name": "-",
+            "company": "우리농장",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-22T03:32:21.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uWkHD2A0",
+            "name": "null",
+            "company": "우리농장",
+            "status": "Qualified",
+            "owner": "장순지",
+            "createdDate": "2026-01-23T08:34:32.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정 (CX)\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000B4YCsYAN",
+          "name": "거래처 미지정 (CX)",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "이용진"
+        }
+      },
+      {
+        "phone": "01023401554",
+        "count": 2,
+        "company": "하남돼지집",
+        "spanDays": 0.3,
+        "intervals": [
+          {
+            "minutes": 365,
+            "days": 0.3
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uVGug2AG",
+            "name": "-",
+            "company": "하남돼지집",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-23T03:02:20.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uX0H92AK",
+            "name": "null",
+            "company": "하남돼지집서울역점",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-23T09:07:23.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"비비큐\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001IR00001q1ww4YAA",
+          "name": "비비큐",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "신승언"
+        }
+      },
+      {
+        "phone": "01090274042",
+        "count": 2,
+        "company": "태산김치찜",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 4,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uVZdz2AG",
+            "name": "null",
+            "company": "태산김치찜",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-23T05:11:32.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uVmHq2AK",
+            "name": "대표님",
+            "company": "태산김치찜",
+            "status": "종료",
+            "owner": "명세준",
+            "createdDate": "2026-01-23T05:15:25.000+0000",
+            "taskCount": 3
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01030397023",
+        "count": 2,
+        "company": "광일실업",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 25,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 6,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uWyGw2AK",
+            "name": "null",
+            "company": "광일실업",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-23T08:29:09.000+0000",
+            "taskCount": 5
+          },
+          {
+            "id": "00QTJ00000uX7VW2A0",
+            "name": "null",
+            "company": "광일실업",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-23T08:53:46.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01057887344",
+        "count": 2,
+        "company": "고기집",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uaH0V2AU",
+            "name": "null",
+            "company": "고기집",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-24T10:36:04.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000ua4fy2AA",
+            "name": "null",
+            "company": "고기집",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-24T10:36:29.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01036632222",
+        "count": 2,
+        "company": "포차",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "고민중": 1
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uaK6Q2AU",
+            "name": "null",
+            "company": "포차",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-24T11:48:14.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000ua5p42AA",
+            "name": "null",
+            "company": "포차",
+            "status": "고민중",
+            "owner": "김유준",
+            "createdDate": "2026-01-24T11:48:15.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정 (CX)\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000B4YCsYAN",
+          "name": "거래처 미지정 (CX)",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "신진섭"
+        }
+      },
+      {
+        "phone": "01062625425",
+        "count": 2,
+        "company": "몽골 동대문",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000ub3t72AA",
+            "name": "null",
+            "company": "몽골 동대문",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-24T22:15:17.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000ub3uj2AA",
+            "name": "null",
+            "company": "몽골 동대문",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-24T22:15:19.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01035393541",
+        "count": 2,
+        "company": "설록공인중개사",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 1,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000ucDAT2A2",
+            "name": "null",
+            "company": "설록공인중개사",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-25T11:04:00.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000ucAXb2AM",
+            "name": "null",
+            "company": "설록공인중개사",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-25T11:05:19.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정 (CX)\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000B4YCsYAN",
+          "name": "거래처 미지정 (CX)",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Caller:010****3541"
+        }
+      },
+      {
+        "phone": "01045213944",
+        "count": 2,
+        "company": "김천대패삼겹살",
+        "spanDays": 0.2,
+        "intervals": [
+          {
+            "minutes": 329,
+            "days": 0.2
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000udcYE2AY",
+            "name": "null",
+            "company": "김천대패삼겹살",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-26T01:18:25.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000ufeu72AA",
+            "name": "강병옥",
+            "company": "대패삼겹살",
+            "status": "종료",
+            "owner": "정주희",
+            "createdDate": "2026-01-26T06:47:51.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01085190130",
+        "count": 2,
+        "company": "이창식",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000unM2M2AU",
+            "name": "null",
+            "company": "이창식",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-28T00:18:18.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000unGBT2A2",
+            "name": "null",
+            "company": "이창식",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-28T00:18:19.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01083427999",
+        "count": 2,
+        "company": "꼬꼬댁치킨호프",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uoCVZ2A2",
+            "name": "null",
+            "company": "꼬꼬댁치킨호프",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-28T01:59:19.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000ungKR2AY",
+            "name": "null",
+            "company": "꼬꼬댁치킨호프",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-28T01:59:20.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"꼬꼬댁치킨호프\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001IR00001q1ieBYAQ",
+          "name": "꼬꼬댁치킨호프",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "주은숙"
+        }
+      },
+      {
+        "phone": "01084999153",
+        "count": 2,
+        "company": "쵤윤우",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000upRp92AE",
+            "name": "null",
+            "company": "쵤윤우",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-28T07:23:06.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000upnWI2AY",
+            "name": "null",
+            "company": "쵤윤우",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-28T07:23:07.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01088590279",
+        "count": 2,
+        "company": "김금자숯불갈비",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 2,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uqUBR2A2",
+            "name": "박영진",
+            "company": "김금자숯불갈비",
+            "status": "Qualified",
+            "owner": "정주희",
+            "createdDate": "2026-01-28T08:52:32.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uqUjJ2AU",
+            "name": "박영진",
+            "company": "김금자숯불갈비",
+            "status": "종료",
+            "owner": "정주희",
+            "createdDate": "2026-01-28T08:54:14.000+0000",
+            "taskCount": 4
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01099902716",
+        "count": 2,
+        "company": "수호롬",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "고민중": 1
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000urDLY2A2",
+            "name": "null",
+            "company": "수호롬",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-28T14:17:00.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000urKGT2A2",
+            "name": "null",
+            "company": "수호롬",
+            "status": "고민중",
+            "owner": "김유준",
+            "createdDate": "2026-01-28T14:17:01.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01077696306",
+        "count": 2,
+        "company": "장기명",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uufoE2AQ",
+            "name": "null",
+            "company": "장기명",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-29T07:46:53.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uuhOb2AI",
+            "name": "null",
+            "company": "장기명",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-29T07:46:54.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01049148663",
+        "count": 2,
+        "company": "최우석 아",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000v1qjh2AA",
+            "name": "null",
+            "company": "최우석 아",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-31T04:06:55.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000v1qlJ2AQ",
+            "name": "null",
+            "company": "최우석 아",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-31T04:06:56.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      },
+      {
+        "phone": "01099471224",
+        "count": 2,
+        "company": "달빛마실",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000v1ziA2AQ",
+            "name": "null",
+            "company": "달빛마실",
+            "status": "Qualified",
+            "owner": "이지혜",
+            "createdDate": "2026-01-31T05:50:42.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000v23c62AA",
+            "name": "null",
+            "company": "달빛마실",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-31T05:50:43.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE1_EXISTING_CUSTOMER",
+        "reason": "기존 Account 존재: \"거래처 미지정\" (Contact 경유)",
+        "matchedAccount": {
+          "id": "001TJ00000DLyZZYA1",
+          "name": "거래처 미지정",
+          "contractStatus": "계약 없음",
+          "contractNumber": null,
+          "matchedVia": "Contact",
+          "contactName": "Unknown"
+        }
+      }
+    ],
+    "case2_open_reinquiry": [
+      {
+        "phone": "01024155243",
+        "count": 2,
+        "company": "테이블오더",
+        "spanDays": 0.6,
+        "intervals": [
+          {
+            "minutes": 840,
+            "days": 0.6
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tnb6n2AA",
+            "name": "null",
+            "company": "테이블오더",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-12T08:47:02.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tovoD2AQ",
+            "name": "null",
+            "company": "테이블 오더",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-12T22:46:36.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE2_OPEN_REINQUIRY",
+        "reason": "기존 Open Lead 2건 존재 (최초: 2024-12-15)",
+        "priorLeads": [
+          {
+            "id": "00QTJ000008y4Lv2AI",
+            "name": "null",
+            "company": "테이블ㆍ오더",
+            "status": "종료",
+            "owner": "강수영",
+            "createdDate": "2024-12-15T21:58:30.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000hiZcP2AU",
+            "name": "null",
+            "company": "영주시 교통 장애인 협회",
+            "status": "종료",
+            "owner": "정지영",
+            "createdDate": "2025-07-03T13:16:39.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "openOpportunities": []
+      }
+    ],
+    "case3_cl_reinquiry": [],
+    "case4_spam": [
+      {
+        "phone": "01031058624",
+        "count": 4,
+        "company": "호",
+        "spanDays": 16.8,
+        "intervals": [
+          {
+            "minutes": 12,
+            "days": 0
+          },
+          {
+            "minutes": 24119,
+            "days": 16.7
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 4
+        },
+        "taskSummary": {
+          "totalTasks": 6,
+          "leadsWithTask": 3,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tsbNt2AI",
+            "name": "null",
+            "company": "호",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-13T11:51:31.000+0000",
+            "taskCount": 3
+          },
+          {
+            "id": "00QTJ00000tscF72AI",
+            "name": "null",
+            "company": "난승재버거",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-13T12:03:08.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000uyq8L2AQ",
+            "name": "null",
+            "company": "모유수유승재",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-30T06:01:50.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uyq8M2AQ",
+            "name": "null",
+            "company": "비속어/장난",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-30T06:01:51.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE4_SPAM",
+        "reason": "Company명 스팸 패턴 감지: \"호\""
+      },
+      {
+        "phone": "01066283735",
+        "count": 3,
+        "company": "test_pago",
+        "spanDays": 1.5,
+        "intervals": [
+          {
+            "minutes": 14,
+            "days": 0
+          },
+          {
+            "minutes": 2086,
+            "days": 1.4
+          }
+        ],
+        "statusDistribution": {
+          "종료": 1,
+          "배정대기": 2
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 3,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tKD352AG",
+            "name": "null",
+            "company": "test_pago",
+            "status": "종료",
+            "owner": "그로스팀 공용계정",
+            "createdDate": "2026-01-05T02:16:56.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000tK7wy2AC",
+            "name": "null",
+            "company": "test_pago",
+            "status": "배정대기",
+            "owner": "명세준",
+            "createdDate": "2026-01-05T02:30:46.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000tSGlL2AW",
+            "name": "null",
+            "company": "test_pago",
+            "status": "배정대기",
+            "owner": "그로스팀 공용계정",
+            "createdDate": "2026-01-06T13:17:10.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE4_SPAM",
+        "reason": "Company명 스팸 패턴 감지: \"test_pago\""
+      },
+      {
+        "phone": "01021147953",
+        "count": 2,
+        "company": "test_mapa",
+        "spanDays": 28.2,
+        "intervals": [
+          {
+            "minutes": 40548,
+            "days": 28.2
+          }
+        ],
+        "statusDistribution": {
+          "종료": 1,
+          "배정대기": 1
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tCHoc2AG",
+            "name": "null",
+            "company": "test_mapa",
+            "status": "종료",
+            "owner": "interface",
+            "createdDate": "2026-01-02T02:04:44.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uy9hw2AA",
+            "name": "null",
+            "company": "test_mapa",
+            "status": "배정대기",
+            "owner": "interface",
+            "createdDate": "2026-01-30T05:53:00.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE4_SPAM",
+        "reason": "Company명 스팸 패턴 감지: \"test_mapa\""
+      },
+      {
+        "phone": "01035000546",
+        "count": 2,
+        "company": "늘",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tUxxS2AS",
+            "name": "null",
+            "company": "늘",
+            "status": "Qualified",
+            "owner": "장순지",
+            "createdDate": "2026-01-07T05:42:56.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tVHPt2AO",
+            "name": "null",
+            "company": "늘",
+            "status": "Qualified",
+            "owner": "김유준",
+            "createdDate": "2026-01-07T05:42:57.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE4_SPAM",
+        "reason": "Company명 스팸 패턴 감지: \"늘\""
+      },
+      {
+        "phone": "01000000000",
+        "count": 2,
+        "company": "test_hose",
+        "spanDays": 14.9,
+        "intervals": [
+          {
+            "minutes": 21511,
+            "days": 14.9
+          }
+        ],
+        "statusDistribution": {
+          "배정대기": 2
+        },
+        "taskSummary": {
+          "totalTasks": 0,
+          "leadsWithTask": 0,
+          "leadsWithoutTask": 2
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tWoV32AK",
+            "name": "null",
+            "company": "test_hose",
+            "status": "배정대기",
+            "owner": "시스템관리자",
+            "createdDate": "2026-01-07T10:20:37.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000uSVBu2AO",
+            "name": "null",
+            "company": "test_hose",
+            "status": "배정대기",
+            "owner": "interface",
+            "createdDate": "2026-01-22T08:51:26.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE4_SPAM",
+        "reason": "Company명 스팸 패턴 감지: \"test_hose\""
+      },
+      {
+        "phone": "01023338687",
+        "count": 2,
+        "company": "-",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000toiuD2AQ",
+            "name": "null",
+            "company": "-",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-12T19:48:31.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000toeCO2AY",
+            "name": "null",
+            "company": "(비속어)",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-12T19:48:32.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE4_SPAM",
+        "reason": "Company명 스팸 패턴 감지: \"(비속어)\""
+      },
+      {
+        "phone": "01086529636",
+        "count": 2,
+        "company": "불",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "Qualified": 1,
+          "종료": 1
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000u5ogi2AA",
+            "name": "유현규",
+            "company": "불",
+            "status": "Qualified",
+            "owner": "조아라",
+            "createdDate": "2026-01-16T12:03:19.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000u5wvx2AA",
+            "name": "null",
+            "company": "불",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-16T12:03:20.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE4_SPAM",
+        "reason": "Company명 스팸 패턴 감지: \"불\""
+      }
+    ],
+    "case5_pure_duplicate": [
+      {
+        "phone": "01047729784",
+        "count": 7,
+        "company": "동행님",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 1,
+            "days": 0
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          },
+          {
+            "minutes": 1,
+            "days": 0
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          },
+          {
+            "minutes": 2,
+            "days": 0
+          },
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 7
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 3,
+          "leadsWithoutTask": 4
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tBJZ72AO",
+            "name": "null",
+            "company": "동행님",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-01T20:48:38.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tBJfZ2AW",
+            "name": "null",
+            "company": "동행님",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-01T20:49:56.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tBBRu2AO",
+            "name": "null",
+            "company": "동행님",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-01T20:49:58.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tBJin2AG",
+            "name": "null",
+            "company": "동행님",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-01T20:51:11.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000tBJkP2AW",
+            "name": "null",
+            "company": "동행님",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-01T20:51:12.000+0000",
+            "taskCount": 0
+          },
+          {
+            "id": "00QTJ00000tBJvh2AG",
+            "name": "null",
+            "company": "동행님",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-01T20:53:25.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000tBJxJ2AW",
+            "name": "null",
+            "company": "동행님",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-01T20:53:26.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE5_PURE_DUPLICATE",
+        "subPattern": "SYSTEM_DUP",
+        "reason": "평균 1분 간격 → 시스템 중복 (동시 인입)",
+        "responsePattern": "PARTIAL_RESPONSE",
+        "responseNote": "3건 응대, 4건 미응대"
+      },
+      {
+        "phone": "01058208513",
+        "count": 2,
+        "company": "와꽈와꽈",
+        "spanDays": 5.9,
+        "intervals": [
+          {
+            "minutes": 8446,
+            "days": 5.9
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 6,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tAmN32AK",
+            "name": "null",
+            "company": "와꽈와꽈",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-01T11:35:23.000+0000",
+            "taskCount": 4
+          },
+          {
+            "id": "00QTJ00000tW7ec2AC",
+            "name": "null",
+            "company": "갈비집",
+            "status": "종료",
+            "owner": "장순지",
+            "createdDate": "2026-01-07T08:21:32.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE5_PURE_DUPLICATE",
+        "subPattern": "SHORT_TERM_RETRY",
+        "reason": "평균 6일 간격 → 단기 재문의 (응대 미흡 가능성)",
+        "responsePattern": "ALL_RESPONDED",
+        "responseNote": "전체 2건 모두 응대 (중복 인지 못하고 개별 처리)"
+      },
+      {
+        "phone": "01052290222",
+        "count": 2,
+        "company": "천하종합주식회사",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tGOtB2AW",
+            "name": "null",
+            "company": "천하종합주식회사",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-03T10:41:32.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tGTmU2AW",
+            "name": "null",
+            "company": "천하종합주식회사",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-03T10:41:32.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE5_PURE_DUPLICATE",
+        "subPattern": "SYSTEM_DUP",
+        "reason": "평균 0분 간격 → 시스템 중복 (동시 인입)",
+        "responsePattern": "PARTIAL_RESPONSE",
+        "responseNote": "1건 응대, 1건 미응대"
+      },
+      {
+        "phone": "01035339031",
+        "count": 2,
+        "company": "추승엽",
+        "spanDays": 5.6,
+        "intervals": [
+          {
+            "minutes": 8125,
+            "days": 5.6
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000thtkj2AA",
+            "name": "null",
+            "company": "추승엽",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-10T11:13:58.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000u3Y892AE",
+            "name": "null",
+            "company": "간식",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-16T02:38:49.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE5_PURE_DUPLICATE",
+        "subPattern": "SHORT_TERM_RETRY",
+        "reason": "평균 6일 간격 → 단기 재문의 (응대 미흡 가능성)",
+        "responsePattern": "ALL_RESPONDED",
+        "responseNote": "전체 2건 모두 응대 (중복 인지 못하고 개별 처리)"
+      },
+      {
+        "phone": "01093938668",
+        "count": 2,
+        "company": "무지개관광",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 3,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tjNGv2AM",
+            "name": "null",
+            "company": "무지개관광",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-11T09:28:15.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tjMpX2AU",
+            "name": "null",
+            "company": "무지개관광",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-11T09:28:16.000+0000",
+            "taskCount": 1
+          }
+        ],
+        "classification": "CASE5_PURE_DUPLICATE",
+        "subPattern": "SYSTEM_DUP",
+        "reason": "평균 0분 간격 → 시스템 중복 (동시 인입)",
+        "responsePattern": "ALL_RESPONDED",
+        "responseNote": "전체 2건 모두 응대 (중복 인지 못하고 개별 처리)"
+      },
+      {
+        "phone": "01001031177",
+        "count": 2,
+        "company": "대창개발",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 2,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000to5b82AA",
+            "name": "null",
+            "company": "대창개발",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-12T11:36:07.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000to0dA2AQ",
+            "name": "null",
+            "company": "대창개발",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-12T11:36:08.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE5_PURE_DUPLICATE",
+        "subPattern": "SYSTEM_DUP",
+        "reason": "평균 0분 간격 → 시스템 중복 (동시 인입)",
+        "responsePattern": "PARTIAL_RESPONSE",
+        "responseNote": "1건 응대, 1건 미응대"
+      },
+      {
+        "phone": "01053545746",
+        "count": 2,
+        "company": "인영",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 5,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tsUvu2AE",
+            "name": "null",
+            "company": "인영",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-13T11:59:10.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tscJx2AI",
+            "name": "null",
+            "company": "매독인영",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-13T12:04:20.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE5_PURE_DUPLICATE",
+        "subPattern": "SYSTEM_DUP",
+        "reason": "평균 5분 간격 → 시스템 중복 (동시 인입)",
+        "responsePattern": "ALL_RESPONDED",
+        "responseNote": "전체 2건 모두 응대 (중복 인지 못하고 개별 처리)"
+      },
+      {
+        "phone": "01048849347",
+        "count": 2,
+        "company": "상효",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 4,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000tsbsX2AQ",
+            "name": "null",
+            "company": "상효",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-13T11:59:39.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000tsbvm2AA",
+            "name": "null",
+            "company": "난상효띠",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-13T12:03:47.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE5_PURE_DUPLICATE",
+        "subPattern": "SYSTEM_DUP",
+        "reason": "평균 4분 간격 → 시스템 중복 (동시 인입)",
+        "responsePattern": "ALL_RESPONDED",
+        "responseNote": "전체 2건 모두 응대 (중복 인지 못하고 개별 처리)"
+      },
+      {
+        "phone": "0432949988",
+        "count": 2,
+        "company": "상당솥뚜껑매운탕",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 1,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 4,
+          "leadsWithTask": 2,
+          "leadsWithoutTask": 0
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000u95rS2AQ",
+            "name": "null",
+            "company": "상당솥뚜껑매운탕",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-18T01:44:09.000+0000",
+            "taskCount": 2
+          },
+          {
+            "id": "00QTJ00000u8MhS2AU",
+            "name": "null",
+            "company": "상당솥뚜껑매운탕",
+            "status": "종료",
+            "owner": "조아라",
+            "createdDate": "2026-01-18T01:44:58.000+0000",
+            "taskCount": 2
+          }
+        ],
+        "classification": "CASE5_PURE_DUPLICATE",
+        "subPattern": "SYSTEM_DUP",
+        "reason": "평균 1분 간격 → 시스템 중복 (동시 인입)",
+        "responsePattern": "ALL_RESPONDED",
+        "responseNote": "전체 2건 모두 응대 (중복 인지 못하고 개별 처리)"
+      },
+      {
+        "phone": "0105653875",
+        "count": 2,
+        "company": "티오",
+        "spanDays": 0,
+        "intervals": [
+          {
+            "minutes": 0,
+            "days": 0
+          }
+        ],
+        "statusDistribution": {
+          "종료": 2
+        },
+        "taskSummary": {
+          "totalTasks": 1,
+          "leadsWithTask": 1,
+          "leadsWithoutTask": 1
+        },
+        "leads": [
+          {
+            "id": "00QTJ00000uL82N2AS",
+            "name": "null",
+            "company": "티오",
+            "status": "종료",
+            "owner": "이지혜",
+            "createdDate": "2026-01-21T01:06:27.000+0000",
+            "taskCount": 1
+          },
+          {
+            "id": "00QTJ00000uKvQ62AK",
+            "name": "null",
+            "company": "티오",
+            "status": "종료",
+            "owner": "김유준",
+            "createdDate": "2026-01-21T01:06:28.000+0000",
+            "taskCount": 0
+          }
+        ],
+        "classification": "CASE5_PURE_DUPLICATE",
+        "subPattern": "SYSTEM_DUP",
+        "reason": "평균 0분 간격 → 시스템 중복 (동시 인입)",
+        "responsePattern": "PARTIAL_RESPONSE",
+        "responseNote": "1건 응대, 1건 미응대"
+      }
+    ]
+  }
+}

@@ -1,0 +1,267 @@
+@import "tailwindcss";
+
+html {
+  font-size: 18px;
+}
+
+:root {
+  --metro-blue: #0078d4;
+  --metro-green: #107c10;
+  --metro-orange: #ff8c00;
+  --metro-teal: #00b7c3;
+  --metro-purple: #8661c5;
+  --metro-red: #e81123;
+  --metro-dark: #555;
+  --background: #f5f5f5;
+  --foreground: #333;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'Roboto', -apple-system, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  line-height: 1.5;
+}
+
+/* Metro UI Typography */
+h1 {
+  font-size: 2.5em;
+  font-weight: 300;
+  letter-spacing: -1px;
+  color: #333;
+}
+
+h2 {
+  font-size: 1.6em;
+  font-weight: 400;
+  color: #333;
+  padding-bottom: 10px;
+  border-bottom: 3px solid var(--metro-blue);
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-weight: 400;
+  font-size: 1.2em;
+}
+
+h4 {
+  font-weight: 500;
+  font-size: 1.1em;
+  color: #333;
+}
+
+/* Metro Card */
+.metro-card {
+  background: #fff;
+  padding: 25px;
+  margin-bottom: 25px;
+  border-left: 4px solid var(--metro-blue);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.metro-card.green { border-left-color: var(--metro-green); }
+.metro-card.orange { border-left-color: var(--metro-orange); }
+.metro-card.red { border-left-color: var(--metro-red); }
+.metro-card.purple { border-left-color: var(--metro-purple); }
+.metro-card.teal { border-left-color: var(--metro-teal); }
+
+/* Metro Tile */
+.metro-tile {
+  padding: 25px;
+  color: #fff;
+}
+
+.metro-tile.blue { background: var(--metro-blue); }
+.metro-tile.green { background: var(--metro-green); }
+.metro-tile.orange { background: var(--metro-orange); }
+.metro-tile.teal { background: var(--metro-teal); }
+.metro-tile.purple { background: var(--metro-purple); }
+.metro-tile.red { background: var(--metro-red); }
+.metro-tile.dark { background: var(--metro-dark); }
+
+.metro-tile .stat-number {
+  font-size: 3em;
+  font-weight: 300;
+}
+
+.metro-tile .stat-label {
+  font-size: 0.85em;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.metro-tile .stat-sub {
+  font-size: 0.85em;
+  opacity: 0.7;
+  margin-top: 5px;
+}
+
+/* Metro Table */
+.metro-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.metro-table th,
+.metro-table td {
+  padding: 14px 18px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.metro-table th {
+  background: #f0f0f0;
+  font-weight: 500;
+  color: #333;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.5px;
+}
+
+.metro-table tr:hover {
+  background: #f8f8f8;
+}
+
+/* Daily Raw Data Table - 일별 원본 데이터용 강화 테이블 */
+.metro-table.daily-raw th {
+  background: #1a237e;
+  color: #fff;
+  font-size: 1.0em;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 13px 16px;
+  border-bottom: none;
+  white-space: nowrap;
+}
+
+.metro-table.daily-raw td {
+  padding: 13px 16px;
+  font-size: 1.0em;
+  color: #333;
+  border-bottom: 1px solid #eee;
+}
+
+.metro-table.daily-raw tbody tr:nth-child(even) {
+  background: #f8fafd;
+}
+
+.metro-table.daily-raw tbody tr:hover {
+  background: #e8eaf6;
+}
+
+/* 색상 변형 - FRT */
+.metro-table.daily-raw-red th {
+  background: #b71c1c;
+}
+.metro-table.daily-raw-red tbody tr:nth-child(even) {
+  background: #fef5f5;
+}
+.metro-table.daily-raw-red tbody tr:hover {
+  background: #ffebee;
+}
+
+/* 색상 변형 - 미전환 MQL */
+.metro-table.daily-raw-orange th {
+  background: #e65100;
+}
+.metro-table.daily-raw-orange tbody tr:nth-child(even) {
+  background: #fff8f0;
+}
+.metro-table.daily-raw-orange tbody tr:hover {
+  background: #fff3e0;
+}
+
+/* 색상 변형 - 방문 미완료 */
+.metro-table.daily-raw-purple th {
+  background: #4a148c;
+}
+.metro-table.daily-raw-purple tbody tr:nth-child(even) {
+  background: #faf5fd;
+}
+.metro-table.daily-raw-purple tbody tr:hover {
+  background: #f3e5f5;
+}
+
+/* 색상 변형 - BO 진행중 Opp (teal) */
+.metro-table.daily-raw-teal th {
+  background: #00695c;
+}
+.metro-table.daily-raw-teal tbody tr:nth-child(even) {
+  background: #f0fdfa;
+}
+.metro-table.daily-raw-teal tbody tr:hover {
+  background: #e0f2f1;
+}
+
+/* 색상 변형 - BO 마감 내역 (green) */
+.metro-table.daily-raw-green th {
+  background: #1b5e20;
+}
+.metro-table.daily-raw-green tbody tr:nth-child(even) {
+  background: #f1f8e9;
+}
+.metro-table.daily-raw-green tbody tr:hover {
+  background: #dcedc8;
+}
+
+/* Badge */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.badge-blue { background: var(--metro-blue); color: #fff; }
+.badge-green { background: var(--metro-green); color: #fff; }
+.badge-orange { background: var(--metro-orange); color: #fff; }
+.badge-red { background: var(--metro-red); color: #fff; }
+
+/* Grid */
+.metro-grid {
+  display: grid;
+  gap: 15px;
+}
+
+.metro-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.metro-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.metro-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.metro-grid-5 { grid-template-columns: repeat(5, 1fr); }
+.metro-grid-6 { grid-template-columns: repeat(6, 1fr); }
+
+@media (max-width: 768px) {
+  .metro-grid-2,
+  .metro-grid-3,
+  .metro-grid-4,
+  .metro-grid-5,
+  .metro-grid-6 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Loading */
+.metro-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "salesforce-data-tools",
+  "version": "1.0.0",
+  "description": "Salesforce Closed-Lost Grid 데이터 추출 도구",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "fetch:daily": "node index.js daily",
+    "fetch:weekly": "node index.js weekly",
+    "fetch:monthly": "node index.js monthly",
+    "fetch:all": "node index.js all"
+  },
+  "keywords": [
+    "salesforce",
+    "data-extraction",
+    "closed-lost"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1005.0",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1"
+  }
+}
