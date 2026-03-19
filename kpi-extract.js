@@ -882,33 +882,65 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
   console.log(`  👥 채널세일즈 인원: ${users.length}명 (AE:${chTeamMembers.AE.length} AM:${chTeamMembers.AM.length} TM:${chTeamMembers.TM.length} BO:${chTeamMembers.백오피스.length})`);
 
   // 2. 채널 Lead 조회 (TM용 - 인바운드 반대 조건)
-  const channelLeadQuery = `
-    SELECT Id, CreatedDate, CreatedTime__c, OwnerId, Name, Status, LossReason__c, LossReason_Contract__c, LossReasonDetail__c, ConvertedOpportunityId, Company, LeadSource, Partner__c, PartnerName__c, BrandName__c
-    FROM Lead
-    WHERE CreatedDate >= ${startUTC}
-      AND CreatedDate < ${endUTC}
-      AND (ServiceType__c = '테이블오더' OR ServiceType__c = '티오더 웨이팅')
-      AND (LossReason__c = NULL OR LossReason__c != '오생성')
-      AND (Partner__c != NULL OR PartnerName__c != NULL OR StoreType__c = '프랜차이즈제휴')
-  `.replace(/\s+/g, ' ').trim();
-  const channelLeadsRecords = await soqlQueryAll(instanceUrl, accessToken, channelLeadQuery);
-  const channelLeads = channelLeadsRecords.filter(l => !l.Company || !l.Company.toLowerCase().includes('test'));
+  let channelLeads = [];
+  try {
+    const channelLeadQuery = `
+      SELECT Id, CreatedDate, CreatedTime__c, OwnerId, Name, Status, LossReason__c, LossReason_Contract__c, LossReasonDetail__c, ConvertedOpportunityId, Company, LeadSource, Partner__c, PartnerName__c, BrandName__c
+      FROM Lead
+      WHERE CreatedDate >= ${startUTC}
+        AND CreatedDate < ${endUTC}
+        AND (ServiceType__c = '테이블오더' OR ServiceType__c = '티오더 웨이팅')
+        AND (LossReason__c = NULL OR LossReason__c != '오생성')
+        AND (Partner__c != NULL OR PartnerName__c != NULL OR StoreType__c = '프랜차이즈제휴')
+    `.replace(/\s+/g, ' ').trim();
+    const channelLeadsRecords = await soqlQueryAll(instanceUrl, accessToken, channelLeadQuery);
+    channelLeads = channelLeadsRecords.filter(l => !l.Company || !l.Company.toLowerCase().includes('test'));
+  } catch (err) {
+    console.log('  ⚠️ channelLeadQuery: Partner__c 필드 없음, PartnerName__c로 폴백');
+    const channelLeadQueryFallback = `
+      SELECT Id, CreatedDate, CreatedTime__c, OwnerId, Name, Status, LossReason__c, LossReason_Contract__c, LossReasonDetail__c, ConvertedOpportunityId, Company, LeadSource, PartnerName__c, BrandName__c
+      FROM Lead
+      WHERE CreatedDate >= ${startUTC}
+        AND CreatedDate < ${endUTC}
+        AND (ServiceType__c = '테이블오더' OR ServiceType__c = '티오더 웨이팅')
+        AND (LossReason__c = NULL OR LossReason__c != '오생성')
+        AND (PartnerName__c != NULL OR StoreType__c = '프랜차이즈제휴')
+    `.replace(/\s+/g, ' ').trim();
+    const channelLeadsRecords = await soqlQueryAll(instanceUrl, accessToken, channelLeadQueryFallback);
+    channelLeads = channelLeadsRecords.filter(l => !l.Company || !l.Company.toLowerCase().includes('test'));
+  }
   console.log(`  📋 채널 Lead: ${channelLeads.length}건`);
 
   // 2-1. 기간 내 전환된 채널 Lead 조회 (ConvertedDate 기준 — 방문배정 카운트용)
-  // Lead 생성일이 아닌 실제 전환일 기준으로 카운트하기 위해 별도 쿼리
-  const convertedLeadQuery = `
-    SELECT Id, Name, Company, CreatedDate, ConvertedDate, ConvertedOpportunityId, OwnerId, Owner.Name
-    FROM Lead
-    WHERE ConvertedDate >= ${startDate}
-      AND ConvertedDate <= ${endDate}
-      AND IsConverted = true
-      AND (ServiceType__c = '테이블오더' OR ServiceType__c = '티오더 웨이팅')
-      AND (LossReason__c = NULL OR LossReason__c != '오생성')
-      AND (Partner__c != NULL OR PartnerName__c != NULL OR StoreType__c = '프랜차이즈제휴')
-  `.replace(/\s+/g, ' ').trim();
-  const convertedLeadsRaw = await soqlQueryAll(instanceUrl, accessToken, convertedLeadQuery);
-  const channelConvertedLeads = convertedLeadsRaw.filter(l => !l.Company || !l.Company.toLowerCase().includes('test'));
+  let channelConvertedLeads = [];
+  try {
+    const convertedLeadQuery = `
+      SELECT Id, Name, Company, CreatedDate, ConvertedDate, ConvertedOpportunityId, OwnerId, Owner.Name
+      FROM Lead
+      WHERE ConvertedDate >= ${startDate}
+        AND ConvertedDate <= ${endDate}
+        AND IsConverted = true
+        AND (ServiceType__c = '테이블오더' OR ServiceType__c = '티오더 웨이팅')
+        AND (LossReason__c = NULL OR LossReason__c != '오생성')
+        AND (Partner__c != NULL OR PartnerName__c != NULL OR StoreType__c = '프랜차이즈제휴')
+    `.replace(/\s+/g, ' ').trim();
+    const convertedLeadsRaw = await soqlQueryAll(instanceUrl, accessToken, convertedLeadQuery);
+    channelConvertedLeads = convertedLeadsRaw.filter(l => !l.Company || !l.Company.toLowerCase().includes('test'));
+  } catch (err) {
+    console.log('  ⚠️ convertedLeadQuery: Partner__c 필드 없음, PartnerName__c로 폴백');
+    const convertedLeadQueryFallback = `
+      SELECT Id, Name, Company, CreatedDate, ConvertedDate, ConvertedOpportunityId, OwnerId, Owner.Name
+      FROM Lead
+      WHERE ConvertedDate >= ${startDate}
+        AND ConvertedDate <= ${endDate}
+        AND IsConverted = true
+        AND (ServiceType__c = '테이블오더' OR ServiceType__c = '티오더 웨이팅')
+        AND (LossReason__c = NULL OR LossReason__c != '오생성')
+        AND (PartnerName__c != NULL OR StoreType__c = '프랜차이즈제휴')
+    `.replace(/\s+/g, ' ').trim();
+    const convertedLeadsRaw = await soqlQueryAll(instanceUrl, accessToken, convertedLeadQueryFallback);
+    channelConvertedLeads = convertedLeadsRaw.filter(l => !l.Company || !l.Company.toLowerCase().includes('test'));
+  }
   console.log(`  🔄 기간 내 전환 Lead (ConvertedDate): ${channelConvertedLeads.length}건`);
 
   // 3. 채널 Lead별 첫 Task 조회 (FRT용)
@@ -926,15 +958,29 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
   console.log(`  📞 채널 Lead Task (FRT): ${channelLeadTasks.length}건`);
 
   // 4. LeadSource 기반 채널 Lead 조회 (AM용 - 일별 리드 확보 수)
-  const sourceLeadQuery = `
-    SELECT Id, Name, Company, Status, Partner__c, PartnerName__c, BrandName__c, LeadSource, CreatedDate, OwnerId, Owner.Name, ConvertedOpportunityId, IsConverted, ConvertedDate
-    FROM Lead
-    WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
-      AND CreatedDate >= ${startUTC}
-      AND CreatedDate < ${endUTC}
-    ORDER BY CreatedDate DESC
-  `.replace(/\s+/g, ' ').trim();
-  const sourceLeads = await soqlQueryAll(instanceUrl, accessToken, sourceLeadQuery);
+  let sourceLeads = [];
+  try {
+    const sourceLeadQuery = `
+      SELECT Id, Name, Company, Status, Partner__c, PartnerName__c, BrandName__c, LeadSource, CreatedDate, OwnerId, Owner.Name, ConvertedOpportunityId, IsConverted, ConvertedDate
+      FROM Lead
+      WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
+        AND CreatedDate >= ${startUTC}
+        AND CreatedDate < ${endUTC}
+      ORDER BY CreatedDate DESC
+    `.replace(/\s+/g, ' ').trim();
+    sourceLeads = await soqlQueryAll(instanceUrl, accessToken, sourceLeadQuery);
+  } catch (err) {
+    console.log('  ⚠️ sourceLeadQuery: Partner__c 필드 없음, PartnerName__c로 폴백');
+    const sourceLeadQueryFallback = `
+      SELECT Id, Name, Company, Status, PartnerName__c, BrandName__c, LeadSource, CreatedDate, OwnerId, Owner.Name, ConvertedOpportunityId, IsConverted, ConvertedDate
+      FROM Lead
+      WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
+        AND CreatedDate >= ${startUTC}
+        AND CreatedDate < ${endUTC}
+      ORDER BY CreatedDate DESC
+    `.replace(/\s+/g, ' ').trim();
+    sourceLeads = await soqlQueryAll(instanceUrl, accessToken, sourceLeadQueryFallback);
+  }
   const partnerSourceLeads = sourceLeads.filter(l => l.LeadSource === '파트너사 소개');
   const franchiseSourceLeads = sourceLeads.filter(l => l.LeadSource === '프랜차이즈소개');
   console.log(`  📋 LeadSource 기반 - 파트너사: ${partnerSourceLeads.length}건, 프랜차이즈: ${franchiseSourceLeads.length}건`);
@@ -1012,14 +1058,27 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
 
   // 10. 전체 LeadSource 기반 Lead 조회 (AM 활성 파트너 집계용 - 최근 90일)
   const threeMonthsAgo = new Date(new Date(startDate).getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10);
-  const allSourceLeadQuery = `
-    SELECT Id, Partner__c, PartnerName__c, BrandName__c, LeadSource, CreatedDate, IsConverted
-    FROM Lead
-    WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
-      AND CreatedDate >= ${kstToUTC(threeMonthsAgo, true)}
-    ORDER BY CreatedDate DESC
-  `.replace(/\s+/g, ' ').trim();
-  const allSourceLeads = await soqlQueryAll(instanceUrl, accessToken, allSourceLeadQuery);
+  let allSourceLeads = [];
+  try {
+    const allSourceLeadQuery = `
+      SELECT Id, Partner__c, PartnerName__c, BrandName__c, LeadSource, CreatedDate, IsConverted
+      FROM Lead
+      WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
+        AND CreatedDate >= ${kstToUTC(threeMonthsAgo, true)}
+      ORDER BY CreatedDate DESC
+    `.replace(/\s+/g, ' ').trim();
+    allSourceLeads = await soqlQueryAll(instanceUrl, accessToken, allSourceLeadQuery);
+  } catch (err) {
+    console.log('  ⚠️ allSourceLeadQuery: Partner__c 필드 없음, PartnerName__c로 폴백');
+    const allSourceLeadQueryFallback = `
+      SELECT Id, PartnerName__c, BrandName__c, LeadSource, CreatedDate, IsConverted
+      FROM Lead
+      WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
+        AND CreatedDate >= ${kstToUTC(threeMonthsAgo, true)}
+      ORDER BY CreatedDate DESC
+    `.replace(/\s+/g, ' ').trim();
+    allSourceLeads = await soqlQueryAll(instanceUrl, accessToken, allSourceLeadQueryFallback);
+  }
   console.log(`  📋 전체 채널 Lead (90일): ${allSourceLeads.length}건`);
 
   // 11. 채널 Opportunity별 Task 조회 (과업 정보)
