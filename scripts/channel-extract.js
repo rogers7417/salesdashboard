@@ -82,15 +82,37 @@ async function runChannelExtract(targetMonth) {
       })),
     } : null;
 
+    // 히트맵 sparse 변환 (활동 있는 날만)
+    const sparseDailyActivity = (arr) =>
+      (arr || []).filter(d => d.leads > 0 || d.meetings > 0 || d.count > 0);
+
+    const channelLeadsByOwner = stats.summary?.channelLeadsByOwner;
+    const sparseChannelLeadsByOwner = channelLeadsByOwner ? {
+      ...channelLeadsByOwner,
+      amHeatmap: channelLeadsByOwner.amHeatmap ? {
+        ...channelLeadsByOwner.amHeatmap,
+        data: (channelLeadsByOwner.amHeatmap.data || []).map(d => ({
+          ...d,
+          dailyData: (d.dailyData || []).filter(dd => dd.count > 0)
+        }))
+      } : null
+    } : null;
+
     const kpiV2Report = {
       period,
       kpi: stats.kpi,
       summary: stats.summary ? {
-        channelLeadsByOwner: stats.summary.channelLeadsByOwner,
+        channelLeadsByOwner: sparseChannelLeadsByOwner,
       } : null,
       mouStats: stats.mouStats,
-      partnerStats: stripRawData(stats).partnerStats,
-      franchiseHQList: stats.franchiseHQList,
+      partnerStats: (stripRawData(stats).partnerStats || []).map(({ leads, referredStores, dailyLeads, ...rest }) => ({
+        ...rest,
+        dailyActivity: sparseDailyActivity(rest.dailyActivity)
+      })),
+      franchiseHQList: (stats.franchiseHQList || []).map(hq => ({
+        ...hq,
+        dailyActivity: sparseDailyActivity(hq.dailyActivity)
+      })),
       rawData: rawDataSlim,
       generatedAt,
     };

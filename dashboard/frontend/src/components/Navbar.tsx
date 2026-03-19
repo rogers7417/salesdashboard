@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 const navItems = [
   { href: '/kpi-v2', label: 'KPI v2' },
+  { href: '/kpi-v2?tab=score', label: '🏆 스코어' },
   { href: '/inbound', label: '인바운드 세일즈' },
   { href: '/channel', label: '채널 세일즈' },
   { href: '/kpi', label: 'KPI' },
@@ -12,8 +14,10 @@ const navItems = [
   { href: '/install-tracking-v2', label: '트래킹 v2' },
 ];
 
-export default function Navbar() {
+function NavbarInner() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const fullPath = searchParams.get('tab') ? `${pathname}?tab=${searchParams.get('tab')}` : pathname;
 
   return (
     <nav style={{
@@ -37,16 +41,16 @@ export default function Navbar() {
                     color: '#fff',
                     textDecoration: 'none',
                     fontSize: '0.95em',
-                    background: pathname === item.href ? 'rgba(255,255,255,0.2)' : 'transparent',
+                    background: fullPath === item.href ? 'rgba(255,255,255,0.2)' : 'transparent',
                     transition: 'background 0.2s'
                   }}
                   onMouseEnter={(e) => {
-                    if (pathname !== item.href) {
+                    if (fullPath !== item.href) {
                       e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (pathname !== item.href) {
+                    if (fullPath !== item.href) {
                       e.currentTarget.style.background = 'transparent';
                     }
                   }}
@@ -62,5 +66,15 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
+  );
+}
+
+export default function Navbar() {
+  return (
+    <Suspense fallback={
+      <nav style={{ background: '#0078d4', color: '#fff', height: '56px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }} />
+    }>
+      <NavbarInner />
+    </Suspense>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { fetchKPIReport, fetchKPIMonths, fetchChannelSales } from '@/lib/api';
 import DataTable from '@/components/DataTable';
 import TossBadge from '@/components/TossBadge';
@@ -32,13 +33,15 @@ interface FlowStep {
 
 // ============ 메인 페이지 ============
 
-export default function KPIV2Page() {
+function KPIV2PageInner() {
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [month, setMonth] = useState<string>('');
   const [months, setMonths] = useState<string[]>([]);
-  const [activeGroup, setActiveGroup] = useState<'inbound' | 'channel'>('inbound');
+  const [activeGroup, setActiveGroup] = useState<'inbound' | 'channel' | 'score'>('inbound');
   const [activeTab, setActiveTab] = useState<'is' | 'fs' | 'bo'>('is');
   const [activeStep, setActiveStep] = useState<number>(0);
   const [fsActiveStep, setFsActiveStep] = useState<number>(0);
@@ -62,10 +65,17 @@ export default function KPIV2Page() {
   const [csChurnedTab, setCsChurnedTab] = useState<'partner' | 'hq' | 'storeCX'>('partner');
   const [csOnboardTab, setCsOnboardTab] = useState<'partner' | 'hq'>('partner');
   const [csOnboardSettledOpen, setCsOnboardSettledOpen] = useState<Record<string, boolean>>({});
+  const [scoreTab, setScoreTab] = useState<'is' | 'fs' | 'bo' | 'ae' | 'am' | 'tm' | 'csbo'>('is');
 
-  // CS 데이터 lazy-load
+  // URL tab 파라미터 동기화
   useEffect(() => {
-    if (activeGroup !== 'channel') return;
+    if (tabParam === 'score') setActiveGroup('score');
+    else if (activeGroup === 'score' && !tabParam) setActiveGroup('inbound');
+  }, [tabParam]);
+
+  // CS 데이터 lazy-load (채널 탭 + 스코어 탭에서 AE/AM 사용)
+  useEffect(() => {
+    if (activeGroup !== 'channel' && activeGroup !== 'score') return;
     setCsLoading(true);
     fetchChannelSales(month)
       .then(res => setCsData(res))
@@ -461,16 +471,375 @@ export default function KPIV2Page() {
     { key: 'lastTaskDate', header: '마지막 터치', render: (v: string) => lastTouchRender(v) },
   ];
 
+  // ============ 구성원 칩 렌더링 ============
+  function renderMemberChips(members: any[] | undefined, color: string) {
+    if (!members || members.length === 0) return null;
+    return (
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px',
+        padding: '10px 14px', background: '#F9FAFB', borderRadius: '10px',
+        border: '1px solid #E5E8EB',
+      }}>
+        <span style={{ fontSize: '12px', fontWeight: 600, color: '#6B7684', whiteSpace: 'nowrap' }}>👥 구성원</span>
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+          {members.map((m: any, i: number) => (
+            <span key={m.id} style={{ fontSize: '13px', fontWeight: 600, color: '#333D4B' }}>
+              {m.name}{i < members.length - 1 ? ',' : ''}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ============ 직무별 그룹핑 유틸리티 ============
+
+  function groupByTeam(owners: any[]) {
+    const teamMap: Record<string, any[]> = {};
+    owners.forEach((o: any) => {
+      const team = o.team || '-';
+      if (!teamMap[team]) teamMap[team] = [];
+      teamMap[team].push(o);
+    });
+    return teamMap;
+  }
+
+  // members + byOwner 합쳐서 전원 표시 (데이터 없는 사람은 0)
+  function getAllMembersWithData(byOwnerArr: any[], membersList: any[]) {
+    const ownerMap = new Map((byOwnerArr || []).map((o: any) => [o.name, o]));
+    // byOwner에 team이 있는 사람 중 가장 많은 team을 기본값으로
+    const teamCounts: Record<string, number> = {};
+    byOwnerArr?.forEach((o: any) => { if (o.team && o.team !== '-') teamCounts[o.team] = (teamCounts[o.team] || 0) + 1; });
+    const defaultTeam = Object.entries(teamCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || '-';
+    return (membersList || []).map((m: any) => {
+      const existing = ownerMap.get(m.name);
+      if (existing) return { ...existing, team: existing.team || defaultTeam };
+      return { name: m.name, team: defaultTeam, frtOk: 0, frtOver20: 0, avgFrt: 0, lead: 0, mql: 0, sql: 0, sqlConversionRate: 0, visitConverted: 0, visitTotal: 0, visitRate: 0 };
+    });
+  }
+
+  function renderTeamFRTTable(owners: any[]) {
+    const fullOwners = getAllMembersWithData(is?.byOwner, is?.members);
+    const teamMap = groupByTeam(fullOwners.filter((o: any) => o.team && o.team !== '-'));
+    const teams = Object.entries(teamMap);
+    if (teams.length === 0) return null;
+    return (
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          <span style={{ fontSize: '16px', fontWeight: 700, color: '#191F28' }}>🏆 직무별 FRT 현황</span>
+          <span style={{ fontSize: '13px', color: '#8B95A1' }}>시상용 스코어링</span>
+        </div>
+        {teams.map(([team, members]) => {
+          const totalOk = members.reduce((s: number, m: any) => s + (m.frtOk ?? 0), 0);
+          const totalOver = members.reduce((s: number, m: any) => s + (m.frtOver20 ?? 0), 0);
+          const totalAll = totalOk + totalOver;
+          const teamRate = totalAll > 0 ? +((totalOk / totalAll) * 100).toFixed(1) : 0;
+          const teamAvgFrt = members.length > 0 ? members.reduce((s: number, m: any) => s + (m.avgFrt ?? 0), 0) / members.length : 0;
+          return (
+            <div key={team} style={{ marginBottom: '16px', border: '1px solid #E5E8EB', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ background: '#FFF8E1', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontWeight: 700, color: '#191F28', fontSize: '15px' }}>📋 {team} ({members.length}명)</span>
+                <span style={{ fontSize: '13px', color: '#6B7684' }}>
+                  팀 준수율 <TossBadge variant={teamRate >= 80 ? 'weak' : 'fill'} size="xsmall" color={teamRate >= 80 ? 'green' : teamRate >= 50 ? 'yellow' : 'red'}>{teamRate}%</TossBadge>
+                  {' '}평균 FRT <TossBadge variant="weak" size="xsmall" color={teamAvgFrt <= 20 ? 'green' : 'red'}>{fmtFrt(teamAvgFrt)}</TossBadge>
+                </span>
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '18px' }}>
+                <thead>
+                  <tr style={{ background: '#F9FAFB' }}>
+                    <th style={thStyle}>담당자</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>FRT 준수</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>FRT 초과</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>준수율</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>평균 FRT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {members.map((o: any) => {
+                    const total = (o.frtOk ?? 0) + (o.frtOver20 ?? 0);
+                    const rate = total > 0 ? +((o.frtOk / total) * 100).toFixed(1) : 0;
+                    return (
+                      <tr key={o.name} style={{ borderBottom: '1px solid #F2F4F6' }}>
+                        <td style={tdStyle}><span style={{ fontWeight: 600, color: '#191F28' }}>{o.name}</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>
+                          <TossBadge variant="weak" size="xsmall" color="green">{o.frtOk ?? 0}건</TossBadge>
+                        </td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>
+                          {(o.frtOver20 ?? 0) > 0
+                            ? <TossBadge variant="fill" size="xsmall" color="red">{o.frtOver20}건</TossBadge>
+                            : <span style={{ color: '#B0B8C1' }}>0건</span>
+                          }
+                        </td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>
+                          <TossBadge variant={rate >= 80 ? 'weak' : 'fill'} size="xsmall" color={rate >= 80 ? 'green' : rate >= 50 ? 'yellow' : 'red'}>
+                            {rate}%
+                          </TossBadge>
+                        </td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>
+                          <TossBadge variant="weak" size="xsmall" color={(o.avgFrt ?? 0) <= 20 ? 'green' : 'red'}>
+                            {fmtFrt(o.avgFrt ?? 0)}
+                          </TossBadge>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr style={{ background: '#FFFDF5', borderTop: '2px solid #E5E8EB' }}>
+                    <td style={tdStyle}><span style={{ fontWeight: 700, color: '#6B7684' }}>소계</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 700 }}>{totalOk}건</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 700, color: '#F04452' }}>{totalOver}건</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>
+                      <TossBadge variant={teamRate >= 80 ? 'weak' : 'fill'} size="xsmall" color={teamRate >= 80 ? 'green' : teamRate >= 50 ? 'yellow' : 'red'}>
+                        {teamRate}%
+                      </TossBadge>
+                    </td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>
+                      <TossBadge variant="weak" size="xsmall" color={teamAvgFrt <= 20 ? 'green' : 'red'}>
+                        {fmtFrt(teamAvgFrt)}
+                      </TossBadge>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function renderTeamTaskTable(owners: any[], taskData: any[]) {
+    const fullOwners = getAllMembersWithData(is?.byOwner, is?.members);
+    const teamMap = groupByTeam(fullOwners.filter((o: any) => o.team && o.team !== '-'));
+    const taskMap = new Map(taskData.map((t: any) => [t.name, t]));
+    const teams = Object.entries(teamMap);
+    if (teams.length === 0) return null;
+    return (
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          <span style={{ fontSize: '16px', fontWeight: 700, color: '#191F28' }}>🏆 직무별 Task 생성 현황</span>
+          <span style={{ fontSize: '13px', color: '#8B95A1' }}>시상용 스코어링</span>
+        </div>
+        {teams.map(([team, members]) => {
+          let teamTotalTasks = 0;
+          let teamTotalAvgDaily = 0;
+          members.forEach((m: any) => {
+            const task = taskMap.get(m.name);
+            teamTotalTasks += task?.totalTasks ?? 0;
+            teamTotalAvgDaily += task?.avgDaily ?? 0;
+          });
+          const teamAvgDaily = members.length > 0 ? teamTotalAvgDaily / members.length : 0;
+          return (
+            <div key={team} style={{ marginBottom: '16px', border: '1px solid #E5E8EB', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ background: '#FFF8E1', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontWeight: 700, color: '#191F28', fontSize: '15px' }}>📋 {team} ({members.length}명)</span>
+                <span style={{ fontSize: '13px', color: '#6B7684' }}>
+                  팀 일평균 <TossBadge variant={teamAvgDaily >= 30 ? 'weak' : 'fill'} size="xsmall" color={teamAvgDaily >= 30 ? 'green' : teamAvgDaily >= 20 ? 'yellow' : 'red'}>{teamAvgDaily.toFixed(1)}건</TossBadge>
+                </span>
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '18px' }}>
+                <thead>
+                  <tr style={{ background: '#F9FAFB' }}>
+                    <th style={thStyle}>담당자</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>총 Task</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>일평균</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>30건 이상 일수</th>
+                    <th style={{ ...thStyle, textAlign: 'center' }}>달성도</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {members.map((o: any) => {
+                    const task = taskMap.get(o.name);
+                    const taskAvg = task?.avgDaily ?? 0;
+                    const daysOver30 = task?.daysOver30 ?? 0;
+                    const totalTasks = task?.totalTasks ?? 0;
+                    return (
+                      <tr key={o.name} style={{ borderBottom: '1px solid #F2F4F6' }}>
+                        <td style={tdStyle}><span style={{ fontWeight: 600, color: '#191F28' }}>{o.name}</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 700, color: '#191F28' }}>{totalTasks}건</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>
+                          <TossBadge variant={taskAvg >= 30 ? 'weak' : 'fill'} size="xsmall" color={taskAvg >= 30 ? 'green' : taskAvg >= 20 ? 'yellow' : 'red'}>
+                            {typeof taskAvg === 'number' ? taskAvg.toFixed(1) : taskAvg}건
+                          </TossBadge>
+                        </td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 600, color: '#191F28' }}>{daysOver30}일</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'center' }}>{renderTaskBar(taskAvg)}</td>
+                      </tr>
+                    );
+                  })}
+                  <tr style={{ background: '#FFFDF5', borderTop: '2px solid #E5E8EB' }}>
+                    <td style={tdStyle}><span style={{ fontWeight: 700, color: '#6B7684' }}>소계</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 700 }}>{teamTotalTasks}건</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>
+                      <TossBadge variant={teamAvgDaily >= 30 ? 'weak' : 'fill'} size="xsmall" color={teamAvgDaily >= 30 ? 'green' : teamAvgDaily >= 20 ? 'yellow' : 'red'}>
+                        {teamAvgDaily.toFixed(1)}건
+                      </TossBadge>
+                    </td>
+                    <td colSpan={2} />
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function renderTeamVisitTable(owners: any[]) {
+    const fullOwners = getAllMembersWithData(is?.byOwner, is?.members);
+    const teamMap = groupByTeam(fullOwners.filter((o: any) => o.team && o.team !== '-'));
+    const PER_PERSON_TARGET = 75;
+    const teams = Object.entries(teamMap);
+    if (teams.length === 0) return null;
+    return (
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          <span style={{ fontSize: '16px', fontWeight: 700, color: '#191F28' }}>🏆 직무별 방문 현황</span>
+          <span style={{ fontSize: '13px', color: '#8B95A1' }}>목표: 인당 75건 × 인원수</span>
+        </div>
+        {teams.map(([team, members]) => {
+          const teamConverted = members.reduce((s: number, m: any) => s + (m.visitConverted ?? 0), 0);
+          const teamVisitTotal = members.reduce((s: number, m: any) => s + (m.visitTotal ?? 0), 0);
+          const teamTarget = PER_PERSON_TARGET * members.length;
+          const teamTargetRate = teamTarget > 0 ? +((teamConverted / teamTarget) * 100).toFixed(1) : 0;
+          const teamRate = teamVisitTotal > 0 ? +((teamConverted / teamVisitTotal) * 100).toFixed(1) : 0;
+          return (
+            <div key={team} style={{ marginBottom: '16px', border: '1px solid #E5E8EB', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ background: '#FFF8E1', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontWeight: 700, color: '#191F28', fontSize: '15px' }}>📋 {team} ({members.length}명)</span>
+                <span style={{ fontSize: '13px', color: '#6B7684' }}>
+                  팀 목표 {teamTarget}건{' '}
+                  <TossBadge variant={teamTargetRate >= 100 ? 'weak' : 'fill'} size="xsmall" color={teamTargetRate >= 100 ? 'green' : teamTargetRate >= 70 ? 'yellow' : 'red'}>
+                    달성 {teamTargetRate}%
+                  </TossBadge>
+                </span>
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '18px' }}>
+                <thead>
+                  <tr style={{ background: '#F9FAFB' }}>
+                    <th style={thStyle}>담당자</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>방문 완료</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>방문 총건</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>완료율</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {members.map((o: any) => {
+                    const rate = o.visitRate ?? 0;
+                    return (
+                      <tr key={o.name} style={{ borderBottom: '1px solid #F2F4F6' }}>
+                        <td style={tdStyle}><span style={{ fontWeight: 600, color: '#191F28' }}>{o.name}</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 700, color: '#191F28' }}>{o.visitConverted ?? 0}건</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ color: '#6B7684' }}>{o.visitTotal ?? 0}건</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>
+                          <TossBadge variant={rate >= 90 ? 'weak' : 'fill'} size="xsmall" color={rate >= 90 ? 'green' : rate >= 70 ? 'yellow' : 'red'}>
+                            {rate}%
+                          </TossBadge>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr style={{ background: '#FFFDF5', borderTop: '2px solid #E5E8EB' }}>
+                    <td style={tdStyle}><span style={{ fontWeight: 700, color: '#6B7684' }}>소계 (목표 {teamTarget}건)</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 700 }}>{teamConverted}건</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 600, color: '#6B7684' }}>{teamVisitTotal}건</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>
+                      <TossBadge variant={teamRate >= 90 ? 'weak' : 'fill'} size="xsmall" color={teamRate >= 90 ? 'green' : teamRate >= 70 ? 'yellow' : 'red'}>
+                        {teamRate}%
+                      </TossBadge>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function renderTeamSQLTable(owners: any[]) {
+    const fullOwners = getAllMembersWithData(is?.byOwner, is?.members);
+    const teamMap = groupByTeam(fullOwners.filter((o: any) => o.team && o.team !== '-'));
+    const teams = Object.entries(teamMap);
+    if (teams.length === 0) return null;
+    return (
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          <span style={{ fontSize: '16px', fontWeight: 700, color: '#191F28' }}>🏆 직무별 SQL 전환 현황</span>
+          <span style={{ fontSize: '13px', color: '#8B95A1' }}>시상용 스코어링</span>
+        </div>
+        {teams.map(([team, members]) => {
+          const teamLead = members.reduce((s: number, m: any) => s + (m.lead ?? 0), 0);
+          const teamMql = members.reduce((s: number, m: any) => s + (m.mql ?? 0), 0);
+          const teamSql = members.reduce((s: number, m: any) => s + (m.sql ?? 0), 0);
+          const teamRate = teamMql > 0 ? +((teamSql / teamMql) * 100).toFixed(1) : 0;
+          return (
+            <div key={team} style={{ marginBottom: '16px', border: '1px solid #E5E8EB', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ background: '#FFF8E1', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontWeight: 700, color: '#191F28', fontSize: '15px' }}>📋 {team} ({members.length}명)</span>
+                <span style={{ fontSize: '13px', color: '#6B7684' }}>
+                  팀 전환율 <TossBadge variant={teamRate >= 90 ? 'weak' : 'fill'} size="xsmall" color={teamRate >= 90 ? 'green' : teamRate >= 70 ? 'yellow' : 'red'}>{teamRate}%</TossBadge>
+                </span>
+              </div>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '18px' }}>
+                <thead>
+                  <tr style={{ background: '#F9FAFB' }}>
+                    <th style={thStyle}>담당자</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>Lead</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>MQL</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>SQL</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>전환율</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {members.map((o: any) => {
+                    const rate = o.sqlConversionRate ?? 0;
+                    return (
+                      <tr key={o.name} style={{ borderBottom: '1px solid #F2F4F6' }}>
+                        <td style={tdStyle}><span style={{ fontWeight: 600, color: '#191F28' }}>{o.name}</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ color: '#6B7684' }}>{o.lead ?? 0}건</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 600, color: '#191F28' }}>{o.mql ?? 0}건</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 700, color: '#191F28' }}>{o.sql ?? 0}건</span></td>
+                        <td style={{ ...tdStyle, textAlign: 'right' }}>
+                          <TossBadge variant={rate >= 90 ? 'weak' : 'fill'} size="xsmall" color={rate >= 90 ? 'green' : rate >= 70 ? 'yellow' : 'red'}>
+                            {rate}%
+                          </TossBadge>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr style={{ background: '#FFFDF5', borderTop: '2px solid #E5E8EB' }}>
+                    <td style={tdStyle}><span style={{ fontWeight: 700, color: '#6B7684' }}>소계</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 700 }}>{teamLead}건</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 700 }}>{teamMql}건</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}><span style={{ fontWeight: 700 }}>{teamSql}건</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>
+                      <TossBadge variant={teamRate >= 90 ? 'weak' : 'fill'} size="xsmall" color={teamRate >= 90 ? 'green' : teamRate >= 70 ? 'yellow' : 'red'}>
+                        {teamRate}%
+                      </TossBadge>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   // ============ 상세 패널 렌더러 ============
 
   function renderFRTDetail() {
     const owners = (is?.byOwner as any[] || []).filter((o: any) =>
-      o.lead >= 10 && o.name && !/^[0-9a-zA-Z]/.test(o.name)
+      o.name && !/^[0-9a-zA-Z]/.test(o.name) && (isOwnerNames.has(o.name) || (o.lead ?? 0) > 0)
     );
     const frtItems = rawData?.frtOver20 || [];
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {renderMemberChips(is?.members, '#F04452')}
         {/* 시간대별 FRT 준수율 */}
         {frtByTimeSlot && (
           <div>
@@ -498,6 +867,9 @@ export default function KPIV2Page() {
             </div>
           </div>
         )}
+
+        {/* 직무별 FRT 현황 */}
+        {renderTeamFRTTable(owners)}
 
         {/* 담당자별 FRT 현황 */}
         <div>
@@ -582,11 +954,15 @@ export default function KPIV2Page() {
   function renderTaskDetail() {
     const taskMap = new Map((filteredDailyTask || []).map((t: any) => [t.name, t]));
     const owners = (is?.byOwner as any[] || []).filter((o: any) =>
-      o.lead >= 10 && o.name && !/^[0-9a-zA-Z]/.test(o.name)
+      o.name && !/^[0-9a-zA-Z]/.test(o.name) && (isOwnerNames.has(o.name) || (o.lead ?? 0) > 0)
     );
 
     return (
       <div>
+        {renderMemberChips(is?.members, '#F04452')}
+        {/* 직무별 Task 생성 현황 */}
+        {renderTeamTaskTable(owners, is?.dailyTask?.byOwner || [])}
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
           <span style={{ fontSize: '16px', fontWeight: 700, color: '#191F28' }}>담당자별 Task 생성 현황</span>
           <TossBadge variant="weak" size="small" color="teal">팀 평균 {avgDailyTask}건/일</TossBadge>
@@ -650,12 +1026,16 @@ export default function KPIV2Page() {
 
   function renderVisitDetail() {
     const owners = (is?.byOwner as any[] || []).filter((o: any) =>
-      o.lead >= 10 && o.name && !/^[0-9a-zA-Z]/.test(o.name)
+      o.name && !/^[0-9a-zA-Z]/.test(o.name) && (isOwnerNames.has(o.name) || (o.lead ?? 0) > 0)
     );
     const noVisitItems = rawData?.noVisitSQL || [];
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {renderMemberChips(is?.members, '#F04452')}
+        {/* 직무별 방문 현황 */}
+        {renderTeamVisitTable(owners)}
+
         {/* 담당자별 방문 현황 */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
@@ -722,12 +1102,16 @@ export default function KPIV2Page() {
 
   function renderSQLDetail() {
     const owners = (is?.byOwner as any[] || []).filter((o: any) =>
-      o.lead >= 10 && o.name && !/^[0-9a-zA-Z]/.test(o.name)
+      o.name && !/^[0-9a-zA-Z]/.test(o.name) && (isOwnerNames.has(o.name) || (o.lead ?? 0) > 0)
     );
     const unconvertedItems = rawData?.unconvertedMQL || [];
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {renderMemberChips(is?.members, '#F04452')}
+        {/* 직무별 SQL 전환 현황 */}
+        {renderTeamSQLTable(owners)}
+
         {/* 담당자별 SQL 전환 현황 */}
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
@@ -1245,7 +1629,10 @@ export default function KPIV2Page() {
 
   const boTotalSQL = boUsers.reduce((s: number, u: any) => s + (u.total ?? 0), 0);
   const boTotalCW = boUsers.reduce((s: number, u: any) => s + (u.thisMonthCW ?? 0), 0);
+  const boTotalCWCarryover = boUsers.reduce((s: number, u: any) => s + (u.carryoverCW ?? 0), 0);
+  const boTotalCWAll = boTotalCW + boTotalCWCarryover;
   const boOverallCWRate = boTotalSQL > 0 ? +((boTotalCW / boTotalSQL) * 100).toFixed(1) : 0;
+  const boOverallCWRateAll = boTotalSQL > 0 ? +((boTotalCWAll / boTotalSQL) * 100).toFixed(1) : 0;
   const boAvgDailyClose = useMemo(() => {
     const byUser = ibo?.dailyClose?.byUser || [];
     if (byUser.length === 0) return '-';
@@ -1289,12 +1676,12 @@ export default function KPIV2Page() {
       },
       {
         key: 'boCW', label: 'CW 전환율', value: `${boOverallCWRate}%`,
-        detail: `SQL ${boTotalSQL}건 중 CW ${boTotalCW}건`,
+        detail: `당월 ${boTotalCW} + 이월 ${boTotalCWCarryover} = 합산 ${boTotalCWAll} / SQL ${boTotalSQL} (합산 ${boOverallCWRateAll}%)`,
         target: '목표 60%', met: boOverallCWRate >= 60,
         color: boOverallCWRate >= 60 ? 'green' : 'blue', rawCount: ibo?.rawData?.rawClosedOpps?.length ?? 0, icon: '🎯',
       },
     ];
-  }, [ibo, boAvgDailyClose, boAvgDailyCloseThisMonth, boAvgDailyCloseCarryover, boCarryoverRate, boCW, boOverallCWRate, boTotalSQL, boTotalCW]);
+  }, [ibo, boAvgDailyClose, boAvgDailyCloseThisMonth, boAvgDailyCloseCarryover, boCarryoverRate, boCW, boOverallCWRate, boOverallCWRateAll, boTotalSQL, boTotalCW, boTotalCWCarryover, boTotalCWAll]);
 
   // BO 단계별 그룹핑
   const stageOrder: Record<string, { order: number; color: string; bg: string }> = {
@@ -2578,7 +2965,13 @@ export default function KPIV2Page() {
                 {activePartners.length === 0 ? (
                   <div style={{ gridColumn: '1/-1', textAlign: 'center', color: '#B0B8C1', padding: '20px', fontSize: '14px' }}>이번달 리드가 발생한 파트너사가 없습니다</div>
                 ) : activePartners.map((partner: any) => {
-                  const activity = partner.dailyActivity || [];
+                  const sparseActivity = partner.dailyActivity || [];
+                  const actMap = new Map(sparseActivity.map((d: any) => [d.day, d]));
+                  const today = new Date().getDate();
+                  const activity = Array.from({ length: today }, (_, i) => {
+                    const day = i + 1;
+                    return actMap.get(day) || { day, leads: 0, meetings: 0, isWeekend: [0, 6].includes(new Date(new Date().getFullYear(), new Date().getMonth(), day).getDay()) };
+                  });
                   const maxLead = Math.max(...activity.map((d: any) => d.leads || 0), 1);
                   return (
                     <div key={partner.id || partner.name} style={{ background: '#fff', borderRadius: '10px', border: '1px solid #E5E8EB', padding: '10px', overflow: 'hidden' }}>
@@ -2647,7 +3040,13 @@ export default function KPIV2Page() {
                 {activeHQs.length === 0 ? (
                   <div style={{ gridColumn: '1/-1', textAlign: 'center', color: '#B0B8C1', padding: '20px', fontSize: '14px' }}>이번달 리드가 발생한 프랜차이즈 본사가 없습니다</div>
                 ) : activeHQs.map((hq: any) => {
-                  const activity = hq.dailyActivity || [];
+                  const sparseActivity = hq.dailyActivity || [];
+                  const actMap = new Map(sparseActivity.map((d: any) => [d.day, d]));
+                  const today = new Date().getDate();
+                  const activity = Array.from({ length: today }, (_, i) => {
+                    const day = i + 1;
+                    return actMap.get(day) || { day, leads: 0, meetings: 0, isWeekend: [0, 6].includes(new Date(new Date().getFullYear(), new Date().getMonth(), day).getDay()) };
+                  });
                   const maxLead = Math.max(...activity.map((d: any) => d.leads || 0), 1);
                   return (
                     <div key={hq.hqId || hq.hqName} style={{ background: '#fff', borderRadius: '10px', border: '1px solid #E5E8EB', padding: '10px', overflow: 'hidden' }}>
@@ -4244,8 +4643,11 @@ export default function KPIV2Page() {
     if (!csBo) return [];
     const users = csBo.cwConversionRate?.byUser || [];
     const totalSQL = users.reduce((s: number, u: any) => s + (u.total ?? 0), 0);
-    const totalCW = users.reduce((s: number, u: any) => s + (u.thisMonthCW ?? 0), 0);
-    const cwRate = totalSQL > 0 ? +((totalCW / totalSQL) * 100).toFixed(1) : 0;
+    const totalCWThisMonth = users.reduce((s: number, u: any) => s + (u.thisMonthCW ?? 0), 0);
+    const totalCWCarryover = users.reduce((s: number, u: any) => s + (u.carryoverCW ?? 0), 0);
+    const totalCWAll = totalCWThisMonth + totalCWCarryover;
+    const cwRateThisMonth = totalSQL > 0 ? +((totalCWThisMonth / totalSQL) * 100).toFixed(1) : 0;
+    const cwRateAll = totalSQL > 0 ? +((totalCWAll / totalSQL) * 100).toFixed(1) : 0;
     const dcUsers = csBo.dailyClose?.byUser || [];
     const avgDaily = dcUsers.length > 0 ? +(dcUsers.reduce((s: number, u: any) => s + (u.avgDailyCloseThisMonth ?? 0), 0) / dcUsers.length).toFixed(1) : 0;
     const over7 = csBo.sqlBacklog?.totalOver7 ?? 0;
@@ -4273,10 +4675,10 @@ export default function KPIV2Page() {
         color: over7 <= 10 ? 'green' : 'red', rawCount: over7, icon: '📋',
       },
       {
-        key: 'csBoCwRate', label: 'SQL→CW 전환율', value: `${cwRate}%`,
-        detail: `CW ${totalCW} / SQL ${totalSQL}`,
-        target: '목표 60%', met: cwRate >= 60,
-        color: cwRate >= 60 ? 'green' : 'red', rawCount: totalCW, icon: '📈',
+        key: 'csBoCwRate', label: 'SQL→CW 전환율', value: `${cwRateThisMonth}%`,
+        detail: `당월 ${totalCWThisMonth} + 이월 ${totalCWCarryover} = 합산 ${totalCWAll} / SQL ${totalSQL} (합산 ${cwRateAll}%)`,
+        target: '목표 60%', met: cwRateThisMonth >= 60,
+        color: cwRateThisMonth >= 60 ? 'green' : 'red', rawCount: totalCWThisMonth, icon: '📈',
       },
     ];
   }, [csBo]);
@@ -5059,28 +5461,575 @@ export default function KPIV2Page() {
     red: { accent: '#F04452', bg: '#FFF0F0', lightBg: '#FFF8F8' },
   };
 
+  // ============ 스코어 탭 렌더링 ============
+
+  function renderScoreTab() {
+    const rankColors = ['#FFD700', '#C0C0C0', '#CD7F32'];
+    const totalColor = (total: number) => total >= 80 ? '#20C997' : total >= 50 ? '#FF8C00' : '#F04452';
+
+    // ===== 공통: 스코어 테이블 렌더러 =====
+    function renderScoreSection(
+      title: string,
+      members: { name: string; scores: { label: string; weight: number; value: number; detail: string; color: string; pct?: number }[]; total: number }[],
+      criteria: { label: string; weight: string; target: string }[],
+    ) {
+      const sorted = [...members].sort((a, b) => b.total - a.total);
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* 배점 기준 (최상단, 가로 일렬) */}
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            {criteria.map((c) => (
+              <div key={c.label} style={{
+                flex: '1 1 0', minWidth: '160px',
+                background: '#fff', borderRadius: '16px', padding: '18px 20px',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #E5E8EB',
+                display: 'flex', flexDirection: 'column', gap: '10px',
+              }}>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  alignSelf: 'flex-start',
+                  padding: '4px 14px', borderRadius: '8px',
+                  background: '#3182F6', color: '#fff', fontSize: '15px', fontWeight: 800,
+                }}>{c.weight}</span>
+                <div style={{ fontSize: '16px', fontWeight: 700, color: '#191F28', lineHeight: 1.4 }}>{c.label}</div>
+                <div style={{ fontSize: '14px', color: '#8B95A1' }}>{c.target}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* 상위 3명 포디움 */}
+          {sorted.length > 0 && (
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              {sorted.slice(0, Math.min(3, sorted.length)).map((m, i) => (
+                <div key={m.name} style={{
+                  flex: '1 1 220px', padding: '28px', borderRadius: '16px', textAlign: 'center',
+                  background: i === 0 ? 'linear-gradient(135deg, #FFF8E1 0%, #FFE082 100%)' : '#F9FAFB',
+                  border: `2px solid ${rankColors[i]}40`,
+                }}>
+                  <div style={{ fontSize: '40px', marginBottom: '8px' }}>{['🥇','🥈','🥉'][i]}</div>
+                  <div style={{ fontSize: '22px', fontWeight: 800, color: '#191F28' }}>{m.name}</div>
+                  <div style={{ fontSize: '34px', fontWeight: 900, color: totalColor(m.total), marginTop: '10px' }}>
+                    {m.total}<span style={{ fontSize: '18px', fontWeight: 600, color: '#8B95A1' }}>점</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 전원 상세 카드 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+            {sorted.map((m, i) => {
+              return (
+                <div key={m.name} style={{
+                  background: '#fff', borderRadius: '16px', padding: '28px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                  border: i < 3 ? `2px solid ${rankColors[i]}30` : '1px solid #F2F4F6',
+                }}>
+                  {/* 헤더: 순위 + 이름 + 총점 */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                      <span style={{ fontWeight: 800, fontSize: '26px', color: i < 3 ? rankColors[i] : '#6B7684' }}>{i + 1}</span>
+                      <span style={{ fontWeight: 800, fontSize: '22px', color: '#191F28' }}>{m.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                      <span style={{ fontSize: '34px', fontWeight: 900, color: totalColor(m.total) }}>{m.total}</span>
+                      <span style={{ fontSize: '18px', fontWeight: 600, color: '#8B95A1' }}>점</span>
+                    </div>
+                  </div>
+                  {/* 지표 그리드 */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                    {m.scores.map(s => {
+                      const barPct = s.pct !== undefined ? Math.min(s.pct, 100) : (s.weight > 0 ? Math.min((s.value / s.weight) * 100, 100) : 0);
+                      const passed = s.value > 0;
+                      return (
+                        <div key={s.label} style={{ background: '#F9FAFB', borderRadius: '14px', padding: '18px 20px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <span style={{ fontSize: '16px', color: '#6B7684', fontWeight: 600 }}>{s.label}</span>
+                            <span style={{ fontSize: '16px', fontWeight: 700, color: passed ? '#20C997' : '#F04452' }}>{s.value}/{s.weight}</span>
+                          </div>
+                          <div style={{ height: '12px', background: '#E5E8EB', borderRadius: '6px', overflow: 'hidden', marginBottom: '10px' }}>
+                            <div style={{ width: `${barPct}%`, height: '100%', background: passed ? s.color : '#E5E8EB', borderRadius: '6px', transition: 'width 0.5s',
+                              backgroundImage: !passed && barPct > 0 ? `repeating-linear-gradient(45deg, ${s.color}60, ${s.color}60 4px, ${s.color}30 4px, ${s.color}30 8px)` : 'none',
+                              backgroundColor: passed ? s.color : undefined,
+                            }} />
+                          </div>
+                          <div style={{ fontSize: '22px', fontWeight: 800, color: passed ? s.color : '#F04452', textAlign: 'center' }}>{s.detail}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // ===== IS 인사이드세일즈 =====
+    function renderISScore() {
+      if (!is) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음</div>;
+      const fullOwners = getAllMembersWithData(is?.byOwner, is?.members);
+      const allTaskData = is?.dailyTask?.byOwner || [];
+      const taskMap = new Map(allTaskData.map((t: any) => [t.name, t]));
+      const members = fullOwners.filter((o: any) => o.team && o.team !== '-').map((m: any) => {
+        const frtTotal = (m.frtOk ?? 0) + (m.frtOver20 ?? 0);
+        const frtRate = frtTotal > 0 ? (m.frtOk / frtTotal) * 100 : 0;
+        const task = taskMap.get(m.name);
+        const taskAvg = task?.avgDaily ?? 0;
+        const sqlRate = m.sqlConversionRate ?? 0;
+        const visitConverted = m.visitConverted ?? 0;
+        return {
+          name: m.name,
+          scores: [
+            { label: 'SQL전환율', weight: 50, value: sqlRate >= 90 ? 50 : 0, detail: `${sqlRate}%`, color: '#8B5CF6', pct: (sqlRate / 90) * 100 },
+            { label: 'FRT', weight: 20, value: frtRate >= 80 ? 20 : 0, detail: `${+frtRate.toFixed(1)}%`, color: '#20C997', pct: (frtRate / 80) * 100 },
+            { label: 'Task', weight: 10, value: taskAvg >= 30 ? 10 : 0, detail: `${+taskAvg.toFixed(1)}건/일`, color: '#3182F6', pct: (taskAvg / 30) * 100 },
+            { label: '방문', weight: 20, value: visitConverted >= 75 ? 20 : 0, detail: `${visitConverted}건`, color: '#FF8C00', pct: (visitConverted / 75) * 100 },
+          ],
+          total: 0,
+        };
+      });
+      members.forEach(m => { m.total = m.scores.reduce((s, sc) => s + sc.value, 0); });
+      return renderScoreSection('인사이드세일즈 스코어', members, [
+        { label: 'SQL 전환율', weight: '50점', target: '목표: 90% 이상' },
+        { label: 'FRT 준수율 (20분 초과 0건)', weight: '20점', target: '목표: 80% 이상' },
+        { label: 'Task 생성수 (인당 30건)', weight: '10점', target: '목표: 일 30건 이상' },
+        { label: '방문완료 건수 (인당 75건)', weight: '20점', target: '목표: 월 75건 이상' },
+      ]);
+    }
+
+    // ===== FS 필드세일즈 — 1등 집중 포상 =====
+    function renderFSScore() {
+      const fsMemberNames = new Set((fs?.members || []).map((m: any) => m.name));
+      const users = (fs?.cwConversionRate?.byUser || []).filter((u: any) => fsMemberNames.has(u.name));
+      if (users.length === 0) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음</div>;
+      const sorted = [...users].sort((a: any, b: any) => (b.thisMonthCW ?? 0) - (a.thisMonthCW ?? 0));
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div style={{ background: 'linear-gradient(135deg, #FFF8E1 0%, #FFE082 100%)', borderRadius: '16px', padding: '32px', textAlign: 'center' }}>
+            <div style={{ fontSize: '48px', marginBottom: '8px' }}>🏆</div>
+            <div style={{ fontSize: '14px', color: '#8B95A1', marginBottom: '4px' }}>CW 1위</div>
+            <div style={{ fontSize: '28px', fontWeight: 900, color: '#191F28' }}>{sorted[0]?.name ?? '-'}</div>
+            <div style={{ fontSize: '20px', fontWeight: 700, color: '#FF8C00', marginTop: '8px' }}>CW {sorted[0]?.thisMonthCW ?? 0}건 / 전환율 {sorted[0]?.cwRate ?? 0}%</div>
+          </div>
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#191F28', marginBottom: '16px' }}>전체 순위 (CW 건수 기준)</div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+              <thead>
+                <tr style={{ background: '#F9FAFB' }}>
+                  <th style={{ ...thStyle, textAlign: 'center', width: '50px' }}>순위</th>
+                  <th style={thStyle}>이름</th>
+                  <th style={{ ...thStyle, textAlign: 'right' }}>SQL</th>
+                  <th style={{ ...thStyle, textAlign: 'right' }}>CW</th>
+                  <th style={{ ...thStyle, textAlign: 'right' }}>CL</th>
+                  <th style={{ ...thStyle, textAlign: 'right' }}>진행중</th>
+                  <th style={{ ...thStyle, textAlign: 'right' }}>전환율</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((u: any, i: number) => (
+                  <tr key={u.name} style={{ borderBottom: '1px solid #F2F4F6', background: i === 0 ? '#FFFDF5' : '#fff' }}>
+                    <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 800, color: i < 3 ? rankColors[i] : '#6B7684', fontSize: '16px' }}>{i + 1}</td>
+                    <td style={tdStyle}><span style={{ fontWeight: 700 }}>{u.name}</span></td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>{u.total ?? 0}</td>
+                    <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 700, color: '#20C997' }}>{u.thisMonthCW ?? 0}</td>
+                    <td style={{ ...tdStyle, textAlign: 'right', color: '#F04452' }}>{u.thisMonthCL ?? 0}</td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>{u.open ?? 0}</td>
+                    <td style={{ ...tdStyle, textAlign: 'right' }}>
+                      <span style={{ fontWeight: 700, color: (u.cwRate ?? 0) >= 60 ? '#20C997' : '#F04452' }}>{u.cwRate ?? 0}%</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ background: '#F9FAFB', borderRadius: '12px', padding: '16px 20px', fontSize: '13px', color: '#6B7684' }}>
+            <div style={{ fontWeight: 700, marginBottom: '4px', color: '#191F28' }}>📌 평가 기준</div>
+            <div>기존 3/2/1억 클럽 폐지 → <span style={{ fontWeight: 700 }}>1등 집중 포상</span> (CW 건수 기준)</div>
+          </div>
+        </div>
+      );
+    }
+
+    // ===== BO 인바운드 백오피스 =====
+    function renderBOScore() {
+      const boMemberNames = new Set((ibo?.members || []).map((m: any) => m.name));
+      const allUsers = ibo?.cwConversionRate?.byUser || [];
+      const dcUsers = ibo?.dailyClose?.byUser || [];
+      const dcMap = new Map(dcUsers.map((u: any) => [u.name, u]));
+      const blUsers = ibo?.sqlBacklog?.byUser || [];
+      const blMap = new Map(blUsers.map((u: any) => [u.name, u]));
+      // 계약 태블릿 댓수 (byBO)
+      const contractByBO = new Map((ibo?.contractSummary?.byBO || []).map((b: any) => [b.name, b]));
+      // members 기준 필터 + 데이터 없는 멤버도 포함
+      const userMap = new Map(allUsers.map((u: any) => [u.name, u]));
+      const filteredNames = Array.from(boMemberNames);
+      if (filteredNames.length === 0) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음</div>;
+      // 마감률: 3월 목표 2600대, 인당 = 2600 / BO멤버수
+      const monthlyTarget = 2600;
+      const perPersonTarget = Math.round(monthlyTarget / filteredNames.length);
+      const members = filteredNames.map((name: string) => {
+        const u = userMap.get(name) || { name, cwRate: 0, over7: 0, total: 0, thisMonthCW: 0, carryoverCW: 0, thisMonthCL: 0, carryoverCL: 0, cw: 0, cl: 0 };
+        const dc = dcMap.get(name);
+        const bl = blMap.get(name);
+        const thisMonthCW = u.thisMonthCW ?? 0;
+        const carryoverCW = u.carryoverCW ?? 0;
+        const allCW = thisMonthCW + carryoverCW;
+        const totalSQL = u.total ?? 0;
+        // 당월 CW 기준 전환율 (스코어 판정용)
+        const cwRate = totalSQL > 0 ? +((thisMonthCW / totalSQL) * 100).toFixed(1) : 0;
+        const cwRateAll = totalSQL > 0 ? +((allCW / totalSQL) * 100).toFixed(1) : 0;
+        // 일마감: KPI 탭과 동일하게 avgDailyCloseThisMonth (당월 기준) 사용
+        const avgDaily = dc?.avgDailyCloseThisMonth ?? dc?.avgDailyClose ?? 0;
+        const over7 = bl?.over7 ?? (u.over7 ?? 0);
+        // 마감률: 계약 태블릿 댓수 (이월 포함) / 인당 목표 대수
+        const contract = contractByBO.get(name);
+        const tablets = contract?.tablets ?? 0;
+        const closeRate = perPersonTarget > 0 ? +((tablets / perPersonTarget) * 100).toFixed(1) : 0;
+        return {
+          name: u.name ?? name,
+          scores: [
+            { label: 'CW전환율', weight: 50, value: cwRate >= 60 ? 50 : 0, detail: `당월 ${cwRate}% (이월 ${carryoverCW}건 / 합산 ${cwRateAll}%)`, color: '#8B5CF6', pct: (cwRate / 60) * 100 },
+            { label: '일마감', weight: 10, value: avgDaily >= 5 ? 10 : 0, detail: `${(+avgDaily).toFixed(1)}건/일`, color: '#3182F6', pct: (avgDaily / 5) * 100 },
+            { label: 'SQL잔량', weight: 10, value: over7 <= 10 ? 10 : 0, detail: `${over7}건`, color: '#FF8C00', pct: over7 <= 10 ? 100 : Math.max((1 - (over7 - 10) / 20) * 100, 5) },
+            { label: '마감률', weight: 30, value: closeRate >= 100 ? 30 : 0, detail: `${tablets}/${perPersonTarget}대 (${closeRate}%)`, color: '#20C997', pct: Math.min(closeRate, 100) },
+          ],
+          total: 0,
+        };
+      });
+      members.forEach(m => { m.total = m.scores.reduce((s, sc) => s + sc.value, 0); });
+      return renderScoreSection('인바운드 백오피스 스코어', members, [
+        { label: 'SQL→CW 전환율', weight: '50점', target: '목표: 60% 이상 (이월 포함)' },
+        { label: '일일 마감 건수', weight: '10점', target: '목표: 일 5건 이상' },
+        { label: '7일 초과 SQL 잔량', weight: '10점', target: '목표: 10건 이내' },
+        { label: '마감률 (태블릿 댓수)', weight: '30점', target: `목표: 인당 ${perPersonTarget}대 (월 ${monthlyTarget}대/${filteredNames.length}명)` },
+      ]);
+    }
+
+    // ===== 채널 TM =====
+    function renderCsTmScore() {
+      const tmMemberNames = new Set((csTm?.members || []).map((m: any) => m.name));
+      const tmOwners = (csTm?.byOwner || []).filter((o: any) => tmMemberNames.has(o.name));
+      if (tmOwners.length === 0) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음</div>;
+      const members = tmOwners.map((o: any) => {
+        const avgDailyConv = o.avgDailyConversion ?? 0;
+        const frtOver20 = o.frtOver20 ?? 0;
+        const unconverted = o.unconvertedMQL ?? 0;
+        const sqlRate = (o.mql ?? 0) > 0 ? +((o.sql / o.mql) * 100).toFixed(1) : 0;
+        return {
+          name: o.name,
+          scores: [
+            { label: '전환건수', weight: 50, value: avgDailyConv >= 5 ? 50 : 0, detail: `${avgDailyConv}건/일`, color: '#8B5CF6', pct: (avgDailyConv / 5) * 100 },
+            { label: 'FRT', weight: 10, value: frtOver20 === 0 ? 10 : 0, detail: `초과 ${frtOver20}건`, color: '#20C997', pct: frtOver20 === 0 ? 100 : Math.max((1 - frtOver20 / 10) * 100, 5) },
+            { label: '미전환', weight: 20, value: unconverted === 0 ? 20 : 0, detail: `${unconverted}건`, color: '#FF8C00', pct: unconverted === 0 ? 100 : Math.max((1 - unconverted / 20) * 100, 5) },
+            { label: 'SQL잔량', weight: 20, value: 20, detail: '-', color: '#3182F6' }, // TODO: per-user over7
+          ],
+          total: 0,
+        };
+      });
+      members.forEach(m => { m.total = m.scores.reduce((s, sc) => s + sc.value, 0); });
+      return renderScoreSection('TM 스코어', members, [
+        { label: '영업기회 전환 건수 (일 5건 x 영업일수)', weight: '50점', target: '목표: 일 5건 이상' },
+        { label: 'FRT (20분 초과 0건)', weight: '10점', target: '목표: 초과 0건' },
+        { label: '미전환 건수', weight: '20점', target: '목표: 0건' },
+        { label: '7일 초과 SQL 잔량', weight: '20점', target: '목표: 10건 이내' },
+      ]);
+    }
+
+    // ===== 채널 BO =====
+    function renderCsBoScore() {
+      const csBoMemberNames = new Set((csBo?.members || []).map((m: any) => m.name));
+      const allUsers = csBo?.cwConversionRate?.byUser || [];
+      const ltUsers = csBo?.leadTime?.byUser || [];
+      const blUsers = csBo?.sqlBacklog?.byUser || [];
+      const dcUsers = csBo?.dailyClose?.byUser || [];
+      const ltMap = new Map(ltUsers.map((u: any) => [u.name, u]));
+      const blMap = new Map(blUsers.map((u: any) => [u.name, u]));
+      const dcMap = new Map(dcUsers.map((u: any) => [u.name, u]));
+      const userMap = new Map(allUsers.map((u: any) => [u.name, u]));
+      const filteredNames = Array.from(csBoMemberNames);
+      if (filteredNames.length === 0) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음</div>;
+      const members = filteredNames.map((name: string) => {
+        const u = userMap.get(name) || { name, cwRate: 0, total: 0, thisMonthCW: 0, carryoverCW: 0 };
+        const thisMonthCW = u.thisMonthCW ?? 0;
+        const carryoverCW = u.carryoverCW ?? 0;
+        const allCW = thisMonthCW + carryoverCW;
+        const totalSQL = u.total ?? 0;
+        // 당월 CW 기준 전환율 (스코어 판정용)
+        const cwRate = totalSQL > 0 ? +((thisMonthCW / totalSQL) * 100).toFixed(1) : 0;
+        const cwRateAll = totalSQL > 0 ? +((allCW / totalSQL) * 100).toFixed(1) : 0;
+        const dc = dcMap.get(name);
+        const avgDaily = dc?.avgDailyCloseThisMonth ?? dc?.avgDailyClose ?? 0;
+        const lt = ltMap.get(u.name);
+        const overdue = lt?.overdue ?? 0;
+        const bl = blMap.get(u.name);
+        const over7 = bl?.over7 ?? 0;
+        return {
+          name: u.name,
+          scores: [
+            { label: 'CW전환율', weight: 50, value: cwRate >= 60 ? 50 : 0, detail: `당월 ${cwRate}% (이월 ${carryoverCW}건 / 합산 ${cwRateAll}%)`, color: '#8B5CF6', pct: (cwRate / 60) * 100 },
+            { label: '일마감', weight: 20, value: avgDaily >= 3 ? 20 : 0, detail: `${(+avgDaily).toFixed(1)}건`, color: '#3182F6', pct: (avgDaily / 3) * 100 },
+            { label: '리드타임', weight: 10, value: overdue === 0 ? 10 : 0, detail: `초과 ${overdue}건`, color: '#20C997', pct: overdue === 0 ? 100 : Math.max((1 - overdue / 10) * 100, 5) },
+            { label: 'SQL잔량', weight: 20, value: over7 <= 10 ? 20 : 0, detail: `${over7}건`, color: '#FF8C00', pct: over7 <= 10 ? 100 : Math.max((1 - (over7 - 10) / 20) * 100, 5) },
+          ],
+          total: 0,
+        };
+      });
+      members.forEach(m => { m.total = m.scores.reduce((s, sc) => s + sc.value, 0); });
+      return renderScoreSection('채널 백오피스 스코어', members, [
+        { label: 'SQL→CW 전환율', weight: '50점', target: '목표: 60% 이상' },
+        { label: '일일 마감 건수', weight: '20점', target: '목표: 일 3건 이상' },
+        { label: 'BO 배정 후 리드타임 (당일 완료)', weight: '10점', target: '목표: 초과 0건' },
+        { label: '7일 초과 SQL 잔량', weight: '20점', target: '목표: 10건 이내' },
+      ]);
+    }
+
+    // ===== 채널 AE (csData 기반) =====
+    function renderAEScore() {
+      const bd = csKpi?.bd;
+      if (!bd) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음 (채널 데이터 로딩 필요)</div>;
+
+      // MOU 체결 owner별 집계 (csMouStats.partner/franchiseHQ.thisMonthList)
+      const mouPartners = csMouStats?.partner?.thisMonthList || [];
+      const mouHQs = csMouStats?.franchiseHQ?.thisMonthList || [];
+      const ownerMouCount: Record<string, number> = {};
+      [...mouPartners, ...mouHQs].forEach((m: any) => {
+        const owner = m.owner || m.Owner?.Name;
+        if (owner) ownerMouCount[owner] = (ownerMouCount[owner] || 0) + 1;
+      });
+
+      // 네고진입 owner별 집계 (negoAccountsEnriched에서 파생)
+      const negoTarget = bd.negoEntryThisMonth?.target ?? 10;
+      const negoByOwner: Record<string, number> = {};
+      negoAccountsEnriched.forEach((a: any) => {
+        if (a.owner && a.owner !== '-') negoByOwner[a.owner] = (negoByOwner[a.owner] || 0) + 1;
+      });
+
+      // 미서명 owner별 (data.channel.ae에서 가져오되 csData 우선)
+      const aeKpi = data?.channel?.ae;
+      const unsignedMap = new Map((aeKpi?.unsignedContracts?.byOwner || []).map((o: any) => [o.name, o]));
+
+      // 미팅 byOwner (csKpi.meetingsByOwner — mouIncomplete = 네고/MOU전 미팅)
+      const meetingsByOwner = csKpi?.meetingsByOwner || [];
+      const meetingMap = new Map(meetingsByOwner.map((o: any) => [o.name, o.total ?? 0]));
+
+      // 영업일수 (csKpi.thisMonthDays = 현재 경과일, 영업일 근사값으로 0.7 곱)
+      const workdays = aeKpi?.workdays ?? aeKpi?.totalWeekdays ?? (Math.round((csKpi?.thisMonthDays ?? 12) * 0.7) || 12);
+      const meetingTarget = 2 * workdays;
+
+      // 멤버 목록: meetingsByOwner + MOU owner + 네고 owner 합집합
+      const memberSet = new Set<string>();
+      meetingsByOwner.forEach((o: any) => { if (o.name) memberSet.add(o.name); });
+      Object.keys(ownerMouCount).forEach(n => memberSet.add(n));
+      Object.keys(negoByOwner).forEach(n => memberSet.add(n));
+      // data.channel.ae.members가 있으면 그것으로 필터
+      if (aeKpi?.members?.length > 0) {
+        const aeNames = new Set(aeKpi.members.map((m: any) => m.name));
+        memberSet.forEach(n => { if (!aeNames.has(n)) memberSet.delete(n); });
+      }
+
+      const members = Array.from(memberSet).map((name: string) => {
+        const mouCnt = ownerMouCount[name] ?? 0;
+        const negoCnt = negoByOwner[name] ?? 0;
+        const unsigned = unsignedMap.get(name);
+        const overdueCount = unsigned?.overdue ?? 0;
+        const meetCnt = meetingMap.get(name) ?? 0;
+        return {
+          name,
+          scores: [
+            { label: 'MOU체결', weight: 50, value: mouCnt >= 4 ? 50 : 0, detail: `${mouCnt}건`, color: '#8B5CF6', pct: (mouCnt / 4) * 100 },
+            { label: '네고진입', weight: 10, value: negoCnt >= negoTarget ? 10 : 0, detail: `${negoCnt}건`, color: '#FF8C00', pct: (negoCnt / negoTarget) * 100 },
+            { label: '미서명', weight: 20, value: overdueCount === 0 ? 20 : 0, detail: overdueCount === 0 ? '없음' : `${overdueCount}건 초과`, color: '#20C997', pct: overdueCount === 0 ? 100 : Math.max((1 - overdueCount / 5) * 100, 5) },
+            { label: '미팅', weight: 20, value: meetCnt >= meetingTarget ? 20 : 0, detail: `${meetCnt}건`, color: '#3182F6', pct: (meetCnt / meetingTarget) * 100 },
+          ],
+          total: 0,
+        };
+      });
+      members.forEach(m => { m.total = m.scores.reduce((s, sc) => s + sc.value, 0); });
+      return renderScoreSection('AE 스코어', members, [
+        { label: '신규 MOU 체결 수', weight: '50점', target: '목표: 월 4건 이상' },
+        { label: 'MOU 네고 단계 진입 건수', weight: '10점', target: `목표: 월 ${negoTarget}건 이상` },
+        { label: '계약서 발송 후 미서명 경과 일수', weight: '20점', target: '목표: 7일 초과 0건' },
+        { label: '미완료 파트너 캘린더 확정 미팅 수', weight: '20점', target: `목표: 일 2건 x 영업일수 (${meetingTarget}건)` },
+      ]);
+    }
+
+    // ===== 채널 AM (csData 기반) =====
+    function renderAMScore() {
+      const amKpi = csKpi?.am;
+      if (!amKpi) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음 (채널 데이터 로딩 필요)</div>;
+
+      // 개인별 리드 (amHeatmap.data — Account Owner 기준, Lead→파트너Account→Owner 매핑)
+      const amHeatmap = csSummary?.channelLeadsByOwner?.amHeatmap;
+      const leadsByOwner = amHeatmap?.data || [];
+      const leadMap = new Map(leadsByOwner.map((o: any) => [o.owner, { total: o.total ?? 0 }]));
+
+      // 미팅 byOwner (csKpi.meetingsByOwner — mouComplete = MOU완료 곳 미팅)
+      const meetingsByOwner = csKpi?.meetingsByOwner || [];
+      const meetingMap = new Map(meetingsByOwner.map((o: any) => [o.name, o.mouComplete ?? 0]));
+
+      // 영업일수
+      const amData = data?.channel?.am;
+      const workdays = amData?.workdays ?? amData?.totalWeekdays ?? (Math.round((csKpi?.thisMonthDays ?? 12) * 0.7) || 12);
+      const meetingTarget = 2 * workdays;
+
+      // 안착률 byOwner (csMouStats.onboarding.partner.list + franchiseHQ.list → owner별 집계)
+      const partnerList = csMouStats?.onboarding?.partner?.list || [];
+      const hqList = csMouStats?.onboarding?.franchiseHQ?.list || [];
+      const onboardByOwner: Record<string, { settled: number; total: number }> = {};
+      [...partnerList, ...hqList].forEach((p: any) => {
+        const owner = p.owner || '-';
+        if (!onboardByOwner[owner]) onboardByOwner[owner] = { settled: 0, total: 0 };
+        onboardByOwner[owner].total++;
+        if (p.isSettled || p.settled) onboardByOwner[owner].settled++;
+      });
+
+      // 활성파트너 byOwner (csPartnerStats + csFranchiseHQList — 최근 90일 리드 발생 기준)
+      const activeByOwner: Record<string, number> = {};
+      (csPartnerStats || []).forEach((p: any) => {
+        if ((p.last3MonthLeadCount ?? 0) > 0) {
+          const owner = p.owner || '-';
+          activeByOwner[owner] = (activeByOwner[owner] || 0) + 1;
+        }
+      });
+      (csFranchiseHQList || []).forEach((h: any) => {
+        if ((h.last3MonthLeadCount ?? 0) > 0) {
+          const owner = h.owner || '-';
+          activeByOwner[owner] = (activeByOwner[owner] || 0) + 1;
+        }
+      });
+
+      const leadTarget = 5; // 일 5건 목표
+
+      // 멤버 목록: channelLeadsByOwner + meetingsByOwner + onboarding 합집합
+      const memberSet = new Set<string>();
+      leadsByOwner.forEach((o: any) => { if (o.owner) memberSet.add(o.owner); });
+      meetingsByOwner.forEach((o: any) => { if (o.name) memberSet.add(o.name); });
+      Object.keys(onboardByOwner).filter(n => n !== '-').forEach(n => memberSet.add(n));
+      // data.channel.am.members가 있으면 그것으로 필터
+      if (amData?.members?.length > 0) {
+        const amNames = new Set(amData.members.map((m: any) => m.name));
+        memberSet.forEach(n => { if (!amNames.has(n)) memberSet.delete(n); });
+      }
+
+      const members = Array.from(memberSet).map((name: string) => {
+        const leadOwner = leadMap.get(name);
+        const leadTotal = (leadOwner?.total ?? 0);
+        const leadAvgDaily = workdays > 0 ? +(leadTotal / workdays).toFixed(1) : 0;
+        const meetCnt = meetingMap.get(name) ?? 0;
+        const onboard = onboardByOwner[name];
+        const onboardRate = onboard && onboard.total > 0
+          ? +((onboard.settled / onboard.total) * 100).toFixed(1) : 0;
+        const activeCount = activeByOwner[name] ?? 0;
+        return {
+          name,
+          scores: [
+            { label: '리드확보', weight: 50, value: leadAvgDaily >= leadTarget ? 50 : 0, detail: `${leadAvgDaily}건/일`, color: '#8B5CF6', pct: (leadAvgDaily / leadTarget) * 100 },
+            { label: '미팅', weight: 10, value: meetCnt >= meetingTarget ? 10 : 0, detail: `${meetCnt}건`, color: '#3182F6', pct: (meetCnt / meetingTarget) * 100 },
+            { label: '안착률', weight: 20, value: onboardRate >= 80 ? 20 : 0, detail: `${onboardRate}%`, color: '#20C997', pct: (onboardRate / 80) * 100 },
+            { label: '활성유지', weight: 20, value: activeCount >= 70 ? 20 : 0, detail: `${activeCount}개`, color: '#FF8C00', pct: (activeCount / 70) * 100 },
+          ],
+          total: 0,
+        };
+      });
+      members.forEach(m => { m.total = m.scores.reduce((s, sc) => s + sc.value, 0); });
+      return renderScoreSection('AM 스코어', members, [
+        { label: '채널 리드 확보 수 (일 5건 x 영업일수)', weight: '50점', target: '목표: 일 5건 이상' },
+        { label: 'MOU 완료 파트너 확정 미팅 수 (일 2건)', weight: '10점', target: `목표: ${meetingTarget}건 이상` },
+        { label: '신규 파트너 초기 안착률', weight: '20점', target: '목표: 80% 이상' },
+        { label: '기존 파트너 활성 유지', weight: '20점', target: '목표: 70개 이상' },
+      ]);
+    }
+
+    const scoreGroups = [
+      {
+        label: '인바운드세일즈',
+        tabs: [
+          { key: 'is' as const, label: '인사이드세일즈', color: '#F04452' },
+          { key: 'fs' as const, label: '필드세일즈', color: '#00B8D9' },
+          { key: 'bo' as const, label: '백오피스', color: '#3182F6' },
+        ],
+      },
+      {
+        label: '채널세일즈',
+        tabs: [
+          { key: 'ae' as const, label: 'AE', color: '#20C997' },
+          { key: 'am' as const, label: 'AM', color: '#00B8D9' },
+          { key: 'tm' as const, label: 'TM', color: '#F04452' },
+          { key: 'csbo' as const, label: '백오피스', color: '#3182F6' },
+        ],
+      },
+    ];
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {/* 파트 탭 */}
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', background: '#fff', borderRadius: '14px', padding: '10px 12px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', border: '1px solid #E5E8EB' }}>
+          {scoreGroups.map((group, gi) => (
+            <React.Fragment key={group.label}>
+              {gi > 0 && <div style={{ width: '1px', background: '#E5E8EB', margin: '0 2px' }} />}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 600, color: '#8B95A1', letterSpacing: '0.5px', paddingLeft: '4px' }}>{group.label}</div>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {group.tabs.map((tab) => {
+                    const isActive = scoreTab === tab.key;
+                    return (
+                      <button
+                        key={tab.key}
+                        onClick={() => setScoreTab(tab.key)}
+                        style={{
+                          padding: '10px 18px', border: 'none', cursor: 'pointer', borderRadius: '10px',
+                          fontSize: '15px', fontWeight: 700, transition: 'all 0.2s ease',
+                          background: isActive ? tab.color : 'transparent',
+                          color: isActive ? '#fff' : '#6B7684',
+                          boxShadow: isActive ? `0 2px 8px ${tab.color}30` : 'none',
+                        }}
+                      >
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+
+        {scoreTab === 'is' && renderISScore()}
+        {scoreTab === 'fs' && renderFSScore()}
+        {scoreTab === 'bo' && renderBOScore()}
+        {scoreTab === 'ae' && renderAEScore()}
+        {scoreTab === 'am' && renderAMScore()}
+        {scoreTab === 'tm' && renderCsTmScore()}
+        {scoreTab === 'csbo' && renderCsBoScore()}
+      </div>
+    );
+  }
+
   const teamGroups = [
     { key: 'inbound' as const, label: '인바운드 세일즈팀', color: '#3182F6' },
     { key: 'channel' as const, label: '채널 세일즈팀', color: '#20C997' },
   ];
 
   const inboundTabs = [
-    { key: 'is' as const, label: 'Inside Sales', desc: '과정 지표가 결과(SQL 전환율)를 만듭니다', color: '#F04452' },
-    { key: 'fs' as const, label: 'Field Sales', desc: '과정 지표(Golden Time·방문관리)가 결과(CW 전환율)를 만듭니다', color: '#00B8D9' },
-    { key: 'bo' as const, label: 'Back Office', desc: '과정 지표(일평균 마감·SQL 잔량)가 결과(CW 전환율)를 만듭니다', color: '#3182F6' },
+    { key: 'is' as const, label: '인사이드세일즈', desc: '과정 지표가 결과(SQL 전환율)를 만듭니다', color: '#F04452' },
+    { key: 'fs' as const, label: '필드세일즈', desc: '과정 지표(Golden Time·방문관리)가 결과(CW 전환율)를 만듭니다', color: '#00B8D9' },
+    { key: 'bo' as const, label: '백오피스', desc: '과정 지표(일평균 마감·SQL 잔량)가 결과(CW 전환율)를 만듭니다', color: '#3182F6' },
   ];
 
   const channelTabs = [
     { key: 'ae' as const, label: 'AE', desc: '미팅 → 네고 체류 관리 → MOU 체결', color: '#20C997' },
     { key: 'am' as const, label: 'AM', desc: 'MOU 미팅 → Lead 창출 → 비활성 파트너 → 활성 파트너 관리', color: '#00B8D9' },
     { key: 'tm' as const, label: 'TM', desc: 'Lead 전환(방문+견적) → FRT → MQL 전환 → SQL 잔량 관리', color: '#F04452' },
-    { key: 'bo' as const, label: 'Back Office', desc: 'SQL→CW 전환율, 계약 체결, 일평균 마감, SQL 잔량 관리', color: '#3182F6' },
+    { key: 'bo' as const, label: '백오피스', desc: 'SQL→CW 전환율, 계약 체결, 일평균 마감, SQL 잔량 관리', color: '#3182F6' },
   ];
 
   const activeGroupInfo = teamGroups.find(g => g.key === activeGroup)!;
   const activeDesc = activeGroup === 'inbound'
     ? (inboundTabs.find(t => t.key === activeTab)?.desc ?? '')
-    : (channelTabs.find(t => t.key === csActiveTab)?.desc ?? '');
+    : activeGroup === 'channel'
+    ? (channelTabs.find(t => t.key === csActiveTab)?.desc ?? '')
+    : '직무별 담당자 스코어링 — 시상 기준 점수표';
 
   return (
     <div style={{ padding: '30px 40px', background: '#F9FAFB', minHeight: '100vh' }}>
@@ -5089,9 +6038,9 @@ export default function KPIV2Page() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h1 style={{ margin: 0, fontSize: '1.8em', fontWeight: 700, color: '#191F28', letterSpacing: '-0.5px' }}>
-              KPI Dashboard
+              {activeGroup === 'score' ? '🏆 스코어' : 'KPI Dashboard'}
             </h1>
-            <TossBadge variant="weak" size="small" color="blue">v2</TossBadge>
+            {activeGroup !== 'score' && <TossBadge variant="weak" size="small" color="blue">v2</TossBadge>}
           </div>
           <p style={{ color: '#8B95A1', marginTop: '6px', fontSize: '15px' }}>
             {activeDesc}
@@ -5100,14 +6049,17 @@ export default function KPIV2Page() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {/* 데이터 기준 시간 */}
           {(() => {
-            const ts = data?.extractedAt || csData?.generatedAt;
+            const ts = [data?.extractedAt, csData?.generatedAt]
+              .filter(Boolean)
+              .sort()
+              .pop();
             if (!ts) return null;
             const d = new Date(ts);
             const kst = new Date(d.getTime() + 9 * 3600000);
             const label = `${kst.getUTCFullYear()}.${String(kst.getUTCMonth() + 1).padStart(2, '0')}.${String(kst.getUTCDate()).padStart(2, '0')} ${String(kst.getUTCHours()).padStart(2, '0')}:${String(kst.getUTCMinutes()).padStart(2, '0')} 기준`;
             return (
               <span style={{ fontSize: '13px', color: '#8B95A1', fontWeight: 400 }}>
-                📊 {label}
+                데이터 갱신 {label}
               </span>
             );
           })()}
@@ -5125,7 +6077,7 @@ export default function KPIV2Page() {
       </div>
 
       {/* 팀 그룹 네비게이션 */}
-      <div style={{
+      {activeGroup !== 'score' && <div style={{
         display: 'flex', gap: '6px', marginBottom: '12px',
       }}>
         {teamGroups.map(group => {
@@ -5148,7 +6100,7 @@ export default function KPIV2Page() {
             </button>
           );
         })}
-      </div>
+      </div>}
 
       {/* 하위 탭 네비게이션 (인바운드) */}
       {activeGroup === 'inbound' && (
@@ -5228,27 +6180,30 @@ export default function KPIV2Page() {
         </div>
       )}
 
-      {/* Inside Sales 탭 */}
+      {/* 인사이드세일즈 탭 */}
       {activeGroup === 'inbound' && activeTab === 'is' && !loading && is && renderFlowSection(
-        'Inside Sales',
+        '인사이드세일즈',
         '',
         flowSteps, activeStep, setActiveStep, detailRenderers, 'red',
       )}
 
-      {/* Field Sales 탭 */}
+      {/* 필드세일즈 탭 */}
       {activeGroup === 'inbound' && activeTab === 'fs' && !loading && fs && renderFlowSection(
-        'Field Sales',
+        '필드세일즈',
         '',
         fsFlowSteps, fsActiveStep, setFsActiveStep, fsDetailRenderers, 'teal',
       )}
 
-      {/* Back Office 탭 */}
+      {/* 인바운드 백오피스 탭 */}
       {activeGroup === 'inbound' && activeTab === 'bo' && !loading && ibo && renderFlowSection(
-        'Back Office',
+        '백오피스',
         '',
         boFlowSteps, boActiveStep, setBoActiveStep, boDetailRenderers, 'blue',
         renderBOOwnerSummary(),
       )}
+
+      {/* 스코어 탭 (상단) */}
+      {activeGroup === 'score' && !loading && is && renderScoreTab()}
 
       {/* Channel Sales - AE 탭 */}
       {activeGroup === 'channel' && csActiveTab === 'ae' && !csLoading && csData && renderFlowSection(
@@ -5271,9 +6226,9 @@ export default function KPIV2Page() {
         csTmFlowSteps, csTmActiveStep, setCsTmActiveStep, csTmDetailRenderers, 'red',
       )}
 
-      {/* Channel Sales - BO 탭 */}
+      {/* Channel Sales - 백오피스 탭 */}
       {activeGroup === 'channel' && csActiveTab === 'bo' && !loading && data?.channel?.backOffice && renderFlowSection(
-        'Back Office',
+        '백오피스',
         '',
         csBoFlowSteps, csBoActiveStep, setCsBoActiveStep, csBoDetailRenderers, 'blue',
       )}
@@ -5863,3 +6818,11 @@ const tdStyle: React.CSSProperties = {
   color: '#333D4B',
   whiteSpace: 'nowrap',
 };
+
+export default function KPIV2Page() {
+  return (
+    <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#8B95A1' }}>로딩중...</div>}>
+      <KPIV2PageInner />
+    </Suspense>
+  );
+}

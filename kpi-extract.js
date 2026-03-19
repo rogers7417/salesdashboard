@@ -175,6 +175,367 @@ function countWeekdays(startDate, endDate) {
 const AUTO_TASK_OWNER_ID = '005IR00000FgbZtYAJ';
 
 // ============================================
+// 2026년 월별 태블릿 계약 목표 대수
+// 출처: Confluence 2026 Sales Business Plan
+// ============================================
+const TABLET_TARGETS_2026 = {
+  IBS: {
+    '2026-01': 2150, '2026-02': 2160, '2026-03': 2600, '2026-04': 2600,
+    '2026-05': 2400, '2026-06': 2080, '2026-07': 2080, '2026-08': 2250,
+    '2026-09': 2450, '2026-10': 2650, '2026-11': 2580, '2026-12': 2100,
+  },
+  OBS: {
+    '2026-01': 400,  '2026-02': 550,  '2026-03': 550,  '2026-04': 800,
+    '2026-05': 750,  '2026-06': 600,  '2026-07': 700,  '2026-08': 700,
+    '2026-09': 800,  '2026-10': 680,  '2026-11': 800,  '2026-12': 600,
+  },
+  CHS: {
+    '2026-01': 2000, '2026-02': 2410, '2026-03': 3200, '2026-04': 3250,
+    '2026-05': 3150, '2026-06': 2400, '2026-07': 3120, '2026-08': 3100,
+    '2026-09': 2220, '2026-10': 3560, '2026-11': 3210, '2026-12': 2350,
+  },
+};
+
+// ============================================
+// Score 계산 유틸
+// ============================================
+
+/** 등급 산정: S(≥90) / A(≥80) / B(≥70) / C(≥50) / D(<50) */
+function gradeOf(total) {
+  if (total >= 90) return 'S';
+  if (total >= 80) return 'A';
+  if (total >= 70) return 'B';
+  if (total >= 50) return 'C';
+  return 'D';
+}
+
+/** 비례 점수: (actual/target) × maxPts, [0, maxPts] 클램프 */
+function calcPropScore(actual, target, maxPts) {
+  if (target <= 0) return 0;
+  return Math.min(maxPts, Math.max(0, Math.round((actual / target) * maxPts)));
+}
+
+/**
+ * IS Score — IS 팀원별 (SQL전환율·FRT·Task·방문완료, 100점)
+ * @param {Object} insideSales - inbound.insideSales
+ */
+function calcISScores(insideSales) {
+  const { byOwner = [], dailyTask = {} } = insideSales;
+  const dailyTaskMap = {};
+  (dailyTask.byOwner || []).forEach(u => { dailyTaskMap[u.userId] = u; });
+
+  return byOwner.map(u => {
+    const frtTotal     = (u.frtOk || 0) + (u.frtOver20 || 0);
+    const frtRate      = frtTotal > 0 ? +((u.frtOk || 0) / frtTotal * 100).toFixed(1) : 0;
+    const avgDailyTask = dailyTaskMap[u.userId]?.avgDaily || 0;
+
+    const sqlPts   = calcPropScore(u.sqlConversionRate || 0, 90, 50);
+    const frtPts   = calcPropScore(frtRate, 80, 20);
+    const taskPts  = calcPropScore(avgDailyTask, 30, 10);
+    const visitPts = calcPropScore(u.visitConverted || 0, 75, 20);
+    const total    = sqlPts + frtPts + taskPts + visitPts;
+
+    return {
+      userId: u.userId, name: u.name, total, grade: gradeOf(total),
+      breakdown: {
+        sql:   { pts: sqlPts,   max: 50, actual: u.sqlConversionRate || 0, target: 90, label: 'SQL 전환율' },
+        frt:   { pts: frtPts,   max: 20, actual: frtRate,                  target: 80, label: 'FRT 준수율' },
+        task:  { pts: taskPts,  max: 10, actual: avgDailyTask,             target: 30, label: 'Task 생성수' },
+        visit: { pts: visitPts, max: 20, actual: u.visitConverted || 0,    target: 75, label: '방문완료' },
+      },
+    };
+  }).sort((a, b) => b.total - a.total);
+}
+
+/** FS Score — CW 건수 순위 (점수제 없음, 1등 집중 포상) */
+function calcFSRanking(fieldSales) {
+  return (fieldSales.cwConversionRate?.byUser || [])
+    .map(u => ({
+      userId: u.userId,
+      name:   u.name,
+      sql:    u.thisMonthTotal || 0,
+      cw:     u.thisMonthCW || 0,
+      cl:     u.thisMonthCL || 0,
+      open:   Math.max(0, (u.thisMonthTotal || 0) - (u.thisMonthCW || 0) - (u.thisMonthCL || 0)),
+      cwRate: u.thisMonthTotal > 0
+        ? +((u.thisMonthCW || 0) / u.thisMonthTotal * 100).toFixed(1)
+        : 0,
+    }))
+    .sort((a, b) => b.cw - a.cw)
+    .map((u, i) => ({ ...u, rank: i + 1 }));
+}
+
+/**
+ * BO Score — 인바운드 BO 팀원별 (CW전환율·일마감·잔량·태블릿, 100점)
+ * @param {Object} backOffice - inbound.backOffice
+ * @param {number} ibsTarget  - 해당 월 IBS 태블릿 목표 대수
+ */
+function calcBOScores(backOffice, ibsTarget) {
+  const cwByUser       = backOffice.cwConversionRate?.byUser || [];
+  const contractByBO   = backOffice.contractSummary?.byBO || [];
+  const contractByName = {};
+  contractByBO.forEach(c => { contractByName[c.name] = c; });
+
+  const boMemberCount   = Math.max(1, cwByUser.length);
+  const perPersonTarget = Math.round(ibsTarget / boMemberCount);
+
+  return cwByUser.map(u => {
+    const cwRate        = u.cwRate || 0;
+    const avgDailyClose = u.avgDailyCloseThisMonth ?? u.avgDailyClose ?? 0;
+    const over7         = u.openByAge?.over7 || 0;
+    const tablets       = contractByName[u.name]?.tablets || 0;
+    const closeRate     = perPersonTarget > 0 ? (tablets / perPersonTarget) * 100 : 0;
+
+    const cwPts     = calcPropScore(cwRate, 60, 50);
+    const closePts  = calcPropScore(avgDailyClose, 5, 10);
+    const stalePts  = over7 <= 10 ? 10 : Math.max(0, 10 - (over7 - 10));
+    const tabletPts = calcPropScore(closeRate, 100, 30);
+    const total     = cwPts + closePts + stalePts + tabletPts;
+
+    return {
+      userId: u.userId, name: u.name, total, grade: gradeOf(total),
+      breakdown: {
+        cw:         { pts: cwPts,     max: 50, actual: cwRate,         target: 60,              label: 'CW 전환율' },
+        dailyClose: { pts: closePts,  max: 10, actual: avgDailyClose,  target: 5,               label: '일일 마감' },
+        stale:      { pts: stalePts,  max: 10, actual: over7,          target: 10,              label: '7일+ SQL 잔량' },
+        tablets:    { pts: tabletPts, max: 30, actual: tablets,        target: perPersonTarget, label: '태블릿 마감률' },
+      },
+      meta: { perPersonTarget, monthlyTarget: ibsTarget, tablets, closeRate: +closeRate.toFixed(1) },
+    };
+  }).sort((a, b) => b.total - a.total);
+}
+
+/**
+ * TM Score — 팀 레벨 (전환건수·FRT·MQL미전환·SQL잔량, 100점)
+ * @param {Object} tm - channel.tm
+ */
+function calcTMScore(tm) {
+  const avgDailyConversion = tm?.dailyConversion?.avgDaily || 0;
+  const frtOver20          = tm?.frt?.frtOver20 || 0;
+  const unconverted        = tm?.unconvertedMQL?.count ?? 0;
+  const sqlBacklog         = tm?.sqlBacklog?.over7 ?? 0;
+
+  const convPts        = calcPropScore(avgDailyConversion, 5, 50);
+  const frtPts         = frtOver20 === 0 ? 10 : 0;
+  const unconvertedPts = unconverted === 0 ? 20 : 0;
+  const backlogPts     = sqlBacklog <= 10 ? 20 : Math.max(0, 20 - (sqlBacklog - 10));
+  const total          = convPts + frtPts + unconvertedPts + backlogPts;
+
+  return {
+    teamLevel: true, total, grade: gradeOf(total),
+    breakdown: {
+      conversion:  { pts: convPts,        max: 50, actual: avgDailyConversion, target: 5,  label: '일 전환 건수' },
+      frt:         { pts: frtPts,         max: 10, actual: frtOver20,          target: 0,  label: 'FRT 20분 초과' },
+      unconverted: { pts: unconvertedPts, max: 20, actual: unconverted,        target: 0,  label: 'MQL 미전환' },
+      backlog:     { pts: backlogPts,     max: 20, actual: sqlBacklog,         target: 10, label: 'SQL 잔량 7일+' },
+    },
+  };
+}
+
+/**
+ * Channel BO Score — 채널 BO 팀원별 (CW전환율·일마감·리드타임·잔량, 100점)
+ * @param {Object} channelBO - channel.backOffice
+ */
+function calcChannelBOScores(channelBO) {
+  const cwByUser = channelBO.cwConversionRate?.byUser || [];
+
+  return cwByUser.map(u => {
+    const cwRate        = u.cwRate || 0;
+    const avgDailyClose = u.avgDailyCloseThisMonth ?? u.avgDailyClose ?? 0;
+    const overdue       = 0; // 리드타임 초과 데이터 미지원
+    const over7         = u.over7 || 0;
+
+    const cwPts       = calcPropScore(cwRate, 60, 50);
+    const closePts    = calcPropScore(avgDailyClose, 3, 20);
+    const leadTimePts = overdue === 0 ? 10 : 0;
+    const stalePts    = over7 <= 10 ? 20 : Math.max(0, 20 - (over7 - 10));
+    const total       = cwPts + closePts + leadTimePts + stalePts;
+
+    return {
+      userId: u.userId, name: u.name, total, grade: gradeOf(total),
+      breakdown: {
+        cw:         { pts: cwPts,       max: 50, actual: cwRate,        target: 60, label: 'CW 전환율' },
+        dailyClose: { pts: closePts,    max: 20, actual: avgDailyClose, target: 3,  label: '일일 마감' },
+        leadTime:   { pts: leadTimePts, max: 10, actual: overdue,       target: 0,  label: 'BO 리드타임 초과' },
+        stale:      { pts: stalePts,    max: 20, actual: over7,         target: 10, label: '7일+ SQL 잔량' },
+      },
+    };
+  }).sort((a, b) => b.total - a.total);
+}
+
+/**
+ * AE Score — 담당자별 (MOU체결50·네고진입10·미서명20·미팅20, 100점)
+ * @param {Object} ae - channel.ae
+ * @param {Object} am - channel.am (안착률/활성파트너 참조용, 하위호환)
+ */
+function calcAEScore(ae, am) {
+  const members = ae?.members || [];
+  const targetMOU = ae?.mouCount?.target || 4;
+  const negoTarget = ae?.negoEntry?.target || 10;
+  const unsignedTargetDays = ae?.unsignedContracts?.target_days || 7;
+  const meetingTarget_daily = ae?.meetingCount?.target_daily || 2;
+  const totalWeekdays = ae?.workdays || 12;
+  const meetingTarget = meetingTarget_daily * totalWeekdays;
+
+  // 팀 공통 지표
+  const teamMouCount = ae?.mouCount?.total || 0;
+  const teamNegoEntry = ae?.negoEntry?.thisMonth || 0;
+  const teamUnsignedOverdue = ae?.unsignedContracts?.overdue || 0;
+
+  // AE별 MOU 맵
+  const mouByOwnerMap = {};
+  (ae?.mouCount?.byOwner || []).forEach(o => { mouByOwnerMap[o.name] = o.count; });
+
+  // AE별 네고 맵
+  const negoByOwnerMap = {};
+  (ae?.negoEntry?.byOwner || []).forEach(o => { negoByOwnerMap[o.name] = o; });
+
+  // AE별 미서명 맵
+  const unsignedByOwnerMap = {};
+  (ae?.unsignedContracts?.byOwner || []).forEach(o => { unsignedByOwnerMap[o.name] = o; });
+
+  // AE별 미팅 맵
+  const meetingByOwnerMap = {};
+  (ae?.meetingCount?.byOwner || []).forEach(o => { meetingByOwnerMap[o.name] = o.count; });
+
+  const perMember = members.map(m => {
+    const name = m.name;
+
+    // MOU: 개인별
+    const mouCnt = mouByOwnerMap[name] || 0;
+    const mouPts = calcPropScore(mouCnt, targetMOU, 50);
+
+    // 네고진입: 팀 공통 (개인 Account 배정이므로 팀 합산)
+    const negoPts = calcPropScore(teamNegoEntry, negoTarget, 10);
+
+    // 미서명: 개인별 (overdue 0이면 만점)
+    const myUnsigned = unsignedByOwnerMap[name];
+    const myOverdue = myUnsigned?.overdueCount || 0;
+    const unsignedPts = myOverdue === 0 ? 20 : Math.max(0, 20 - myOverdue * 5);
+
+    // 미팅: 개인별
+    const meetCnt = meetingByOwnerMap[name] || 0;
+    const meetingPts = calcPropScore(meetCnt, meetingTarget, 20);
+
+    const total = Math.min(100, mouPts + negoPts + unsignedPts + meetingPts);
+
+    return {
+      name, total, grade: gradeOf(total),
+      breakdown: {
+        mou:      { pts: mouPts,      max: 50, actual: mouCnt,    target: targetMOU,    label: 'MOU 체결' },
+        nego:     { pts: negoPts,     max: 10, actual: teamNegoEntry, target: negoTarget, label: '네고 진입 (팀)' },
+        unsigned: { pts: unsignedPts, max: 20, actual: myOverdue, target: 0,            label: '미서명 7일 초과' },
+        meetings: { pts: meetingPts,  max: 20, actual: meetCnt,   target: meetingTarget, label: '미팅' },
+      },
+    };
+  }).sort((a, b) => b.total - a.total);
+
+  // 팀 레벨 요약
+  const teamTotal = perMember.length > 0
+    ? Math.round(perMember.reduce((s, m) => s + m.total, 0) / perMember.length)
+    : 0;
+
+  return {
+    teamLevel: false,
+    total: teamTotal,
+    grade: gradeOf(teamTotal),
+    breakdown: {
+      mou:      { pts: 0, max: 50, actual: teamMouCount,       target: targetMOU,    label: 'MOU 체결' },
+      nego:     { pts: 0, max: 10, actual: teamNegoEntry,      target: negoTarget,   label: '네고 진입' },
+      unsigned: { pts: 0, max: 20, actual: teamUnsignedOverdue, target: 0,           label: '미서명 7일 초과' },
+      meetings: { pts: 0, max: 20, actual: 0,                  target: meetingTarget, label: '미팅' },
+    },
+    perMember,
+  };
+}
+
+/**
+ * AM Score — 담당자별 (리드확보50·미팅10·안착률20·활성유지20, 100점)
+ * @param {Object} am - channel.am
+ */
+function calcAMScore(am) {
+  const members = am?.members || [];
+  const leadTarget = 5; // 일 5건 목표 (개인 Account Owner 기준)
+  const meetingTarget_daily = am?.meetingCount?.target_daily || 2;
+  const totalWeekdays = am?.workdays || 12;
+  const meetingTarget = meetingTarget_daily * totalWeekdays;
+  const targetSettling = am?.onboardingRate?.target || 80;
+  const targetActive = am?.activePartnerCount?.target || 70;
+
+  // 팀 공통 지표
+  const teamOnboardRate = am?.onboardingRate?.rate || 0;
+  const teamActiveCount = am?.activePartnerCount?.total || 0;
+  const teamLeadAvgDaily = am?.dailyLeadCount?.avgDaily || 0;
+
+  // AM별 Account Owner 기준 리드 맵
+  const acctOwnerLeadMap = {};
+  (am?.dailyLeadCount?.byOwner || []).forEach(o => { acctOwnerLeadMap[o.name] = o; });
+
+  // AM별 안착률 맵
+  const onboardByOwnerMap = {};
+  (am?.onboardingRate?.byOwner || []).forEach(o => { onboardByOwnerMap[o.name] = o; });
+
+  // AM별 활성파트너 맵
+  const activeByOwnerMap = {};
+  (am?.activePartnerCount?.byOwner || []).forEach(o => { activeByOwnerMap[o.name] = o; });
+
+  // AM별 미팅 맵
+  const meetingByOwner = am?.meetingByOwner || {};
+
+  const perMember = members.map(m => {
+    const name = m.name;
+    // 리드: Account Owner 기준 개인 avgDaily
+    const myLeadData = acctOwnerLeadMap[name];
+    const myAvgDaily = myLeadData?.avgDaily || 0;
+    const leadPts = calcPropScore(myAvgDaily, leadTarget, 50);
+
+    // 미팅: Event Owner 기준
+    const meetCnt = meetingByOwner[name] || 0;
+    const meetingPts = calcPropScore(meetCnt, meetingTarget, 10);
+
+    // 안착률: Account Owner 기준 개인
+    const myOnboard = onboardByOwnerMap[name];
+    const myOnboardRate = myOnboard?.rate || 0;
+    const settlingPts = calcPropScore(myOnboardRate, targetSettling, 20);
+
+    // 활성유지: Account Owner 기준 개인
+    const myActive = activeByOwnerMap[name];
+    const myActiveCount = myActive?.total || 0;
+    const activePts = calcPropScore(myActiveCount, targetActive, 20);
+
+    const total = Math.min(100, leadPts + meetingPts + settlingPts + activePts);
+
+    return {
+      name, total, grade: gradeOf(total),
+      breakdown: {
+        lead:     { pts: leadPts,     max: 50, actual: myAvgDaily,     target: leadTarget,     label: '리드 확보 (일평균)' },
+        meetings: { pts: meetingPts,  max: 10, actual: meetCnt,        target: meetingTarget,  label: '미팅' },
+        settling: { pts: settlingPts, max: 20, actual: myOnboardRate,  target: targetSettling, label: '초기 안착률' },
+        active:   { pts: activePts,   max: 20, actual: myActiveCount,  target: targetActive,   label: '활성 파트너' },
+      },
+    };
+  }).sort((a, b) => b.total - a.total);
+
+  // 팀 레벨 요약도 유지
+  const teamTotal = perMember.length > 0
+    ? Math.round(perMember.reduce((s, m) => s + m.total, 0) / perMember.length)
+    : 0;
+
+  return {
+    teamLevel: false,
+    total: teamTotal,
+    grade: gradeOf(teamTotal),
+    breakdown: {
+      lead:     { pts: 0, max: 50, actual: teamLeadAvgDaily, target: `${leadTarget}/인`, label: '리드 확보 (팀 일평균)' },
+      meetings: { pts: 0, max: 10, actual: 0,                target: meetingTarget,      label: '미팅' },
+      settling: { pts: 0, max: 20, actual: teamOnboardRate,   target: targetSettling,     label: '초기 안착률' },
+      active:   { pts: 0, max: 20, actual: teamActiveCount,   target: targetActive,       label: '활성 파트너' },
+    },
+    perMember,
+  };
+}
+
+// ============================================
 // 인바운드 데이터 수집
 // ============================================
 async function collectInboundData(instanceUrl, accessToken, startDate, endDate) {
@@ -182,14 +543,26 @@ async function collectInboundData(instanceUrl, accessToken, startDate, endDate) 
   const endUTC = kstToUTC(endDate, false);
   console.log(`\n📥 인바운드 데이터 수집 (${startDate} ~ ${endDate})`);
 
-  // 1. 인바운드세일즈 User 조회
-  const userQuery = `SELECT Id, Name FROM User WHERE Department = '인바운드세일즈' AND IsActive = true`;
+  // 1. 인바운드세일즈 User 조회 (Team__c 포함)
+  const userQuery = `SELECT Id, Name, Team__c FROM User WHERE Department = '인바운드세일즈' AND IsActive = true`;
   const usersResult = await soqlQuery(instanceUrl, accessToken, userQuery);
   const users = usersResult.records;
   const userIds = users.map(u => `'${u.Id}'`).join(',');
   const userNameMap = {};
-  users.forEach(u => { userNameMap[u.Id] = u.Name; });
-  console.log(`  👥 인바운드세일즈 인원: ${users.length}명`);
+  const userTeamMap = {};
+  users.forEach(u => { userNameMap[u.Id] = u.Name; userTeamMap[u.Id] = u.Team__c || '-'; });
+
+  // Team__c 기반 파트별 인원 매핑
+  const teamMembers = { 인사이드세일즈: [], 필드세일즈: [], 백오피스: [], 기타: [] };
+  users.forEach(u => {
+    const team = u.Team__c || '기타';
+    const entry = { id: u.Id, name: u.Name };
+    if (team === '인사이드세일즈') teamMembers.인사이드세일즈.push(entry);
+    else if (team === '필드세일즈' || team === '현장영업') teamMembers.필드세일즈.push(entry);
+    else if (team === '백오피스') teamMembers.백오피스.push(entry);
+    else teamMembers.기타.push(entry);
+  });
+  console.log(`  👥 인바운드세일즈 인원: ${users.length}명 (IS:${teamMembers.인사이드세일즈.length} FS:${teamMembers.필드세일즈.length} BO:${teamMembers.백오피스.length})`);
 
   // 2. Lead 조회 (인바운드 필터)
   const leadQuery = `
@@ -374,7 +747,7 @@ async function collectInboundData(instanceUrl, accessToken, startDate, endDate) 
   }
   console.log(`  🏠 Visit: ${visits.length}건`);
 
-  return { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, fieldUserIds, carryoverOpps, allClosedOpps: cwOppsResult, contracts, visits };
+  return { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, userTeamMap, fieldUserIds, carryoverOpps, allClosedOpps: cwOppsResult, contracts, visits, teamMembers };
 }
 
 // ============================================
@@ -487,23 +860,36 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
   const endUTC = kstToUTC(endDate, false);
   console.log(`\n📥 채널 데이터 수집 (${startDate} ~ ${endDate})`);
 
-  // 1. 채널세일즈팀 User 조회
-  const userQuery = `SELECT Id, Name FROM User WHERE Department = '채널세일즈팀' AND IsActive = true`;
+  // 1. 채널세일즈팀 User 조회 (Team__c 포함, 부서명 변경 반영)
+  const userQuery = `SELECT Id, Name, Team__c FROM User WHERE Department IN ('채널세일즈팀','채널세일즈','채널매니지먼트') AND IsActive = true`;
   const usersResult = await soqlQuery(instanceUrl, accessToken, userQuery);
   const users = usersResult.records;
   const userNameMap = {};
-  users.forEach(u => { userNameMap[u.Id] = u.Name; });
-  console.log(`  👥 채널세일즈팀 인원: ${users.length}명`);
+  const userTeamMap = {};
+  users.forEach(u => { userNameMap[u.Id] = u.Name; userTeamMap[u.Id] = u.Team__c || '-'; });
+
+  // Team__c 기반 파트별 인원 매핑
+  const chTeamMembers = { AE: [], AM: [], TM: [], 백오피스: [], 기타: [] };
+  users.forEach(u => {
+    const team = u.Team__c || '기타';
+    const entry = { id: u.Id, name: u.Name };
+    if (team === 'AE' || team === 'AE/AM') chTeamMembers.AE.push(entry);
+    if (team === 'AM' || team === 'AE/AM') chTeamMembers.AM.push(entry);
+    if (team === 'TM') chTeamMembers.TM.push(entry);
+    else if (team === '백오피스') chTeamMembers.백오피스.push(entry);
+    else if (!['AE', 'AM', 'AE/AM', 'TM', '백오피스'].includes(team)) chTeamMembers.기타.push(entry);
+  });
+  console.log(`  👥 채널세일즈 인원: ${users.length}명 (AE:${chTeamMembers.AE.length} AM:${chTeamMembers.AM.length} TM:${chTeamMembers.TM.length} BO:${chTeamMembers.백오피스.length})`);
 
   // 2. 채널 Lead 조회 (TM용 - 인바운드 반대 조건)
   const channelLeadQuery = `
-    SELECT Id, CreatedDate, CreatedTime__c, OwnerId, Name, Status, LossReason__c, LossReason_Contract__c, LossReasonDetail__c, ConvertedOpportunityId, Company, LeadSource, PartnerName__c, BrandName__c
+    SELECT Id, CreatedDate, CreatedTime__c, OwnerId, Name, Status, LossReason__c, LossReason_Contract__c, LossReasonDetail__c, ConvertedOpportunityId, Company, LeadSource, Partner__c, PartnerName__c, BrandName__c
     FROM Lead
     WHERE CreatedDate >= ${startUTC}
       AND CreatedDate < ${endUTC}
       AND (ServiceType__c = '테이블오더' OR ServiceType__c = '티오더 웨이팅')
       AND (LossReason__c = NULL OR LossReason__c != '오생성')
-      AND (PartnerName__c != NULL OR StoreType__c = '프랜차이즈제휴')
+      AND (Partner__c != NULL OR PartnerName__c != NULL OR StoreType__c = '프랜차이즈제휴')
   `.replace(/\s+/g, ' ').trim();
   const channelLeadsRecords = await soqlQueryAll(instanceUrl, accessToken, channelLeadQuery);
   const channelLeads = channelLeadsRecords.filter(l => !l.Company || !l.Company.toLowerCase().includes('test'));
@@ -519,7 +905,7 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
       AND IsConverted = true
       AND (ServiceType__c = '테이블오더' OR ServiceType__c = '티오더 웨이팅')
       AND (LossReason__c = NULL OR LossReason__c != '오생성')
-      AND (PartnerName__c != NULL OR StoreType__c = '프랜차이즈제휴')
+      AND (Partner__c != NULL OR PartnerName__c != NULL OR StoreType__c = '프랜차이즈제휴')
   `.replace(/\s+/g, ' ').trim();
   const convertedLeadsRaw = await soqlQueryAll(instanceUrl, accessToken, convertedLeadQuery);
   const channelConvertedLeads = convertedLeadsRaw.filter(l => !l.Company || !l.Company.toLowerCase().includes('test'));
@@ -541,7 +927,7 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
 
   // 4. LeadSource 기반 채널 Lead 조회 (AM용 - 일별 리드 확보 수)
   const sourceLeadQuery = `
-    SELECT Id, Name, Company, Status, PartnerName__c, BrandName__c, LeadSource, CreatedDate, OwnerId, Owner.Name, ConvertedOpportunityId, IsConverted, ConvertedDate
+    SELECT Id, Name, Company, Status, Partner__c, PartnerName__c, BrandName__c, LeadSource, CreatedDate, OwnerId, Owner.Name, ConvertedOpportunityId, IsConverted, ConvertedDate
     FROM Lead
     WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
       AND CreatedDate >= ${startUTC}
@@ -627,7 +1013,7 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
   // 10. 전체 LeadSource 기반 Lead 조회 (AM 활성 파트너 집계용 - 최근 90일)
   const threeMonthsAgo = new Date(new Date(startDate).getTime() - 90 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10);
   const allSourceLeadQuery = `
-    SELECT Id, PartnerName__c, BrandName__c, LeadSource, CreatedDate, IsConverted
+    SELECT Id, Partner__c, PartnerName__c, BrandName__c, LeadSource, CreatedDate, IsConverted
     FROM Lead
     WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
       AND CreatedDate >= ${kstToUTC(threeMonthsAgo, true)}
@@ -701,6 +1087,24 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
   const channelQuotes = await soqlQueryAll(instanceUrl, accessToken, quoteQuery);
   console.log(`  📝 채널 Quote(신규): ${channelQuotes.length}건`);
 
+  // 14. 미서명 계약 조회 (ContractStatus__c = '계약서명대기', 채널 Opp 기준)
+  let unsignedContracts = [];
+  try {
+    const unsignedQuery = `
+      SELECT Id, ContractDateStart__c, CreatedDate,
+             Opportunity__r.Id, Opportunity__r.Name, Opportunity__r.OwnerId, Opportunity__r.Owner.Name,
+             Opportunity__r.Account.Name
+      FROM Contract__c
+      WHERE ContractStatus__c = '계약서명대기'
+        AND Opportunity__r.OwnerId IN (${channelUserIds})
+      ORDER BY CreatedDate ASC
+    `.replace(/\s+/g, ' ').trim();
+    unsignedContracts = await soqlQueryAll(instanceUrl, accessToken, unsignedQuery);
+    console.log(`  📝 미서명 계약 (채널): ${unsignedContracts.length}건`);
+  } catch (err) {
+    console.log(`  ⚠️ 미서명 계약 조회 오류: ${err.message}`);
+  }
+
   return {
     users, userNameMap,
     channelLeads, channelLeadTasks, channelConvertedLeads,
@@ -710,7 +1114,7 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
     allSourceLeads, allAccountIds,
     targetMonth, threeMonthsAgo,
     channelVisits, channelStageHistory,
-    channelQuotes
+    channelQuotes, unsignedContracts, chTeamMembers, userTeamMap
   };
 }
 
@@ -718,7 +1122,7 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
 // 인바운드 KPI 계산
 // ============================================
 function calculateInboundKPIs(data, startDate, endDate) {
-  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, fieldUserIds, carryoverOpps, allClosedOpps, contracts, visits = [], stageChangeHistory = [] } = data;
+  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, userTeamMap = {}, fieldUserIds, carryoverOpps, allClosedOpps, contracts, visits = [], stageChangeHistory = [], teamMembers = { 인사이드세일즈: [], 필드세일즈: [], 백오피스: [], 기타: [] } } = data;
 
   // Lead별 Task 매핑 (전체 + 첫/마지막 Task + 미완료 Task)
   const allTasksByLead = {};
@@ -890,7 +1294,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
   });
 
   const ownerFunnelStats = Object.entries(byOwner).map(([ownerId, o]) => ({
-    userId: ownerId, name: o.name,
+    userId: ownerId, name: o.name, team: userTeamMap[ownerId] || '-',
     lead: o.lead, mql: o.mql, sql: o.sql, opp: o.opp, visitConverted: o.visitConverted, cw: o.cw,
     sqlConversionRate: o.mql > 0 ? +(o.sql / o.mql * 100).toFixed(1) : 0,
     frtOk: o.frtOk, frtOver20: o.withTask - o.frtOk,
@@ -919,6 +1323,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
     return {
       userId: u.Id,
       name: u.Name,
+      team: userTeamMap[u.Id] || '-',
       totalTasks,
       avgDaily: Math.round(avgDaily * 10) / 10,
       daysOver30,
@@ -1074,6 +1479,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
   });
 
   const insideSales = {
+    members: teamMembers.인사이드세일즈,
     lead: totalLeads,
     mql: mqlLeads.length,
     sql: sqlLeads.length,
@@ -1128,7 +1534,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
   });
 
   const fieldStats = Object.entries(fieldUserStats).map(([userId, stats]) => ({
-    userId, ...stats,
+    userId, ...stats, team: userTeamMap[userId] || '-',
     // 전환율: 이번달 SQL 전체 대비 이번달 CW
     cwRate: stats.thisMonthTotal > 0 ? +(stats.thisMonthCW / stats.thisMonthTotal * 100).toFixed(1) : 0
   })).sort((a, b) => b.total - a.total);
@@ -1385,6 +1791,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
   });
 
   const fieldSales = {
+    members: teamMembers.필드세일즈,
     cwConversionRate: {
       byUser: fieldStats,
       target: 60
@@ -1500,7 +1907,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
     const thisMonthCW = hist.cw - carryoverCW;
     const thisMonthCL = hist.cl - carryoverCL;
     return {
-      userId, name: stats.name,
+      userId, name: stats.name, team: userTeamMap[userId] || '-',
       total: stats.total, // 전체 SQL
       cw: hist.cw, cl: hist.cl, // CW/CL (History 기준)
       open: stats.open,
@@ -1633,6 +2040,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
   });
 
   const backOffice = {
+    members: teamMembers.백오피스,
     cwConversionRate: {
       byUser: boStats,
       target: 60
@@ -1690,6 +2098,9 @@ function calculateChannelKPIs(data, startDate, endDate) {
     stageChangeHistory = [],
     channelStageHistory = [],
     channelQuotes = [],
+    unsignedContracts = [],
+    chTeamMembers = { AE: [], AM: [], TM: [], 백오피스: [], 기타: [] },
+    userTeamMap = {},
   } = data;
 
   // ========== AE KPIs ==========
@@ -1712,6 +2123,51 @@ function calculateChannelKPIs(data, startDate, endDate) {
     progressValues[p] = (progressValues[p] || 0) + 1;
   });
 
+  // 네고 Account 집계
+  const negoAccounts = allMOUAccounts.filter(a => a.Progress__c === 'Negotiation');
+  const negoThisMonth = negoAccounts.filter(a =>
+    a.CreatedDate && a.CreatedDate.substring(0, 7) === targetMonth
+  );
+
+  // 네고 담당자별 집계
+  const negoByOwner = {};
+  negoAccounts.forEach(a => {
+    const owner = a.Owner?.Name || '미배정';
+    if (!negoByOwner[owner]) negoByOwner[owner] = { total: 0, thisMonth: 0 };
+    negoByOwner[owner].total++;
+    if (a.CreatedDate && a.CreatedDate.substring(0, 7) === targetMonth) {
+      negoByOwner[owner].thisMonth++;
+    }
+  });
+
+  // 미서명 계약 분석 (계약서명대기 경과일수)
+  const now = new Date();
+  const unsignedContractData = unsignedContracts.map(c => {
+    const createdDate = c.CreatedDate ? c.CreatedDate.substring(0, 10) : null;
+    const daysSinceSent = createdDate ? Math.floor((now - new Date(createdDate)) / (1000 * 60 * 60 * 24)) : 0;
+    return {
+      id: c.Id,
+      oppId: c.Opportunity__r?.Id,
+      oppName: c.Opportunity__r?.Name || '-',
+      owner: c.Opportunity__r?.Owner?.Name || '미배정',
+      ownerId: c.Opportunity__r?.OwnerId,
+      accountName: c.Opportunity__r?.Account?.Name || '-',
+      createdDate,
+      daysSinceSent,
+      isOverdue: daysSinceSent > 7
+    };
+  });
+  const unsignedOver7 = unsignedContractData.filter(c => c.isOverdue);
+
+  // 미서명 담당자별 집계
+  const unsignedByOwner = {};
+  unsignedContractData.forEach(c => {
+    const owner = c.owner;
+    if (!unsignedByOwner[owner]) unsignedByOwner[owner] = { total: 0, overdue: 0 };
+    unsignedByOwner[owner].total++;
+    if (c.isOverdue) unsignedByOwner[owner].overdue++;
+  });
+
   // Event 일별 집계 (AE/AM 공용)
   const eventsByOwnerDate = {};
   channelEvents.forEach(e => {
@@ -1725,7 +2181,7 @@ function calculateChannelKPIs(data, startDate, endDate) {
   const eventsByOwner = {};
   channelEvents.forEach(e => {
     const ownerId = e.OwnerId;
-    if (!eventsByOwner[ownerId]) eventsByOwner[ownerId] = { name: userNameMap[ownerId] || e.Owner?.Name || ownerId, count: 0 };
+    if (!eventsByOwner[ownerId]) eventsByOwner[ownerId] = { name: userNameMap[ownerId] || e.Owner?.Name || ownerId, team: userTeamMap[ownerId] || '-', count: 0 };
     eventsByOwner[ownerId].count++;
   });
 
@@ -1733,6 +2189,8 @@ function calculateChannelKPIs(data, startDate, endDate) {
   const totalWeekdays = countWeekdays(startDate, endDate);
 
   const ae = {
+    members: chTeamMembers.AE,
+    workdays: totalWeekdays,
     mouCount: {
       partners: mouPartnersThisMonth.length,
       franchiseHQ: mouHQThisMonth.length,
@@ -1742,11 +2200,37 @@ function calculateChannelKPIs(data, startDate, endDate) {
       details: {
         partners: mouPartnersThisMonth.map(p => ({ name: p.Name, mouStart: p.MOUstartdate__c, owner: p.Owner?.Name })),
         franchiseHQ: mouHQThisMonth.map(h => ({ name: h.Name, mouStart: h.MOUstartdate__c, owner: h.Owner?.Name }))
-      }
+      },
+      byOwner: (() => {
+        const mouByOwner = {};
+        mouPartnersThisMonth.forEach(p => {
+          const o = p.Owner?.Name || '미배정';
+          mouByOwner[o] = (mouByOwner[o] || 0) + 1;
+        });
+        mouHQThisMonth.forEach(h => {
+          const o = h.Owner?.Name || '미배정';
+          mouByOwner[o] = (mouByOwner[o] || 0) + 1;
+        });
+        return Object.entries(mouByOwner).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+      })()
+    },
+    negoEntry: {
+      thisMonth: negoThisMonth.length,
+      total: negoAccounts.length,
+      target: 10,
+      byOwner: Object.entries(negoByOwner).map(([name, d]) => ({ name, ...d })).sort((a, b) => b.thisMonth - a.thisMonth)
     },
     mouNegoProgress: {
       byProgress: progressValues,
-      note: 'Progress__c 필드값 분포 - 네고 단계 기준값 확인 필요'
+      note: 'Progress__c 필드값 분포',
+      byOwner: Object.entries(negoByOwner).map(([name, d]) => ({ name, count: d.thisMonth })).sort((a, b) => b.count - a.count)
+    },
+    unsignedContracts: {
+      total: unsignedContractData.length,
+      overdue: unsignedOver7.length,
+      target_days: 7,
+      list: unsignedContractData.sort((a, b) => b.daysSinceSent - a.daysSinceSent),
+      byOwner: Object.entries(unsignedByOwner).map(([name, d]) => ({ name, total: d.total, overdueCount: d.overdue })).sort((a, b) => b.overdueCount - a.overdueCount)
     },
     meetingCount: {
       total: channelEvents.length,
@@ -1757,6 +2241,12 @@ function calculateChannelKPIs(data, startDate, endDate) {
   };
 
   // ========== AM KPIs ==========
+  // Account Owner 맵 (Account.Id → Owner.Name) — AM별 지표 분리용
+  const accountOwnerMap = {};
+  partners.forEach(p => { accountOwnerMap[p.Id] = p.Owner?.Name || '미배정'; });
+  franchiseHQAccounts.forEach(h => { accountOwnerMap[h.Id] = h.Owner?.Name || '미배정'; });
+  franchiseBrands.forEach(b => { accountOwnerMap[b.Id] = b.Owner?.Name || '미배정'; });
+
   // 일별 리드 확보 수
   const dailyLeadCounts = {};
   const allPeriodSourceLeads = [...partnerSourceLeads, ...franchiseSourceLeads];
@@ -1778,12 +2268,12 @@ function calculateChannelKPIs(data, startDate, endDate) {
   const onboardingResults = mouPartners3m.map(p => {
     const mouDate = new Date(p.MOUstartdate__c);
     const mouEndWindow = new Date(mouDate.getFullYear(), mouDate.getMonth() + 3, mouDate.getDate()).toISOString().substring(0, 10);
-    const myLeads = allSourceLeads.filter(l => l.PartnerName__c === p.Id);
+    const myLeads = allSourceLeads.filter(l => (l.Partner__c || l.PartnerName__c) === p.Id);
     const leadsInWindow = myLeads.filter(l => {
       const leadDate = utcToKSTDateStr(l.CreatedDate);
       return leadDate >= p.MOUstartdate__c && leadDate <= mouEndWindow;
     });
-    return { name: p.Name, mouStart: p.MOUstartdate__c, isSettled: leadsInWindow.length > 0, leadCount: leadsInWindow.length };
+    return { name: p.Name, mouStart: p.MOUstartdate__c, isSettled: leadsInWindow.length > 0, leadCount: leadsInWindow.length, owner: p.Owner?.Name || '미배정' };
   });
 
   const settledCount = onboardingResults.filter(r => r.isSettled).length;
@@ -1791,46 +2281,140 @@ function calculateChannelKPIs(data, startDate, endDate) {
   // 기존 파트너 활성 유지 (90일 내 Lead ≥ 1)
   const activePartnerIds = new Set();
   allSourceLeads.forEach(l => {
-    if (l.PartnerName__c) activePartnerIds.add(l.PartnerName__c);
+    const acctId = l.Partner__c || l.PartnerName__c;
+    if (acctId) activePartnerIds.add(acctId);
     if (l.BrandName__c) activePartnerIds.add(l.BrandName__c);
   });
 
   const activePartnerCount = partners.filter(p => activePartnerIds.has(p.Id)).length;
   const activeBrandCount = franchiseBrands.filter(b => activePartnerIds.has(b.Id)).length;
 
-  // AM 담당자별 리드 확보 수
+  // AM 담당자별 리드 확보 수 (Lead Owner 기준)
   const leadByOwner = {};
   allPeriodSourceLeads.forEach(l => {
     const owner = l.Owner?.Name || '미배정';
-    if (!leadByOwner[owner]) leadByOwner[owner] = { name: owner, partner: 0, franchise: 0, total: 0 };
+    const ownerId = l.OwnerId || '';
+    if (!leadByOwner[owner]) leadByOwner[owner] = { name: owner, team: userTeamMap[ownerId] || '-', partner: 0, franchise: 0, total: 0 };
     leadByOwner[owner].total++;
     if (l.LeadSource === '파트너사 소개') leadByOwner[owner].partner++;
     else leadByOwner[owner].franchise++;
   });
   const leadByOwnerList = Object.values(leadByOwner).sort((a, b) => b.total - a.total);
 
+  // Lead → Account Owner 매핑 헬퍼 (Partner__c 우선, PartnerName__c 폴백)
+  function getAccountOwnerFromLead(l) {
+    const acctId = l.Partner__c || l.PartnerName__c || l.BrandName__c;
+    return acctId ? accountOwnerMap[acctId] : null;
+  }
+
+  // AM 담당자별 리드 확보 수 (Account Owner 기준 — AM 실적)
+  const leadByAccountOwner = {};
+  let unmappedLeadCount = 0;
+  const unmappedSamples = [];
+  allPeriodSourceLeads.forEach(l => {
+    const acctOwner = getAccountOwnerFromLead(l);
+    if (!acctOwner) {
+      unmappedLeadCount++;
+      if (unmappedSamples.length < 5) {
+        unmappedSamples.push({ id: l.Id, partner_c: l.Partner__c || null, partnerName: l.PartnerName__c || null, brand: l.BrandName__c || null });
+      }
+      return;
+    }
+    if (!leadByAccountOwner[acctOwner]) leadByAccountOwner[acctOwner] = { name: acctOwner, partner: 0, franchise: 0, total: 0 };
+    leadByAccountOwner[acctOwner].total++;
+    if (l.LeadSource === '파트너사 소개') leadByAccountOwner[acctOwner].partner++;
+    else leadByAccountOwner[acctOwner].franchise++;
+  });
+  if (unmappedLeadCount > 0) {
+    console.log(`  ⚠️ AM 리드 매핑 실패: ${unmappedLeadCount}/${allPeriodSourceLeads.length}건 (Partner__c/PartnerName__c/BrandName__c → Account 매핑 불가)`);
+    console.log(`    샘플:`, JSON.stringify(unmappedSamples));
+    console.log(`    accountOwnerMap 키 수: ${Object.keys(accountOwnerMap).length}`);
+  }
+
+  // AM 담당자별 일별 리드 (Account Owner 기준) — avgDaily 계산
+  const dailyLeadByAccountOwner = {};
+  allPeriodSourceLeads.forEach(l => {
+    const date = utcToKSTDateStr(l.CreatedDate);
+    if (!date) return;
+    const acctOwner = getAccountOwnerFromLead(l);
+    if (!acctOwner) return;
+    if (!dailyLeadByAccountOwner[acctOwner]) dailyLeadByAccountOwner[acctOwner] = {};
+    dailyLeadByAccountOwner[acctOwner][date] = (dailyLeadByAccountOwner[acctOwner][date] || 0) + 1;
+  });
+
+  const leadByAccountOwnerList = Object.entries(leadByAccountOwner).map(([name, data]) => {
+    const dailyCounts = dailyLeadByAccountOwner[name] || {};
+    const days = Object.keys(dailyCounts).filter(isWeekday);
+    const dayTotal = days.reduce((sum, d) => sum + dailyCounts[d], 0);
+    return { ...data, avgDaily: days.length > 0 ? +(dayTotal / days.length).toFixed(1) : 0 };
+  }).sort((a, b) => b.total - a.total);
+
+  // AM 담당자별 안착률 (Account Owner 기준)
+  const onboardingByOwner = {};
+  onboardingResults.forEach(r => {
+    const owner = r.owner;
+    if (!onboardingByOwner[owner]) onboardingByOwner[owner] = { total: 0, settled: 0 };
+    onboardingByOwner[owner].total++;
+    if (r.isSettled) onboardingByOwner[owner].settled++;
+  });
+  const onboardingByOwnerList = Object.entries(onboardingByOwner).map(([name, d]) => ({
+    name, total: d.total, settled: d.settled,
+    rate: d.total > 0 ? +(d.settled / d.total * 100).toFixed(1) : 0
+  })).sort((a, b) => b.total - a.total);
+
+  // AM 담당자별 활성 파트너 수 (Account Owner 기준)
+  const activeByOwner = {};
+  partners.forEach(p => {
+    const owner = p.Owner?.Name || '미배정';
+    if (!activeByOwner[owner]) activeByOwner[owner] = { partners: 0, brands: 0, total: 0 };
+    if (activePartnerIds.has(p.Id)) activeByOwner[owner].partners++;
+  });
+  franchiseBrands.forEach(b => {
+    const owner = b.Owner?.Name || '미배정';
+    if (!activeByOwner[owner]) activeByOwner[owner] = { partners: 0, brands: 0, total: 0 };
+    if (activePartnerIds.has(b.Id)) activeByOwner[owner].brands++;
+  });
+  Object.values(activeByOwner).forEach(v => { v.total = v.partners + v.brands; });
+  const activeByOwnerList = Object.entries(activeByOwner).map(([name, d]) => ({
+    name, ...d
+  })).sort((a, b) => b.total - a.total);
+
+  // AM 담당자별 미팅 수 (이벤트 Owner 기준)
+  const meetingByOwner = {};
+  channelEvents.forEach(e => {
+    const owner = userNameMap[e.OwnerId] || e.Owner?.Name || '미배정';
+    if (!meetingByOwner[owner]) meetingByOwner[owner] = 0;
+    meetingByOwner[owner]++;
+  });
+
   const am = {
+    members: chTeamMembers.AM,
     dailyLeadCount: {
       total: allPeriodSourceLeads.length,
       avgDaily: leadDays.length > 0 ? +(totalDailyLeads / leadDays.length).toFixed(1) : 0,
       target_daily: '20~25',
       partner: partnerSourceLeads.length,
       franchise: franchiseSourceLeads.length,
-      byOwner: leadByOwnerList
+      byOwner: leadByAccountOwnerList,
+      byLeadOwner: leadByOwnerList
     },
+    workdays: totalWeekdays,
     meetingCount: ae.meetingCount, // AE와 공유
     onboardingRate: {
       total: mouPartners3m.length,
       settled: settledCount,
       rate: mouPartners3m.length > 0 ? +(settledCount / mouPartners3m.length * 100).toFixed(1) : 0,
-      target: 80
+      target: 80,
+      byOwner: onboardingByOwnerList
     },
     activePartnerCount: {
       partners: activePartnerCount,
       brands: activeBrandCount,
       total: activePartnerCount + activeBrandCount,
-      target: 70
-    }
+      target: 70,
+      byOwner: activeByOwnerList
+    },
+    meetingByOwner
   };
 
   // ========== TM KPIs (인바운드 로직 재활용, 채널 필터) ==========
@@ -2066,7 +2650,7 @@ function calculateChannelKPIs(data, startDate, endDate) {
       contactName: chSafeStr(raw?.Name) || '-',
       company: chSafeStr(raw?.Company) || '-',
       owner: userNameMap[l.ownerId] || l.ownerId,
-      partnerName: raw?.PartnerName__c ? (accountNameMap[raw.PartnerName__c] || null) : null,
+      partnerName: (raw?.Partner__c || raw?.PartnerName__c) ? (accountNameMap[raw?.Partner__c || raw?.PartnerName__c] || null) : null,
       brandName: raw?.BrandName__c ? (accountNameMap[raw.BrandName__c] || null) : null,
       leadSource: raw?.LeadSource || null,
       createdDate: chLeadCreatedKST(raw),
@@ -2104,7 +2688,7 @@ function calculateChannelKPIs(data, startDate, endDate) {
       contactName: chSafeStr(raw?.Name) || '-',
       company: chSafeStr(raw?.Company) || '-',
       owner: userNameMap[l.ownerId] || l.ownerId,
-      partnerName: raw?.PartnerName__c ? (accountNameMap[raw.PartnerName__c] || null) : null,
+      partnerName: (raw?.Partner__c || raw?.PartnerName__c) ? (accountNameMap[raw?.Partner__c || raw?.PartnerName__c] || null) : null,
       brandName: raw?.BrandName__c ? (accountNameMap[raw.BrandName__c] || null) : null,
       leadSource: raw?.LeadSource || null,
       createdDate: chLeadCreatedKST(raw),
@@ -2168,7 +2752,7 @@ function calculateChannelKPIs(data, startDate, endDate) {
   const tmOwnerStats = Object.entries(tmByOwner).map(([ownerId, o]) => {
     const totalActions = o.converted + o.quoteSent; // 방문배정 + 견적발송(Quote 오브젝트)
     return {
-      userId: ownerId, name: o.name,
+      userId: ownerId, name: o.name, team: userTeamMap[ownerId] || '-',
       lead: o.lead, mql: o.mql, sql: o.sql,
       converted: o.converted, quoteTransitions: o.quoteTransitions,
       quoteSent: o.quoteSent, quoteSentFinal: o.quoteSentFinal,
@@ -2182,6 +2766,7 @@ function calculateChannelKPIs(data, startDate, endDate) {
   }).sort((a, b) => b.lead - a.lead);
 
   const tm = {
+    members: chTeamMembers.TM,
     dailyConversion: {
       visitAssigned: totalConversions,        // 방문배정 건수
       quoteSent: quoteSentTotal,              // 견적 발송 건수 (Quote 오브젝트 기준)
@@ -2322,7 +2907,7 @@ function calculateChannelKPIs(data, startDate, endDate) {
     const totalThisMonth = closeDates.reduce((s, [_, d]) => s + (d.thisMonthCW || 0) + (d.thisMonthCL || 0), 0);
     const totalCarryover = closeDates.reduce((s, [_, d]) => s + (d.carryoverCW || 0) + (d.carryoverCL || 0), 0);
     return {
-      userId, name: stats.name,
+      userId, name: stats.name, team: userTeamMap[userId] || '-',
       total: stats.total,
       cw: hist.cw, cl: hist.cl,
       open: stats.open,
@@ -2456,9 +3041,10 @@ function calculateChannelKPIs(data, startDate, endDate) {
   // OppId → 파트너/프랜차이즈 매핑 (Lead 전환 정보에서 역추적)
   const oppPartnerMap = {};
   [...channelLeads, ...sourceLeads].forEach(l => {
-    if (l.ConvertedOpportunityId && (l.PartnerName__c || l.BrandName__c)) {
+    const partnerId = l.Partner__c || l.PartnerName__c;
+    if (l.ConvertedOpportunityId && (partnerId || l.BrandName__c)) {
       oppPartnerMap[l.ConvertedOpportunityId] = {
-        partnerName: l.PartnerName__c ? (accountNameMap[l.PartnerName__c] || null) : null,
+        partnerName: partnerId ? (accountNameMap[partnerId] || null) : null,
         brandName: l.BrandName__c ? (accountNameMap[l.BrandName__c] || null) : null,
       };
     }
@@ -2657,6 +3243,7 @@ function calculateChannelKPIs(data, startDate, endDate) {
     : 100;
 
   const channelBO = {
+    members: chTeamMembers.백오피스,
     cwConversionRate: {
       byUser: chBoList,
       target: 60
@@ -2819,10 +3406,14 @@ function filterChannelDataForDay(data, dayDate) {
 async function main() {
   const targetMonthArg = process.argv[2]; // e.g. '2026-02'
   const dailyMode = process.argv.includes('--daily');
+  const localMode = process.argv.includes('--local'); // 로컬 /data/ 에만 저장, S3 업로드 건너뜀
+  const s3Mode    = process.argv.includes('--s3');    // S3에만 업로드 (로컬 저장 생략)
   const { startDate, endDate, periodLabel, targetMonth } = getMonthRange(targetMonthArg);
 
   console.log('============================================');
   console.log(`KPI 데이터 추출 - ${periodLabel}`);
+  const modeLabel = localMode ? '[로컬 전용]' : s3Mode ? '[S3 전용]' : '[로컬 + S3]';
+  console.log(`실행 모드: ${modeLabel}`);
   console.log('============================================');
 
   const { accessToken, instanceUrl } = await getSalesforceToken();
@@ -2862,14 +3453,25 @@ async function main() {
       am: channelKPIs.am,
       tm: channelKPIs.tm,
       backOffice: channelKPIs.backOffice
-    }
+    },
+    scores: {
+      is:   calcISScores(inboundKPIs.insideSales),
+      fs:   calcFSRanking(inboundKPIs.fieldSales),
+      bo:   calcBOScores(inboundKPIs.backOffice, TABLET_TARGETS_2026.IBS[targetMonth] ?? 2600),
+      tm:   calcTMScore(channelKPIs.tm),
+      csbo: calcChannelBOScores(channelKPIs.backOffice),
+      ae:   calcAEScore(channelKPIs.ae, channelKPIs.am),
+      am:   calcAMScore(channelKPIs.am),
+    },
   };
 
-  // JSON 파일 저장
+  // JSON 파일 저장 (--s3 전용 모드가 아닌 경우 로컬 저장)
   const outputDir = 'data';
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
   const outputPath = `${outputDir}/kpi-extract-${targetMonth}.json`;
-  fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf-8');
+  if (!s3Mode) {
+    fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf-8');
+  }
 
   // 콘솔 요약 출력
   console.log('\n============================================');
@@ -2897,6 +3499,8 @@ async function main() {
   console.log('\n🔶 채널세일즈팀');
   console.log('  ┌─ AE ──────────────────────────────────');
   console.log(`  │ 신규 MOU 체결: ${channelKPIs.ae.mouCount.total}건 (목표 4건)`);
+  console.log(`  │ 네고 진입: ${channelKPIs.ae.negoEntry.thisMonth}건 (목표 10건, 전체 ${channelKPIs.ae.negoEntry.total}건)`);
+  console.log(`  │ 미서명 계약: ${channelKPIs.ae.unsignedContracts.total}건 (7일 초과: ${channelKPIs.ae.unsignedContracts.overdue}건)`);
   console.log(`  │ 미팅 일평균: ${channelKPIs.ae.meetingCount.avgDaily}건 (목표 2건)`);
   console.log('  ├─ AM ──────────────────────────────────');
   console.log(`  │ 채널 리드 일평균: ${channelKPIs.am.dailyLeadCount.avgDaily}건 (목표 20~25건)`);
@@ -2914,7 +3518,7 @@ async function main() {
   }
   console.log('  └───────────────────────────────────────');
 
-  console.log(`\n✅ 저장 완료: ${outputPath}`);
+  if (!s3Mode) console.log(`\n✅ 로컬 저장 완료: ${outputPath}`);
 
   // 일별 KPI 생성 (--daily 플래그)
   if (dailyMode) {
@@ -3077,7 +3681,7 @@ async function main() {
   // ============================================
   // S3 업로드 + 주간 사전계산 + 메타데이터
   // ============================================
-  if (process.env.S3_BUCKET_NAME) {
+  if (!localMode && (s3Mode || process.env.S3_BUCKET_NAME)) {
     const { uploadJSON } = require('./lib/s3-upload');
     const { aggregateWeeklyData, annotateCurrentStatus, generateWeeks } = require('./lib/kpi-aggregation');
 

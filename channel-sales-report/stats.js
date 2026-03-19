@@ -2,7 +2,23 @@
  * 통계 계산 모듈
  */
 
-function calculateStats(data, targetMonth = null) {
+// 1일~endDate까지의 영업일수 (주말 제외)
+function countWorkdays(year, month, endDay) {
+  let count = 0;
+  for (let d = 1; d <= endDay; d++) {
+    const dow = new Date(year, month, d).getDay();
+    if (dow !== 0 && dow !== 6) count++;
+  }
+  return count;
+}
+
+// Lead → Account ID 추출 (Partner__c 우선, PartnerName__c 폴백)
+function getLeadAccountId(l) {
+  return l.Partner__c || l.PartnerName__c;
+}
+
+function calculateStats(data, targetMonth = null, options = {}) {
+  const { includeClosed = false } = options;
   const { partners, franchiseBrands, franchiseStores, storesByBrand, franchiseHQList, franchiseHQAccounts, leads, opportunities, partnerSourceLeads, franchiseSourceLeads, channelEvents, channelTasks, channelUsers, channelUserMap, contactTasksMap, channelCaseMap, partnerReferredStores, channelLeadOpportunities, channelLeadOppMap } = data;
 
   // Account ID → Name 매핑
@@ -21,7 +37,7 @@ function calculateStats(data, targetMonth = null) {
   // Lead를 Account별로 그룹핑
   const leadsByAccount = new Map();
   leads.forEach(l => {
-    const accountId = l.PartnerName__c;
+    const accountId = getLeadAccountId(l);
     if (accountId && accountMap.has(accountId)) {
       if (!leadsByAccount.has(accountId)) {
         leadsByAccount.set(accountId, []);
@@ -35,7 +51,7 @@ function calculateStats(data, targetMonth = null) {
   const franchiseSourceLeadsByAccount = new Map();
 
   (partnerSourceLeads || []).forEach(l => {
-    const accountId = l.PartnerName__c;
+    const accountId = getLeadAccountId(l);
     if (accountId) {
       if (!partnerSourceLeadsByAccount.has(accountId)) {
         partnerSourceLeadsByAccount.set(accountId, []);
@@ -45,7 +61,7 @@ function calculateStats(data, targetMonth = null) {
   });
 
   (franchiseSourceLeads || []).forEach(l => {
-    const accountId = l.PartnerName__c;
+    const accountId = getLeadAccountId(l);
     if (accountId) {
       if (!franchiseSourceLeadsByAccount.has(accountId)) {
         franchiseSourceLeadsByAccount.set(accountId, []);
@@ -384,15 +400,14 @@ function calculateStats(data, targetMonth = null) {
     const day = l.CreatedDate?.substring(8, 10);
     if (!day) return;
 
-    // 파트너사 소개: PartnerName__c로 Account Owner 조회
+    // 파트너사 소개: Partner__c/PartnerName__c로 Account Owner 조회
     // 프랜차이즈소개: BrandName__c로 Account Owner 조회
     let accountOwner = null;
-    if (l.LeadSource === '파트너사 소개' && l.PartnerName__c) {
-      const account = accountMap.get(l.PartnerName__c);
-      accountOwner = account?.owner;
+    if (l.LeadSource === '파트너사 소개') {
+      const acctId = getLeadAccountId(l);
+      if (acctId) accountOwner = accountMap.get(acctId)?.owner;
     } else if (l.LeadSource === '프랜차이즈소개' && l.BrandName__c) {
-      const account = accountMap.get(l.BrandName__c);
-      accountOwner = account?.owner;
+      accountOwner = accountMap.get(l.BrandName__c)?.owner;
     }
 
     if (!accountOwner) return;
@@ -801,7 +816,7 @@ function calculateStats(data, targetMonth = null) {
     const allLeads = [...(partnerLeads || []), ...(franchiseLeads || [])];
 
     return partnerList.map(p => {
-      const myLeads = allLeads.filter(l => l.PartnerName__c === p.id);
+      const myLeads = allLeads.filter(l => getLeadAccountId(l) === p.id);
       const thisMonthLeads = myLeads.filter(l => l.CreatedDate?.substring(0, 7) === thisMonth);
       const last3MonthLeads = myLeads.filter(l => l.CreatedDate?.substring(0, 7) >= threeMonthsAgo);
       const lastLeadDate = myLeads.length > 0
@@ -978,7 +993,7 @@ function calculateStats(data, targetMonth = null) {
       let myLeads = [];
 
       if (isPartner) {
-        myLeads = allLeads.filter(l => l.PartnerName__c === item.id);
+        myLeads = allLeads.filter(l => getLeadAccountId(l) === item.id);
         const leadsInWindow = myLeads.filter(l => {
           const leadDate = l.CreatedDate?.substring(0, 10);
           return leadDate >= item.mouStart && leadDate <= mouEndWindowStr;
@@ -1280,11 +1295,21 @@ function calculateStats(data, targetMonth = null) {
     thisMonth, leads, opportunities, partners, franchiseBrands, channelUsers
   });
 
+  // 데이터 필터링 (CL 제외 + 마지막 활동 2024년 이전 제외)
+  const clFilter = (item) => includeClosed || item.progress !== 'Closed Lost';
+  const activityFilter = (item) => item.lastLeadDate && item.lastLeadDate >= '2025';
+
+  const applyFilters = (item) => clFilter(item) && activityFilter(item);
+
+  const filteredPartnerStats = enrichedPartnerStats.filter(applyFilters);
+  const filteredFranchiseStats = franchiseStats.filter(clFilter); // 브랜드는 날짜/활동 필터 미적용 (HQ에서 관리)
+  const filteredFranchiseHQList = enrichedFranchiseHQList.filter(applyFilters);
+
   return {
     summary,
-    partnerStats: enrichedPartnerStats,
-    franchiseStats,
-    franchiseHQList: enrichedFranchiseHQList,
+    partnerStats: filteredPartnerStats,
+    franchiseStats: filteredFranchiseStats,
+    franchiseHQList: filteredFranchiseHQList,
     ownerStats: Object.values(ownerStats).sort((a, b) => b.totalLeads - a.totalLeads),
     activePartnerThisMonth,
     activePartnerLast3Months,
@@ -1311,6 +1336,7 @@ function calculateKPI(params) {
 
   const today = now.toISOString().substring(0, 10);
   const thisMonthDays = now.getDate();
+  const workdays = countWorkdays(now.getFullYear(), now.getMonth(), now.getDate());
 
   // MOU 신규 체결
   const mouNewThisMonth = mouPartnerThisMonth.length + mouHQThisMonth.length;
@@ -1355,13 +1381,13 @@ function calculateKPI(params) {
   const leadsThisMonth = allChannelLeads.filter(l =>
     l.CreatedDate && l.CreatedDate.substring(0, 7) === thisMonth
   );
-  const leadsDailyAvg = thisMonthDays > 0 ? (leadsThisMonth.length / thisMonthDays).toFixed(1) : 0;
+  const leadsDailyAvg = workdays > 0 ? (leadsThisMonth.length / workdays).toFixed(1) : 0;
 
   // 90일 활성 파트너
   const ninetyDaysAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 90).toISOString().substring(0, 10);
 
   const activePartners90d = enrichedPartnerStats.filter(p => {
-    const myLeads = allChannelLeads.filter(l => l.PartnerName__c === p.id);
+    const myLeads = allChannelLeads.filter(l => getLeadAccountId(l) === p.id);
     return myLeads.some(l => l.CreatedDate && l.CreatedDate.substring(0, 10) >= ninetyDaysAgo);
   });
 
@@ -1422,11 +1448,12 @@ function calculateKPI(params) {
     date: today,
     thisMonth,
     thisMonthDays,
+    workdays,
     bd: {
       mouNewThisMonth: { value: mouNewThisMonth, target: 4, label: '신규 MOU 체결 수 (월)' },
       negoEntryThisMonth: { value: negoThisMonth.length, total: negoAccounts.length, target: 10, label: 'MOU 네고 단계 진입 (월)' },
       meetingsIncompleteToday: { value: meetingsMouIncompleteToday.length, target: 2, label: 'MOU 미완료 곳 미팅 (오늘)' },
-      meetingsIncompleteAvg: { value: thisMonthDays > 0 ? (meetingsMouIncompleteThisMonth.length / thisMonthDays).toFixed(1) : 0, target: 2, label: 'MOU 미완료 곳 미팅 (일평균)' },
+      meetingsIncompleteAvg: { value: workdays > 0 ? (meetingsMouIncompleteThisMonth.length / workdays).toFixed(1) : 0, target: 2, label: 'MOU 미완료 곳 미팅 (일평균)' },
       meetingsIncompleteThisMonth: { value: meetingsMouIncompleteThisMonth.length, label: 'MOU 미완료 곳 미팅 (이번달 합계)' }
     },
     am: {
@@ -1434,7 +1461,7 @@ function calculateKPI(params) {
       leadsDailyAvg: { value: parseFloat(leadsDailyAvg), target: '20~25', label: '채널 리드 확보 (일평균)' },
       leadsThisMonth: { value: leadsThisMonth.length, label: '채널 리드 확보 (이번달 합계)' },
       meetingsCompleteToday: { value: meetingsMouCompleteToday.length, target: 2, label: 'MOU 완료 곳 미팅 (오늘)' },
-      meetingsCompleteAvg: { value: thisMonthDays > 0 ? (meetingsMouCompleteThisMonth.length / thisMonthDays).toFixed(1) : 0, target: 2, label: 'MOU 완료 곳 미팅 (일평균)' },
+      meetingsCompleteAvg: { value: workdays > 0 ? (meetingsMouCompleteThisMonth.length / workdays).toFixed(1) : 0, target: 2, label: 'MOU 완료 곳 미팅 (일평균)' },
       meetingsCompleteThisMonth: { value: meetingsMouCompleteThisMonth.length, label: 'MOU 완료 곳 미팅 (이번달 합계)' },
       onboardingRate: { value: parseFloat(partnerOnboarding.rate) || 0, settled: partnerOnboarding.settled, total: partnerOnboarding.total, target: 80, label: '신규 파트너 초기 안착률 (%)' },
       activeChannels90d: { value: totalActiveChannels90d, partners: activePartners90d.length, hq: activeHQ90d.length, target: 70, label: '기존 파트너 활성 유지 (90일)' }

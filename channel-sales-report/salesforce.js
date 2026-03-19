@@ -234,19 +234,37 @@ async function collectChannelData(targetMonth = null) {
   }
 
   // 6. LeadSource 기반 채널 Lead 조회 (FRT 계산용 Task 포함)
-  const channelLeadQuery = `
-    SELECT
-      Id, Name, LastName, Company, Status,
-      PartnerName__c, BrandName__c,
-      LeadSource, CreatedDate, CreatedTime__c, OwnerId, Owner.Name,
-      ConvertedOpportunityId, ConvertedAccountId, ConvertedContactId, IsConverted,
-      LossReason__c, LossReason_Contract__c,
-      (SELECT Id, Subject, CreatedDate, CreatedBy.Name FROM Tasks ORDER BY CreatedDate ASC LIMIT 5)
-    FROM Lead
-    WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
-    ORDER BY LeadSource, CreatedDate DESC
-  `;
-  const channelLeads = await soqlQueryAll(instanceUrl, accessToken, channelLeadQuery);
+  let channelLeads = [];
+  try {
+    const channelLeadQueryWithPartner = `
+      SELECT
+        Id, Name, LastName, Company, Status,
+        Partner__c, PartnerName__c, BrandName__c,
+        LeadSource, CreatedDate, CreatedTime__c, OwnerId, Owner.Name,
+        ConvertedOpportunityId, ConvertedAccountId, ConvertedContactId, IsConverted,
+        LossReason__c, LossReason_Contract__c,
+        (SELECT Id, Subject, CreatedDate, CreatedBy.Name FROM Tasks ORDER BY CreatedDate ASC LIMIT 5)
+      FROM Lead
+      WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
+      ORDER BY LeadSource, CreatedDate DESC
+    `;
+    channelLeads = await soqlQueryAll(instanceUrl, accessToken, channelLeadQueryWithPartner);
+  } catch (err) {
+    const channelLeadQueryFallback = `
+      SELECT
+        Id, Name, LastName, Company, Status,
+        PartnerName__c, BrandName__c,
+        LeadSource, CreatedDate, CreatedTime__c, OwnerId, Owner.Name,
+        ConvertedOpportunityId, ConvertedAccountId, ConvertedContactId, IsConverted,
+        LossReason__c, LossReason_Contract__c,
+        (SELECT Id, Subject, CreatedDate, CreatedBy.Name FROM Tasks ORDER BY CreatedDate ASC LIMIT 5)
+      FROM Lead
+      WHERE LeadSource IN ('파트너사 소개', '프랜차이즈소개')
+      ORDER BY LeadSource, CreatedDate DESC
+    `;
+    channelLeads = await soqlQueryAll(instanceUrl, accessToken, channelLeadQueryFallback);
+    console.log('⚠️ channelLeadQuery: Partner__c 필드 없음, PartnerName__c로 폴백');
+  }
 
   const partnerSourceLeads = channelLeads.filter(l => l.LeadSource === '파트너사 소개');
   const franchiseSourceLeads = channelLeads.filter(l => l.LeadSource === '프랜차이즈소개');

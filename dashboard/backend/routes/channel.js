@@ -78,19 +78,42 @@ router.get('/', async (req, res) => {
       });
     }
 
-    // kpi-v2: KPI 대시보드에 필요한 필드만 반환 (~2MB)
+    // kpi-v2: KPI 대시보드에 필요한 필드만 반환
     if (section === 'kpi-v2') {
+      // 히트맵 데이터: 활동 있는 날만 전송 (sparse)
+      const sparseDailyActivity = (arr) =>
+        (arr || []).filter(d => d.leads > 0 || d.meetings > 0 || d.count > 0);
+
+      // amHeatmap sparse 변환
+      const channelLeadsByOwner = stats.summary?.channelLeadsByOwner;
+      const sparseChannelLeadsByOwner = channelLeadsByOwner ? {
+        ...channelLeadsByOwner,
+        amHeatmap: channelLeadsByOwner.amHeatmap ? {
+          ...channelLeadsByOwner.amHeatmap,
+          data: (channelLeadsByOwner.amHeatmap.data || []).map(d => ({
+            ...d,
+            dailyData: (d.dailyData || []).filter(dd => dd.count > 0)
+          }))
+        } : null
+      } : null;
+
       return res.json({
         period: stats.period,
         kpi: stats.kpi,
         summary: stats.summary ? {
           partnerLeads: stats.summary.partnerLeads,
           franchiseLeads: stats.summary.franchiseLeads,
-          channelLeadsByOwner: stats.summary.channelLeadsByOwner,
+          channelLeadsByOwner: sparseChannelLeadsByOwner,
         } : null,
         mouStats: stats.mouStats,
-        partnerStats: stats.partnerStats,
-        franchiseHQList: stats.franchiseHQList,
+        partnerStats: (stats.partnerStats || []).map(({ leads, referredStores, dailyLeads, ...rest }) => ({
+          ...rest,
+          dailyActivity: sparseDailyActivity(rest.dailyActivity)
+        })),
+        franchiseHQList: (stats.franchiseHQList || []).map(hq => ({
+          ...hq,
+          dailyActivity: sparseDailyActivity(hq.dailyActivity)
+        })),
         rawData: rawDataSlim,
         generatedAt: stats.generatedAt,
       });
