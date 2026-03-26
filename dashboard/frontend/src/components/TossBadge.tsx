@@ -4,7 +4,7 @@ import React from 'react';
 
 type BadgeVariant = 'fill' | 'weak';
 type BadgeSize = 'xsmall' | 'small' | 'medium' | 'large';
-type BadgeColor = 'blue' | 'teal' | 'green' | 'red' | 'yellow' | 'elephant';
+type BadgeColor = 'blue' | 'teal' | 'green' | 'red' | 'yellow' | 'elephant' | 'purple';
 
 interface TossBadgeProps {
   children: React.ReactNode;
@@ -39,6 +39,10 @@ const COLOR_MAP: Record<BadgeColor, { fill: { bg: string; color: string }; weak:
     fill: { bg: '#6B7684', color: '#FFFFFF' },
     weak: { bg: '#E8EBED', color: '#4E5968' },
   },
+  purple: {
+    fill: { bg: '#8B5CF6', color: '#FFFFFF' },
+    weak: { bg: '#F3F0FF', color: '#6D28D9' },
+  },
 };
 
 const SIZE_MAP: Record<BadgeSize, { padding: string; fontSize: string; borderRadius: string; lineHeight: string }> = {
@@ -55,7 +59,7 @@ export default function TossBadge({
   color = 'blue',
   style,
 }: TossBadgeProps) {
-  const colorStyle = COLOR_MAP[color][variant];
+  const colorStyle = COLOR_MAP[color]?.[variant] ?? COLOR_MAP.elephant[variant];
   const sizeStyle = SIZE_MAP[size];
 
   return (

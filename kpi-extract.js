@@ -48,6 +48,12 @@ function utcToKSTDateStr(utcDateStr) {
   return new Date(d.getTime() + 9 * 3600000).toISOString().substring(0, 10);
 }
 
+function utcToKSTDateTimeStr(utcDateStr) {
+  if (!utcDateStr) return null;
+  const d = new Date(utcDateStr);
+  return new Date(d.getTime() + 9 * 3600000).toISOString().substring(0, 16).replace('T', ' ');
+}
+
 // 영업일 계산 (주말 제외)
 function countBizDays(startDate, endDate) {
   if (!startDate || !endDate) return null;
@@ -310,24 +316,21 @@ function calcBOScores(backOffice, ibsTarget) {
  * @param {Object} tm - channel.tm
  */
 function calcTMScore(tm) {
-  const avgDailyConversion = tm?.dailyConversion?.avgDaily || 0;
   const frtOver20          = tm?.frt?.frtOver20 || 0;
   const unconverted        = tm?.unconvertedMQL?.count ?? 0;
   const sqlBacklog         = tm?.sqlBacklog?.over7 ?? 0;
 
-  const convPts        = calcPropScore(avgDailyConversion, 5, 50);
-  const frtPts         = frtOver20 === 0 ? 10 : 0;
-  const unconvertedPts = unconverted === 0 ? 20 : 0;
-  const backlogPts     = sqlBacklog <= 10 ? 20 : Math.max(0, 20 - (sqlBacklog - 10));
-  const total          = convPts + frtPts + unconvertedPts + backlogPts;
+  const frtPts         = frtOver20 === 0 ? 30 : Math.max(0, 30 - frtOver20);
+  const unconvertedPts = unconverted === 0 ? 30 : Math.max(0, 30 - unconverted * 2);
+  const backlogPts     = sqlBacklog <= 10 ? 40 : Math.max(0, 40 - (sqlBacklog - 10));
+  const total          = frtPts + unconvertedPts + backlogPts;
 
   return {
     teamLevel: true, total, grade: gradeOf(total),
     breakdown: {
-      conversion:  { pts: convPts,        max: 50, actual: avgDailyConversion, target: 5,  label: '일 전환 건수' },
-      frt:         { pts: frtPts,         max: 10, actual: frtOver20,          target: 0,  label: 'FRT 20분 초과' },
-      unconverted: { pts: unconvertedPts, max: 20, actual: unconverted,        target: 0,  label: 'MQL 미전환' },
-      backlog:     { pts: backlogPts,     max: 20, actual: sqlBacklog,         target: 10, label: 'SQL 잔량 7일+' },
+      frt:         { pts: frtPts,         max: 30, actual: frtOver20,          target: 0,  label: 'FRT 20분 초과' },
+      unconverted: { pts: unconvertedPts, max: 30, actual: unconverted,        target: 0,  label: 'MQL 미전환' },
+      backlog:     { pts: backlogPts,     max: 40, actual: sqlBacklog,         target: 10, label: 'SQL 잔량 7일+' },
     },
   };
 }
@@ -588,7 +591,7 @@ async function collectInboundData(instanceUrl, accessToken, startDate, endDate) 
     for (let i = 0; i < convertedOppIds.length; i += chunkSize) {
       const chunk = convertedOppIds.slice(i, i + chunkSize);
       const oppIds = chunk.map(id => `'${id}'`).join(',');
-      const oppQuery = `SELECT Id, Name, Loss_Reason__c, Loss_Reason_Oppt__c, Loss_Reason_Oppt_2depth__c, Loss_Reason_Detail__c, StageName, FieldUser__c, BOUser__c, AgeInDays, SalesInviteDate__c, CreatedDate, CloseDate, InstallHopeDate__c, RecordType.Name, fm_CompanyStatus__c, (SELECT Id FROM ContractOpportunities__r) FROM Opportunity WHERE Id IN (${oppIds})`;
+      const oppQuery = `SELECT Id, Name, Loss_Reason__c, Loss_Reason_Oppt__c, Loss_Reason_Oppt_2depth__c, Loss_Reason_Detail__c, StageName, FieldUser__c, BOUser__c, AgeInDays, SalesInviteDate__c, CreatedDate, CloseDate, InstallHopeDate__c, AdvancePaymentDate__c, RecordType.Name, fm_CompanyStatus__c, (SELECT Id FROM ContractOpportunities__r) FROM Opportunity WHERE Id IN (${oppIds})`;
       const oppResult = await soqlQuery(instanceUrl, accessToken, oppQuery);
       opportunities = opportunities.concat(oppResult.records);
     }
@@ -673,7 +676,7 @@ async function collectInboundData(instanceUrl, accessToken, startDate, endDate) 
 
   // 9. 이월 포함 CW: CloseDate가 이번 달인 전체 인바운드 Opportunity (이전 달 생성 Lead 포함)
   const cwOppQuery = `
-    SELECT Id, Name, StageName, FieldUser__c, BOUser__c, CloseDate, CreatedDate, AgeInDays, Loss_Reason__c, InstallHopeDate__c, (SELECT Id FROM ContractOpportunities__r)
+    SELECT Id, Name, StageName, FieldUser__c, BOUser__c, CloseDate, CreatedDate, AgeInDays, Loss_Reason__c, InstallHopeDate__c, AdvancePaymentDate__c, (SELECT Id FROM ContractOpportunities__r)
     FROM Opportunity
     WHERE StageName IN ('Closed Won', 'Closed Lost')
       AND CloseDate >= ${startDate}
@@ -747,7 +750,33 @@ async function collectInboundData(instanceUrl, accessToken, startDate, endDate) 
   }
   console.log(`  🏠 Visit: ${visits.length}건`);
 
-  return { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, userTeamMap, fieldUserIds, carryoverOpps, allClosedOpps: cwOppsResult, contracts, visits, teamMembers };
+  // 12. AdvancePaymentDate__c 최초 입력 시점 조회 (OpportunityFieldHistory)
+  let ibPaymentHistory = [];
+  if (convertedOppIds.length > 0) {
+    const chunkSize = 100;
+    for (let i = 0; i < convertedOppIds.length; i += chunkSize) {
+      const chunk = convertedOppIds.slice(i, i + chunkSize);
+      const ids = chunk.map(id => `'${id}'`).join(',');
+      const phQuery = `
+        SELECT OpportunityId, OldValue, NewValue, CreatedDate
+        FROM OpportunityFieldHistory
+        WHERE OpportunityId IN (${ids})
+          AND Field = 'AdvancePaymentDate__c'
+        ORDER BY CreatedDate ASC
+      `.replace(/\s+/g, ' ').trim();
+      const phResult = await soqlQueryAll(instanceUrl, accessToken, phQuery);
+      ibPaymentHistory = ibPaymentHistory.concat(phResult);
+    }
+  }
+  const ibAdvPaymentEnteredMap = {};
+  ibPaymentHistory.forEach(h => {
+    if (!ibAdvPaymentEnteredMap[h.OpportunityId] && !h.OldValue && h.NewValue) {
+      ibAdvPaymentEnteredMap[h.OpportunityId] = h.CreatedDate;
+    }
+  });
+  console.log(`  💰 인바운드 AdvancePaymentDate History: ${ibPaymentHistory.length}건 (최초입력 ${Object.keys(ibAdvPaymentEnteredMap).length}건)`);
+
+  return { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, userTeamMap, fieldUserIds, carryoverOpps, allClosedOpps: cwOppsResult, contracts, visits, teamMembers, ibAdvPaymentEnteredMap };
 }
 
 // ============================================
@@ -803,7 +832,7 @@ async function fetchStageChangeHistory(instanceUrl, accessToken, startDate, endD
     const oppQuery = `
       SELECT Id, Name, StageName, BOUser__c, FieldUser__c, CloseDate, CreatedDate,
              RecordType.Name, Owner.Name, OwnerId, Owner_Department__c,
-             Account.Name, Account.BranchName__c, fm_CompanyStatus__c, InstallHopeDate__c
+             Account.Name, Account.BranchName__c, fm_CompanyStatus__c, InstallHopeDate__c, AdvancePaymentDate__c
       FROM Opportunity WHERE Id IN (${ids})
     `.replace(/\s+/g, ' ').trim();
     const res = await soqlQuery(instanceUrl, accessToken, oppQuery);
@@ -844,6 +873,7 @@ async function fetchStageChangeHistory(instanceUrl, accessToken, startDate, endD
       companyStatus: opp.fm_CompanyStatus__c || '',
       closeDate: opp.CloseDate,
       installHopeDate: opp.InstallHopeDate__c || null,
+      advancePaymentDate: opp.AdvancePaymentDate__c || null,
       oppCreatedDate: opp.CreatedDate,
     };
   });
@@ -987,7 +1017,7 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
 
   // 5. 파트너사 Account 조회
   const partnerQuery = `
-    SELECT Id, Name, OwnerId, Owner.Name, fm_AccountType__c, Progress__c, MOUstartdate__c, MOUenddate__c, CreatedDate
+    SELECT Id, Name, OwnerId, Owner.Name, fm_AccountType__c, Progress__c, MOUstartdate__c, MOUenddate__c, MOU_ContractDate__c, CreatedDate
     FROM Account
     WHERE fm_AccountType__c = '파트너사'
     ORDER BY Name
@@ -997,7 +1027,7 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
 
   // 6. 프랜차이즈 본사 Account 조회
   const hqQuery = `
-    SELECT Id, Name, OwnerId, Owner.Name, fm_AccountType__c, Progress__c, MOUstartdate__c, MOUenddate__c, CreatedDate
+    SELECT Id, Name, OwnerId, Owner.Name, fm_AccountType__c, Progress__c, MOUstartdate__c, MOUenddate__c, MOU_ContractDate__c, CreatedDate
     FROM Account
     WHERE fm_AccountType__c = '프랜차이즈본사'
     ORDER BY Name
@@ -1020,7 +1050,7 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
   if (users.length > 0) {
     const channelUserIds = users.map(u => `'${u.Id}'`).join(',');
     const oppQuery = `
-      SELECT Id, Name, StageName, Amount, CloseDate, AccountId, Account.Name, OwnerId, Owner.Name, CreatedDate, LeadSource, IsClosed, IsWon, Loss_Reason__c, AgeInDays, BOUser__c, FieldUser__c, InstallHopeDate__c, fm_CompanyStatus__c, (SELECT Id FROM ContractOpportunities__r)
+      SELECT Id, Name, StageName, Amount, CloseDate, AccountId, Account.Name, OwnerId, Owner.Name, CreatedDate, LeadSource, IsClosed, IsWon, Loss_Reason__c, AgeInDays, BOUser__c, FieldUser__c, InstallHopeDate__c, AdvancePaymentDate__c, fm_CompanyStatus__c, (SELECT Id FROM ContractOpportunities__r)
       FROM Opportunity
       WHERE OwnerId IN (${channelUserIds})
       ORDER BY CreatedDate DESC
@@ -1164,6 +1194,32 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
     console.log(`  ⚠️ 미서명 계약 조회 오류: ${err.message}`);
   }
 
+  // 15. AdvancePaymentDate__c 최초 입력 시점 조회 (OpportunityFieldHistory)
+  let channelPaymentHistory = [];
+  if (allOppIds.length > 0) {
+    const chunkSize = 100;
+    for (let i = 0; i < allOppIds.length; i += chunkSize) {
+      const chunk = allOppIds.slice(i, i + chunkSize);
+      const ids = chunk.map(id => `'${id}'`).join(',');
+      const phQuery = `
+        SELECT OpportunityId, OldValue, NewValue, CreatedDate
+        FROM OpportunityFieldHistory
+        WHERE OpportunityId IN (${ids})
+          AND Field = 'AdvancePaymentDate__c'
+        ORDER BY CreatedDate ASC
+      `.replace(/\s+/g, ' ').trim();
+      const phResult = await soqlQueryAll(instanceUrl, accessToken, phQuery);
+      channelPaymentHistory = channelPaymentHistory.concat(phResult);
+    }
+  }
+  const advPaymentEnteredMap = {};
+  channelPaymentHistory.forEach(h => {
+    if (!advPaymentEnteredMap[h.OpportunityId] && !h.OldValue && h.NewValue) {
+      advPaymentEnteredMap[h.OpportunityId] = h.CreatedDate;
+    }
+  });
+  console.log(`  💰 채널 AdvancePaymentDate History: ${channelPaymentHistory.length}건 (최초입력 ${Object.keys(advPaymentEnteredMap).length}건)`);
+
   return {
     users, userNameMap,
     channelLeads, channelLeadTasks, channelConvertedLeads,
@@ -1173,7 +1229,8 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
     allSourceLeads, allAccountIds,
     targetMonth, threeMonthsAgo,
     channelVisits, channelStageHistory,
-    channelQuotes, unsignedContracts, chTeamMembers, userTeamMap
+    channelQuotes, unsignedContracts, chTeamMembers, userTeamMap,
+    advPaymentEnteredMap
   };
 }
 
@@ -1181,7 +1238,7 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
 // 인바운드 KPI 계산
 // ============================================
 function calculateInboundKPIs(data, startDate, endDate) {
-  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, userTeamMap = {}, fieldUserIds, carryoverOpps, allClosedOpps, contracts, visits = [], stageChangeHistory = [], teamMembers = { 인사이드세일즈: [], 필드세일즈: [], 백오피스: [], 기타: [] } } = data;
+  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, userTeamMap = {}, fieldUserIds, carryoverOpps, allClosedOpps, contracts, visits = [], stageChangeHistory = [], teamMembers = { 인사이드세일즈: [], 필드세일즈: [], 백오피스: [], 기타: [] }, ibAdvPaymentEnteredMap = {} } = data;
 
   // Lead별 Task 매핑 (전체 + 첫/마지막 Task + 미완료 Task)
   const allTasksByLead = {};
@@ -1257,6 +1314,8 @@ function calculateInboundKPIs(data, startDate, endDate) {
       ageInDays: opp.AgeInDays || 0,
       closeDate: opp.CloseDate,
       installHopeDate: opp.InstallHopeDate__c || null,
+      advancePaymentDate: opp.AdvancePaymentDate__c || null,
+      advancePaymentEnteredAt: ibAdvPaymentEnteredMap[opp.Id] ? utcToKSTDateTimeStr(ibAdvPaymentEnteredMap[opp.Id]) : null,
       hasQuote: !!quote,
       hasContract: !!(opp.ContractOpportunities__r && opp.ContractOpportunities__r.records && opp.ContractOpportunities__r.records.length > 0),
       retouchCount,
@@ -1788,6 +1847,8 @@ function calculateInboundKPIs(data, startDate, endDate) {
         ageBucket: classifyAgeBucket(opp.ageInDays),
         closeDate: opp.closeDate || '-',
         installHopeDate: opp.installHopeDate || '-',
+        advancePaymentDate: opp.advancePaymentDate || null,
+        advancePaymentEnteredAt: opp.advancePaymentEnteredAt || null,
         createdDate: oppDetailMap[oppId]?.createdDate || '-',
         hasQuote: opp.hasQuote,
         hasContract: opp.hasContract || false,
@@ -1836,6 +1897,8 @@ function calculateInboundKPIs(data, startDate, endDate) {
       ageInDays: o.AgeInDays || 0,
       closeDate: o.CloseDate,
       installHopeDate: o.InstallHopeDate__c || '-',
+      advancePaymentDate: o.AdvancePaymentDate__c || null,
+      advancePaymentEnteredAt: ibAdvPaymentEnteredMap[o.Id] ? utcToKSTDateTimeStr(ibAdvPaymentEnteredMap[o.Id]) : null,
     }))
     .sort((a, b) => (b.closeDate || '').localeCompare(a.closeDate || ''));
 
@@ -2014,6 +2077,8 @@ function calculateInboundKPIs(data, startDate, endDate) {
         ageBucket: classifyAgeBucket(opp.ageInDays),
         closeDate: opp.closeDate || '-',
         installHopeDate: opp.installHopeDate || '-',
+        advancePaymentDate: opp.advancePaymentDate || null,
+        advancePaymentEnteredAt: opp.advancePaymentEnteredAt || null,
         createdDate: oppDetailMap[oppId]?.createdDate || '-',
         hasQuote: opp.hasQuote,
         hasContract: opp.hasContract || false,
@@ -2160,6 +2225,7 @@ function calculateChannelKPIs(data, startDate, endDate) {
     unsignedContracts = [],
     chTeamMembers = { AE: [], AM: [], TM: [], 백오피스: [], 기타: [] },
     userTeamMap = {},
+    advPaymentEnteredMap = {},
   } = data;
 
   // ========== AE KPIs ==========
@@ -2325,14 +2391,19 @@ function calculateChannelKPIs(data, startDate, endDate) {
   );
 
   const onboardingResults = mouPartners3m.map(p => {
-    const mouDate = new Date(p.MOUstartdate__c);
+    // 안착 window 시작점: MOU 체결일 우선, 없으면 MOU 시작일 폴백
+    const effectiveMouDate = p.MOU_ContractDate__c || p.MOUstartdate__c;
+    const mouDate = new Date(effectiveMouDate);
     const mouEndWindow = new Date(mouDate.getFullYear(), mouDate.getMonth() + 3, mouDate.getDate()).toISOString().substring(0, 10);
     const myLeads = allSourceLeads.filter(l => (l.Partner__c || l.PartnerName__c) === p.Id);
     const leadsInWindow = myLeads.filter(l => {
       const leadDate = utcToKSTDateStr(l.CreatedDate);
-      return leadDate >= p.MOUstartdate__c && leadDate <= mouEndWindow;
+      return leadDate >= effectiveMouDate && leadDate <= mouEndWindow;
     });
-    return { name: p.Name, mouStart: p.MOUstartdate__c, isSettled: leadsInWindow.length > 0, leadCount: leadsInWindow.length, owner: p.Owner?.Name || '미배정' };
+    const absoluteFirstLeadDate = myLeads.length > 0
+      ? myLeads.reduce((min, l) => l.CreatedDate < min ? l.CreatedDate : min, myLeads[0].CreatedDate).substring(0, 10)
+      : null;
+    return { name: p.Name, mouStart: p.MOUstartdate__c, mouContractDate: p.MOU_ContractDate__c || null, absoluteFirstLeadDate, isSettled: leadsInWindow.length > 0, leadCount: leadsInWindow.length, owner: p.Owner?.Name || '미배정' };
   });
 
   const settledCount = onboardingResults.filter(r => r.isSettled).length;
@@ -2473,6 +2544,16 @@ function calculateChannelKPIs(data, startDate, endDate) {
       target: 70,
       byOwner: activeByOwnerList
     },
+    settlementTimeline: onboardingResults.map(r => ({
+      partnerName: r.name,
+      mouContractDate: r.mouContractDate,
+      absoluteFirstLeadDate: r.absoluteFirstLeadDate,
+      leadToMouDays: (r.absoluteFirstLeadDate && r.mouContractDate)
+        ? Math.round((new Date(r.mouContractDate) - new Date(r.absoluteFirstLeadDate)) / 86400000)
+        : null,
+      leadsAfterMou3Months: r.leadCount,
+      isSettled: r.isSettled
+    })),
     meetingByOwner
   };
 
@@ -2656,10 +2737,10 @@ function calculateChannelKPIs(data, startDate, endDate) {
   const chSQL = channelLeadData.filter(l => l.isSQL);
   const chUnconvertedMQL = chMQL.filter(l => !l.isSQL && !l.isConverted);
 
-  // 7일 초과 SQL 잔량 — TM 구간 (방문배정~견적 단계만)
+  // 입금일자 미입력 + 7일 초과 — Open Opp 중 AdvancePaymentDate__c 없는 건
   const tmStageSet = new Set(['방문배정', '견적', '재견적']);
   const channelOpenOpps = opportunities.filter(o => !o.IsClosed);
-  const tmOpenOpps = channelOpenOpps.filter(o => tmStageSet.has(o.StageName));
+  const tmOpenOpps = channelOpenOpps.filter(o => tmStageSet.has(o.StageName) && !o.AdvancePaymentDate__c);
   const tmOver7 = tmOpenOpps.filter(o => (o.AgeInDays || 0) > 7);
 
   // Raw 데이터: 미달 건 상세 (채널 TM)
@@ -2826,19 +2907,6 @@ function calculateChannelKPIs(data, startDate, endDate) {
 
   const tm = {
     members: chTeamMembers.TM,
-    dailyConversion: {
-      visitAssigned: totalConversions,        // 방문배정 건수
-      quoteSent: quoteSentTotal,              // 견적 발송 건수 (Quote 오브젝트 기준)
-      quoteSentFinal: quoteSentFinal,         // 최종 견적 발송 건수
-      quoteTransitions: totalQuoteTransitions, // Stage 전환 건수 (참고용)
-      total: totalTMActions,                   // 합산 (방문배정 + 견적발송)
-      avgDaily: totalWeekdays > 0 ? +(totalTMActions / totalWeekdays).toFixed(1) : 0,
-      avgDailyPerPerson: totalWeekdays > 0 && tmMemberCount > 0
-        ? +(totalTMActions / (tmMemberCount * totalWeekdays)).toFixed(1) : 0,
-      tmMemberCount,
-      totalWeekdays,
-      target_daily: 5  // 인당 일 5건 목표
-    },
     frt: {
       totalWithTask: chWithTask.length,
       frtOk: chFrtOk.length,
@@ -3134,6 +3202,8 @@ function calculateChannelKPIs(data, startDate, endDate) {
         ageBucket: classifyAgeBucket(o.AgeInDays || 0),
         closeDate: o.CloseDate || '-',
         installHopeDate: o.InstallHopeDate__c || '-',
+        advancePaymentDate: o.AdvancePaymentDate__c || null,
+        advancePaymentEnteredAt: advPaymentEnteredMap[o.Id] ? utcToKSTDateTimeStr(advPaymentEnteredMap[o.Id]) : null,
         createdDate: utcToKSTDateStr(o.CreatedDate),
         // 과업 정보
         taskCount: tasks.length,
@@ -3185,7 +3255,7 @@ function calculateChannelKPIs(data, startDate, endDate) {
     .sort((a, b) => b.ageInDays - a.ageInDays);
 
   // TM/BO Stage 분리: TM = 견적 이전(방문배정, 견적, 재견적), BO = 견적 이후(선납금~)
-  const TM_STAGES = ['방문배정', '견적', '재견적'];
+  const TM_STAGES = ['방문배정', '견적', '재견적', '선납금'];
   const chRawOpenOpps_TM = chRawOpenOpps.filter(o => TM_STAGES.includes(o.stageName));
   const chRawOpenOpps_BO = chRawOpenOpps.filter(o => !TM_STAGES.includes(o.stageName));
   console.log(`  📊 채널 Open Opp 분리 (이번달): TM ${chRawOpenOpps_TM.length}건, BO ${chRawOpenOpps_BO.length}건`);
@@ -3207,6 +3277,8 @@ function calculateChannelKPIs(data, startDate, endDate) {
         amount: o.Amount || 0,
         ageInDays: o.AgeInDays || 0,
         createdDate: utcToKSTDateStr(o.CreatedDate),
+        advancePaymentDate: o.AdvancePaymentDate__c || null,
+        advancePaymentEnteredAt: advPaymentEnteredMap[o.Id] ? utcToKSTDateTimeStr(advPaymentEnteredMap[o.Id]) : null,
         hasOpenTask: openTasks.length > 0,
         openTaskList: openTasks.sort((a, b) => (a.ActivityDate || '9999') < (b.ActivityDate || '9999') ? -1 : 1)
           .map(t => ({ taskId: t.Id || null, subject: t.Subject || '-', date: t.ActivityDate || '-', status: t.Status || '-', owner: userNameMap[t.OwnerId] || '-', description: t.Description || null })),
@@ -3360,17 +3432,18 @@ function calculateChannelKPIs(data, startDate, endDate) {
     lossReasonSummary: chLossReasonSummary,
   };
 
-  // TM rawData에 rawOpenOpps 추가 (이번달 생성 + 방문배정/견적/재견적 단계)
+  // TM rawData에 rawOpenOpps 추가 (방문배정/견적/재견적 단계)
   tm.rawData.rawOpenOpps = chRawOpenOpps_TM;
 
-  // TM sqlBacklog를 이번달 생성분으로 재계산 (담당자별 합계와 Raw 테이블 일치)
+  // TM sqlBacklog: 입금일자 미입력 건만 (담당자별 합계와 Raw 테이블 일치)
+  const chRawOpenOpps_TM_NoPayment = chRawOpenOpps_TM.filter(o => !o.advancePaymentDate);
   tm.sqlBacklog = {
-    openTotal: chRawOpenOpps_TM.length,
-    over7: chRawOpenOpps_TM.filter(o => o.ageInDays > 7).length,
+    openTotal: chRawOpenOpps_TM_NoPayment.length,
+    over7: chRawOpenOpps_TM_NoPayment.filter(o => o.ageInDays > 7).length,
     target: 10,
     byOwner: (() => {
       const ownerMap = {};
-      chRawOpenOpps_TM.forEach(o => {
+      chRawOpenOpps_TM_NoPayment.forEach(o => {
         const name = o.ownerName || '-';
         if (!ownerMap[name]) ownerMap[name] = { name, total: 0, over7: 0, stages: {} };
         ownerMap[name].total++;
@@ -3566,7 +3639,7 @@ async function main() {
   console.log(`  │ 초기 안착률: ${channelKPIs.am.onboardingRate.rate}% (목표 80%)`);
   console.log(`  │ 활성 파트너: ${channelKPIs.am.activePartnerCount.total}개 (목표 70개)`);
   console.log('  ├─ TM ──────────────────────────────────');
-  console.log(`  │ 영업기회 전환 일평균: ${channelKPIs.tm.dailyConversion.avgDaily}건 (목표 5건)`);
+  console.log(`  │ FRT 20분 초과: ${channelKPIs.tm.frt.frtOver20}건 (목표 0건)`);
   console.log(`  │ FRT 20분 초과: ${channelKPIs.tm.frt.frtOver20}건 (목표 0건)`);
   console.log(`  │ MQL→SQL 미전환: ${channelKPIs.tm.unconvertedMQL.count}건 (목표 0건)`);
   console.log(`  │ 7일 초과 SQL 잔량: ${channelKPIs.tm.sqlBacklog.over7}건 (목표 10건 이내)`);
@@ -3659,7 +3732,7 @@ async function main() {
         channelTM: {
           lead: dtm.byOwner?.reduce((s, o) => s + o.lead, 0) || 0,
           frtOver20: dtm.frt?.frtOver20 || 0,
-          dailyConversion: dtm.dailyConversion?.total || 0,
+          sqlBacklogOver7: dtm.sqlBacklog?.over7 || 0,
           unconvertedMQL: dtm.unconvertedMQL?.count || 0,
         },
         // BO 일별 추이 데이터

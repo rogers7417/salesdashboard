@@ -13,8 +13,10 @@ const channelStats = require('../../../channel-sales-report/stats');
 // 캐시 (월별 키)
 let cache = { key: null, data: null, timestamp: 0 };
 const CACHE_TTL = 30 * 60 * 1000; // 30분
+const REFRESH_BEFORE = 5 * 60 * 1000; // TTL 만료 5분 전 백그라운드 갱신
 let isLoading = false;
 let loadingPromise = null;
+let refreshTimer = null;
 
 /**
  * 채널 세일즈 리포트 생성 (캐싱 지원)
@@ -81,7 +83,40 @@ async function _fetchAndCache(targetMonth, cacheKey) {
   cache = { key: cacheKey, data: result, timestamp: Date.now() };
   console.log(`📊 채널 세일즈 리포트 캐시 저장 (key=${cacheKey})`);
 
+  // TTL 만료 전 백그라운드 갱신 스케줄
+  _scheduleRefresh(targetMonth, cacheKey);
+
   return result;
+}
+
+/**
+ * TTL 만료 전 백그라운드 자동 갱신
+ */
+function _scheduleRefresh(targetMonth, cacheKey) {
+  if (refreshTimer) clearTimeout(refreshTimer);
+  const refreshIn = CACHE_TTL - REFRESH_BEFORE; // 25분 후
+  refreshTimer = setTimeout(async () => {
+    try {
+      console.log(`🔄 채널 세일즈 리포트 백그라운드 갱신 시작 (key=${cacheKey})`);
+      await _fetchAndCache(targetMonth, cacheKey);
+      console.log(`✅ 채널 세일즈 리포트 백그라운드 갱신 완료`);
+    } catch (err) {
+      console.error(`⚠️ 채널 세일즈 리포트 백그라운드 갱신 실패:`, err.message);
+    }
+  }, refreshIn);
+}
+
+/**
+ * 서버 시작 시 캐시 프리워밍
+ */
+async function warmCache() {
+  try {
+    console.log(`🔥 채널 세일즈 리포트 캐시 프리워밍 시작...`);
+    await generateReport(null);
+    console.log(`✅ 채널 세일즈 리포트 캐시 프리워밍 완료`);
+  } catch (err) {
+    console.error(`⚠️ 채널 세일즈 리포트 캐시 프리워밍 실패:`, err.message);
+  }
 }
 
 /**
@@ -97,5 +132,6 @@ function extractSummary(stats) {
 
 module.exports = {
   generateReport,
-  extractSummary
+  extractSummary,
+  warmCache
 };

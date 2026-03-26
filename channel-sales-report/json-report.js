@@ -36,6 +36,8 @@ function generateJSON(stats) {
       progress: p.progress,
       mouStart: p.mouStart,
       mouEnd: p.mouEnd,
+      mouContractDate: p.mouContractDate || null,
+      absoluteFirstLeadDate: p.absoluteFirstLeadDate || null,
       // Lead 정보
       leads: {
         partnerLead: p.partnerLeadCount,
@@ -177,6 +179,8 @@ function generateJSON(stats) {
             name: p.name,
             owner: p.owner,
             mouStart: p.mouStart,
+            mouContractDate: p.mouContractDate || null,
+            absoluteFirstLeadDate: p.absoluteFirstLeadDate || null,
             mouEndWindow: p.mouEndWindow
           }))
         },

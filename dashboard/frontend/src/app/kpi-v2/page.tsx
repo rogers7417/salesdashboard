@@ -65,6 +65,7 @@ function KPIV2PageInner() {
   const [csChurnedTab, setCsChurnedTab] = useState<'partner' | 'hq' | 'storeCX'>('partner');
   const [csOnboardTab, setCsOnboardTab] = useState<'partner' | 'hq'>('partner');
   const [csOnboardSettledOpen, setCsOnboardSettledOpen] = useState<Record<string, boolean>>({});
+  const [activeOwnerOpen, setActiveOwnerOpen] = useState<Record<string, boolean>>({});
   const [scoreTab, setScoreTab] = useState<'is' | 'fs' | 'bo' | 'ae' | 'am' | 'tm' | 'csbo'>('is');
 
   // URL tab 파라미터 동기화
@@ -276,7 +277,7 @@ function KPIV2PageInner() {
 
   const frtBadgeRender = (v: number) => {
     if (!v && v !== 0) return <span style={{ color: '#B0B8C1' }}>-</span>;
-    const color = v >= 60 ? 'red' : v >= 30 ? 'red' : 'yellow';
+    const color = v > 30 ? 'red' : v > 20 ? 'yellow' : 'green';
     return <TossBadge variant="fill" size="xsmall" color={color as any}>{fmtFrt(v)}</TossBadge>;
   };
 
@@ -1100,6 +1101,33 @@ function KPIV2PageInner() {
     );
   }
 
+  function OwnerGroupSection({ ownerName, total, openCount, closedCount, children }: {
+    ownerName: string; total: number; openCount: number; closedCount: number; children: React.ReactNode;
+  }) {
+    const [open, setOpen] = useState(true);
+    return (
+      <div style={{ border: '1px solid #E5E8EB', borderRadius: 12, overflow: 'hidden' }}>
+        <button
+          onClick={() => setOpen(!open)}
+          style={{
+            width: '100%', padding: '10px 16px', background: '#F9FAFB', border: 'none',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+            fontSize: '15px', textAlign: 'left',
+          }}
+        >
+          <span style={{ fontSize: 12, color: '#8B95A1' }}>{open ? '\u25BC' : '\u25B6'}</span>
+          <span style={{ fontWeight: 700, color: '#191F28' }}>{ownerName}</span>
+          <TossBadge variant="weak" size="xsmall" color="elephant">{total}건</TossBadge>
+          <span style={{ marginLeft: 'auto', display: 'flex', gap: '6px' }}>
+            <TossBadge variant="weak" size="xsmall" color="yellow">계류 {openCount}</TossBadge>
+            <TossBadge variant="weak" size="xsmall" color="elephant">종료 {closedCount}</TossBadge>
+          </span>
+        </button>
+        {open && <div style={{ borderTop: '1px solid #E5E8EB' }}>{children}</div>}
+      </div>
+    );
+  }
+
   function renderSQLDetail() {
     const owners = (is?.byOwner as any[] || []).filter((o: any) =>
       o.name && !/^[0-9a-zA-Z]/.test(o.name) && (isOwnerNames.has(o.name) || (o.lead ?? 0) > 0)
@@ -1156,26 +1184,46 @@ function KPIV2PageInner() {
           </div>
         </div>
 
-        {/* 미전환 MQL Raw 데이터 */}
-        {unconvertedItems.length > 0 && (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '16px', fontWeight: 700, color: '#191F28' }}>미전환 MQL 상세</span>
-                <TossBadge variant="fill" size="small" color="yellow">{unconvertedItems.length}건</TossBadge>
+        {/* 미전환 MQL Raw 데이터 — 담당자별 그룹핑 */}
+        {unconvertedItems.length > 0 && (() => {
+          const byOwnerMap: Record<string, any[]> = {};
+          unconvertedItems.forEach((item: any) => {
+            const key = item.owner || '미지정';
+            if (!byOwnerMap[key]) byOwnerMap[key] = [];
+            byOwnerMap[key].push(item);
+          });
+          const ownerGroups = Object.entries(byOwnerMap).sort((a, b) => b[1].length - a[1].length);
+
+          return (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 700, color: '#191F28' }}>미전환 MQL 상세</span>
+                  <TossBadge variant="fill" size="small" color="yellow">{unconvertedItems.length}건</TossBadge>
+                </div>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <TossBadge variant="weak" size="xsmall" color="yellow">
+                    계류 {unconvertedItems.filter((r: any) => r.group === 'open').length}
+                  </TossBadge>
+                  <TossBadge variant="weak" size="xsmall" color="elephant">
+                    종료 {unconvertedItems.filter((r: any) => r.group === 'closed').length}
+                  </TossBadge>
+                </div>
               </div>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <TossBadge variant="weak" size="xsmall" color="yellow">
-                  계류 {unconvertedItems.filter((r: any) => r.group === 'open').length}
-                </TossBadge>
-                <TossBadge variant="weak" size="xsmall" color="elephant">
-                  종료 {unconvertedItems.filter((r: any) => r.group === 'closed').length}
-                </TossBadge>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {ownerGroups.map(([ownerName, items]) => {
+                  const openCount = items.filter((r: any) => r.group === 'open').length;
+                  const closedCount = items.filter((r: any) => r.group === 'closed').length;
+                  return (
+                    <OwnerGroupSection key={ownerName} ownerName={ownerName} total={items.length} openCount={openCount} closedCount={closedCount}>
+                      <DataTable columns={unconvertedMQLColumns} data={items} loading={false} className="daily-raw daily-raw-orange" />
+                    </OwnerGroupSection>
+                  );
+                })}
               </div>
             </div>
-            <DataTable columns={unconvertedMQLColumns} data={unconvertedItems} loading={false} className="daily-raw daily-raw-orange" />
-          </div>
-        )}
+          );
+        })()}
       </div>
     );
   }
@@ -3314,6 +3362,7 @@ function KPIV2PageInner() {
         >
           <td style={{ ...tdStyle, fontWeight: 600 }}>{displayName}</td>
           <td style={tdStyle}>{p.mouStart || '-'}</td>
+          <td style={tdStyle}>{p.mouContractDate || '-'}</td>
           <td style={{ ...tdStyle, textAlign: 'center' }}>
             <span style={{
               display: 'inline-block', padding: '2px 8px', borderRadius: '10px', fontSize: '12px', fontWeight: 700,
@@ -3321,6 +3370,22 @@ function KPIV2PageInner() {
               color: days >= 60 ? '#F04452' : days >= 30 ? '#F59F00' : '#8B95A1',
             }}>{days}일</span>
           </td>
+          <td style={tdStyle}>{p.absoluteFirstLeadDate || '-'}</td>
+          <td style={{ ...tdStyle, textAlign: 'center' }}>{p.preMouLeadCount ?? 0}건</td>
+          <td style={{ ...tdStyle, textAlign: 'center' }}>
+            {(() => {
+              const leadToMou = (p.mouContractDate && p.absoluteFirstLeadDate)
+                ? Math.round((new Date(p.mouContractDate).getTime() - new Date(p.absoluteFirstLeadDate).getTime()) / 86400000)
+                : null;
+              if (leadToMou === null) return '-';
+              return <span style={{
+                display: 'inline-block', padding: '2px 8px', borderRadius: '10px', fontSize: '12px', fontWeight: 700,
+                background: leadToMou < 0 ? '#FFF0F0' : '#E3FAF0',
+                color: leadToMou < 0 ? '#F04452' : '#20C997',
+              }}>{leadToMou}일</span>;
+            })()}
+          </td>
+          <td style={{ ...tdStyle, textAlign: 'center' }}>{p.leadCountWithinWindow ?? 0}건</td>
           <td style={{ ...tdStyle, textAlign: 'center' }}>
             {(p.eventCount ?? 0) > 0
               ? <span style={{ cursor: 'pointer' }} onClick={(ev) => {
@@ -3341,9 +3406,10 @@ function KPIV2PageInner() {
               : <span style={{ color: '#B0B8C1' }}>0건</span>
             }
           </td>
+          <td style={tdStyle}>{p.lastTaskDate || '-'}</td>
           {isSettledRow ? (
             <td style={{ ...tdStyle, textAlign: 'center' }}>
-              <TossBadge variant="weak" size="xsmall" color="blue">{p.leadCountWithinWindow || 0}건</TossBadge>
+              <TossBadge variant="weak" size="xsmall" color="green">안착</TossBadge>
             </td>
           ) : (
             <td style={{ ...tdStyle, textAlign: 'center' }}>
@@ -3433,9 +3499,15 @@ function KPIV2PageInner() {
                         <tr style={{ background: '#FFF8F8' }}>
                           <th style={{ ...thStyle, fontSize: '13px' }}>{csOnboardTab === 'partner' ? '파트너명' : '본사명'}</th>
                           <th style={{ ...thStyle, fontSize: '13px' }}>MOU 시작</th>
+                          <th style={{ ...thStyle, fontSize: '13px' }}>MOU 채결</th>
                           <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>경과일</th>
+                          <th style={{ ...thStyle, fontSize: '13px' }}>최초 Lead</th>
+                          <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>MOU 전 Lead</th>
+                          <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>Lead→MOU</th>
+                          <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>MOU 후 Lead</th>
                           <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>미팅</th>
                           <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>Task</th>
+                          <th style={{ ...thStyle, fontSize: '13px' }}>마지막 Task</th>
                           <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>추천</th>
                         </tr>
                       </thead>
@@ -3473,10 +3545,16 @@ function KPIV2PageInner() {
                           <tr style={{ background: '#F0FAF0' }}>
                             <th style={{ ...thStyle, fontSize: '13px' }}>{csOnboardTab === 'partner' ? '파트너명' : '본사명'}</th>
                             <th style={{ ...thStyle, fontSize: '13px' }}>MOU 시작</th>
+                            <th style={{ ...thStyle, fontSize: '13px' }}>MOU 채결</th>
                             <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>경과일</th>
+                            <th style={{ ...thStyle, fontSize: '13px' }}>최초 Lead</th>
+                            <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>MOU 전 Lead</th>
+                            <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>Lead→MOU</th>
+                            <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>MOU 후 Lead</th>
                             <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>미팅</th>
                             <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>Task</th>
-                            <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>리드</th>
+                            <th style={{ ...thStyle, fontSize: '13px' }}>마지막 Task</th>
+                            <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>안착</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -3627,92 +3705,204 @@ function KPIV2PageInner() {
           </div>
         )}
 
-        {/* Raw 파트너 테이블 */}
-        {currentList.length > 0 ? (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-              <thead>
-                <tr style={{ background: '#F9FAFB' }}>
-                  <th style={thStyle}>{amActivePartnerTab === 'partner' ? '파트너명' : '본사명'}</th>
-                  <th style={thStyle}>담당자</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>이번달 리드</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>3개월 리드</th>
-                  <th style={thStyle}>마지막 리드</th>
-                  <th style={{ ...thStyle, textAlign: 'center' }}>경과일</th>
-                  <th style={{ ...thStyle, textAlign: 'center' }}>미팅</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>{amActivePartnerTab === 'partner' ? '추천매장' : '브랜드'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentList.map((p: any, idx: number) => {
-                  const isNoAct = p.days === null;
-                  const isOld = p.days !== null && p.days > 90;
-                  const rowBg = isNoAct ? '#FFF5F5' : isOld ? '#FFFBE6' : 'transparent';
-                  const name = amActivePartnerTab === 'partner' ? p.name : (p.hqName || p.name);
-                  const id = amActivePartnerTab === 'partner' ? p.id : p.hqId;
-                  return (
-                    <tr key={id || idx} style={{ borderBottom: '1px solid #F2F4F6', background: rowBg }}>
-                      <td style={tdStyle}>
-                        <span style={{ fontWeight: 600, color: '#191F28' }}>{name || '-'}</span>
-                      </td>
-                      <td style={tdStyle}>{ownerBold(p.owner || '-')}</td>
-                      <td style={{ ...tdStyle, textAlign: 'right' }}>
-                        {(p.thisMonthLeadCount ?? 0) > 0
-                          ? <TossBadge variant="weak" size="xsmall" color="blue">{p.thisMonthLeadCount}건</TossBadge>
-                          : <span style={{ color: '#B0B8C1' }}>0</span>
-                        }
-                      </td>
-                      <td style={{ ...tdStyle, textAlign: 'right' }}>
-                        {(p.last3MonthLeadCount ?? 0) > 0
-                          ? <span style={{ fontWeight: 600 }}>{p.last3MonthLeadCount}</span>
-                          : <span style={{ color: '#B0B8C1' }}>0</span>
-                        }
-                      </td>
-                      <td style={tdStyle}>{p.lastLeadDate || '-'}</td>
-                      <td style={{ ...tdStyle, textAlign: 'center' }}>
-                        {isNoAct
-                          ? <TossBadge variant="fill" size="xsmall" color="red">활동없음</TossBadge>
-                          : isOld
-                            ? <TossBadge variant="fill" size="xsmall" color="yellow">{p.days}일</TossBadge>
-                            : p.days <= 30
-                              ? <TossBadge variant="weak" size="xsmall" color="green">{p.days}일</TossBadge>
-                              : <TossBadge variant="weak" size="xsmall" color="elephant">{p.days}일</TossBadge>
-                        }
-                      </td>
-                      <td style={{ ...tdStyle, textAlign: 'center' }}>
-                        {(p.meetingCount ?? 0) > 0
-                          ? <span
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (amActivePartnerTab === 'partner') {
-                                  setMeetingModal({ accountId: p.id, accountName: p.name });
-                                }
-                              }}
-                              style={{ cursor: amActivePartnerTab === 'partner' ? 'pointer' : 'default' }}
-                            >
-                              <TossBadge variant="weak" size="xsmall" color="teal">{p.meetingCount}건</TossBadge>
-                            </span>
-                          : <span style={{ color: '#B0B8C1' }}>0</span>
-                        }
-                      </td>
-                      <td style={{ ...tdStyle, textAlign: 'right' }}>
-                        {amActivePartnerTab === 'partner'
-                          ? (p.referredStoreCount ?? 0)
-                          : (p.brands?.length ?? 0)
-                        }
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#8B95A1', background: '#F9FAFB', borderRadius: '10px' }}>
-            <div style={{ fontSize: '2em', marginBottom: '8px' }}>🔥</div>
-            활성 파트너 데이터가 없습니다
-          </div>
-        )}
+        {/* 담당자별 그룹핑 테이블 */}
+        {(() => {
+          // 담당자별 그룹핑
+          const activeByOwner: Record<string, { active: any[]; inactive: any[] }> = {};
+          currentList.forEach((p: any) => {
+            const owner = p.owner || '미지정';
+            if (!activeByOwner[owner]) activeByOwner[owner] = { active: [], inactive: [] };
+            const isActive = p.days !== null && p.days <= 90;
+            if (isActive) activeByOwner[owner].active.push(p);
+            else activeByOwner[owner].inactive.push(p);
+          });
+          // 비활성 많은 순 정렬
+          const ownerEntries = Object.entries(activeByOwner)
+            .sort((a, b) => b[1].inactive.length - a[1].inactive.length);
+
+          const renderActiveRow = (p: any, idx: number) => {
+            const isNoAct = p.days === null;
+            const isOld = p.days !== null && p.days > 90;
+            const rowBg = isNoAct ? '#FFF5F5' : isOld ? '#FFFBE6' : (idx % 2 === 0 ? '#fff' : '#FAFBFC');
+            const name = amActivePartnerTab === 'partner' ? p.name : (p.hqName || p.name);
+            const id = amActivePartnerTab === 'partner' ? p.id : p.hqId;
+            return (
+              <tr key={id || `r-${idx}`} style={{ borderBottom: '1px solid #F2F4F6', background: rowBg }}>
+                <td style={{ ...tdStyle, fontWeight: 600 }}>{name || '-'}</td>
+                <td style={tdStyle}>{p.mouContractDate || p.mouStart || '-'}</td>
+                <td style={{ ...tdStyle, textAlign: 'center' }}>{p.preMouLeadCount ?? '-'}</td>
+                <td style={{ ...tdStyle, textAlign: 'right' }}>
+                  {(p.thisMonthLeadCount ?? 0) > 0
+                    ? <TossBadge variant="weak" size="xsmall" color="blue">{p.thisMonthLeadCount}건</TossBadge>
+                    : <span style={{ color: '#B0B8C1' }}>0</span>
+                  }
+                </td>
+                <td style={{ ...tdStyle, textAlign: 'right' }}>
+                  {(p.last3MonthLeadCount ?? 0) > 0
+                    ? <span style={{ fontWeight: 600 }}>{p.last3MonthLeadCount}</span>
+                    : <span style={{ color: '#B0B8C1' }}>0</span>
+                  }
+                </td>
+                <td style={tdStyle}>{p.lastLeadDate || '-'}</td>
+                <td style={{ ...tdStyle, textAlign: 'center' }}>
+                  {isNoAct
+                    ? <TossBadge variant="fill" size="xsmall" color="red">활동없음</TossBadge>
+                    : isOld
+                      ? <TossBadge variant="fill" size="xsmall" color="yellow">{p.days}일</TossBadge>
+                      : p.days <= 30
+                        ? <TossBadge variant="weak" size="xsmall" color="green">{p.days}일</TossBadge>
+                        : <TossBadge variant="weak" size="xsmall" color="elephant">{p.days}일</TossBadge>
+                  }
+                </td>
+                <td style={{ ...tdStyle, textAlign: 'center' }}>
+                  {(p.meetingCount ?? 0) > 0
+                    ? <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const ids = amActivePartnerTab === 'hq' ? [...(p.brands || []).map((b: any) => b.id), p.hqId].filter(Boolean) : [p.id];
+                          setMeetingModal({ accountId: ids[0], accountName: name, accountIds: ids });
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <TossBadge variant="weak" size="xsmall" color="teal">{p.meetingCount}건</TossBadge>
+                      </span>
+                    : <span style={{ color: '#B0B8C1' }}>0</span>
+                  }
+                </td>
+                <td style={{ ...tdStyle, textAlign: 'center' }}>
+                  {(p.taskCount ?? 0) > 0
+                    ? <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const ids = amActivePartnerTab === 'hq' ? [...(p.brands || []).map((b: any) => b.id), p.hqId].filter(Boolean) : [p.id];
+                          setCsTaskModal({ accountId: ids[0], accountName: name, accountIds: ids });
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <TossBadge variant="weak" size="xsmall" color="elephant">{p.taskCount}건</TossBadge>
+                      </span>
+                    : <span style={{ color: '#B0B8C1' }}>0</span>
+                  }
+                </td>
+                <td style={tdStyle}>{p.lastTaskDate || '-'}</td>
+                <td style={{ ...tdStyle, textAlign: 'right' }}>
+                  {amActivePartnerTab === 'partner'
+                    ? (p.referredStoreCount ?? 0)
+                    : (p.brands?.length ?? 0)
+                  }
+                </td>
+              </tr>
+            );
+          };
+
+          const thRow = (bg: string) => (
+            <tr style={{ background: bg }}>
+              <th style={{ ...thStyle, fontSize: '13px' }}>{amActivePartnerTab === 'partner' ? '파트너명' : '본사명'}</th>
+              <th style={{ ...thStyle, fontSize: '13px' }}>MOU 채결</th>
+              <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>MOU 전 리드</th>
+              <th style={{ ...thStyle, fontSize: '13px', textAlign: 'right' }}>이번달 리드</th>
+              <th style={{ ...thStyle, fontSize: '13px', textAlign: 'right' }}>3개월 리드</th>
+              <th style={{ ...thStyle, fontSize: '13px' }}>마지막 리드</th>
+              <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>경과일</th>
+              <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>미팅</th>
+              <th style={{ ...thStyle, fontSize: '13px', textAlign: 'center' }}>Task</th>
+              <th style={{ ...thStyle, fontSize: '13px' }}>마지막 Task</th>
+              <th style={{ ...thStyle, fontSize: '13px', textAlign: 'right' }}>{amActivePartnerTab === 'partner' ? '추천매장' : '브랜드'}</th>
+            </tr>
+          );
+
+          return ownerEntries.length > 0 ? ownerEntries.map(([owner, group]) => {
+            const hasInactive = group.inactive.length > 0;
+            const ownerKey = `${amActivePartnerTab}-${owner}`;
+            const activeOpen = activeOwnerOpen[ownerKey] || false;
+
+            // 비활성: 경과일 많은 순
+            const sortedInactive = [...group.inactive].sort((a, b) => {
+              if (a.days === null && b.days !== null) return -1;
+              if (b.days === null && a.days !== null) return 1;
+              return (b.days ?? 0) - (a.days ?? 0);
+            });
+
+            return (
+              <div key={owner} style={{
+                borderRadius: '12px', border: '1px solid #E5E8EB', overflow: 'hidden',
+                borderLeft: `4px solid ${hasInactive ? '#FF6B6B' : '#51CF66'}`,
+              }}>
+                {/* 담당자 헤더 */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '14px 16px', background: hasInactive ? '#FFFAF9' : '#F8FFF8',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '16px', fontWeight: 800, color: '#191F28' }}>👤 {owner}</span>
+                    <TossBadge variant="weak" size="xsmall" color="elephant">전체 {group.inactive.length + group.active.length}</TossBadge>
+                    {group.active.length > 0 && <TossBadge variant="weak" size="xsmall" color="green">활성 {group.active.length}</TossBadge>}
+                    {group.inactive.length > 0 && <TossBadge variant="fill" size="xsmall" color="red">비활성 {group.inactive.length}</TossBadge>}
+                  </div>
+                </div>
+
+                {/* 비활성 파트너 (90일+ / 활동없음) */}
+                {hasInactive && (
+                  <div>
+                    <div style={{
+                      padding: '8px 16px', background: '#FFF5F5',
+                      fontSize: '13px', fontWeight: 700, color: '#F04452',
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      borderTop: '1px solid #FFC9C9', borderBottom: '1px solid #FFC9C9',
+                    }}>
+                      ⚠️ 비활성 파트너 ({group.inactive.length}개사)
+                    </div>
+                    <div style={{ overflowX: 'auto' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                        <thead>{thRow('#FFF8F8')}</thead>
+                        <tbody>
+                          {sortedInactive.map((p: any, i: number) => renderActiveRow(p, i))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* 활성 파트너 — 접기/펼치기 */}
+                {group.active.length > 0 && (
+                  <div>
+                    <div
+                      style={{
+                        padding: '8px 16px', background: '#F0FAF0',
+                        fontSize: '13px', fontWeight: 600, color: '#20C997',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        cursor: 'pointer', borderTop: '1px solid #E5E8EB',
+                        userSelect: 'none',
+                      }}
+                      onClick={() => setActiveOwnerOpen(prev => ({
+                        ...prev,
+                        [ownerKey]: !activeOpen,
+                      }))}
+                    >
+                      <span>✅ 활성 파트너 ({group.active.length}개사)</span>
+                      <span style={{ fontSize: '12px', color: '#8B95A1' }}>{activeOpen ? '▲ 접기' : '▼ 펼치기'}</span>
+                    </div>
+                    {activeOpen && (
+                      <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                          <thead>{thRow('#F0FAF0')}</thead>
+                          <tbody>
+                            {group.active.map((p: any, i: number) => renderActiveRow(p, i))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          }) : (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#8B95A1', background: '#F9FAFB', borderRadius: '10px' }}>
+              <div style={{ fontSize: '2em', marginBottom: '8px' }}>🔥</div>
+              활성 파트너 데이터가 없습니다
+            </div>
+          );
+        })()}
       </div>
     );
   }
@@ -4057,16 +4247,10 @@ function KPIV2PageInner() {
         color: unconvertedCount === 0 ? 'green' : 'red', rawCount: unconvertedCount, icon: '🚫',
       },
       {
-        key: 'csTmBacklog', label: 'SQL → 견적', value: `${over7}건 (7일+)`,
-        detail: `TM 구간 ${csTm.sqlBacklog?.openTotal ?? 0}건 중`,
+        key: 'csTmBacklog', label: '입금일자 미입력 (7일+)', value: `${over7}건`,
+        detail: `미입력 ${csTm.sqlBacklog?.openTotal ?? 0}건 중 7일 초과`,
         target: '목표 ≤10건', met: over7 <= 10,
         color: over7 <= 10 ? 'green' : 'red', rawCount: over7, icon: '📋',
-      },
-      {
-        key: 'csTmConversion', label: '인당 전환', value: `${avgDailyPerPerson}건/일`,
-        detail: `방문배정 ${visitAssigned} + 견적발송 ${quoteSentCount} (${tmMemberCount}명, ${dc.totalWeekdays ?? 0}일)`,
-        target: '목표 5건/일', met: avgDailyPerPerson >= 5,
-        color: avgDailyPerPerson >= 5 ? 'green' : 'red', rawCount: totalActions, icon: '🔄',
       },
     ];
   }, [csTm]);
@@ -4309,7 +4493,7 @@ function KPIV2PageInner() {
           </div>
         )}
 
-        {/* FRT 20분 초과 Raw 데이터 */}
+        {/* FRT 20분 초과 Raw 데이터 — 담당자별 그룹핑 */}
         {frtItems.length > 0 ? (
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -4332,7 +4516,39 @@ function KPIV2PageInner() {
                 })()}
               </div>
             </div>
-            <DataTable columns={tmFrtOver20Columns} data={frtItems} loading={false} className="daily-raw daily-raw-red" />
+            {(() => {
+              const grouped = new Map<string, any[]>();
+              frtItems.forEach((item: any) => {
+                const key = item.owner || '미지정';
+                if (!grouped.has(key)) grouped.set(key, []);
+                grouped.get(key)!.push(item);
+              });
+              const sortedGroups = Array.from(grouped.entries()).sort((a, b) => b[1].length - a[1].length);
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {sortedGroups.map(([ownerName, items]) => (
+                    <details key={ownerName} open style={{ border: '1px solid #E8EBED', borderRadius: '12px', overflow: 'hidden' }}>
+                      <summary style={{
+                        padding: '12px 16px', cursor: 'pointer', background: '#F9FAFB',
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                        fontSize: '14px', fontWeight: 600, color: '#191F28',
+                        listStyle: 'none', WebkitAppearance: 'none' as any,
+                      }}>
+                        <span style={{ fontSize: '12px', color: '#8B95A1', transition: 'transform 0.2s' }}>▼</span>
+                        <span>{ownerName}</span>
+                        <TossBadge variant="fill" size="xsmall" color="red">{items.length}건</TossBadge>
+                        <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#8B95A1', fontWeight: 400 }}>
+                          평균 {fmtFrt(items.reduce((s: number, r: any) => s + (r.frtMinutes ?? 0), 0) / items.length)}
+                        </span>
+                      </summary>
+                      <div style={{ padding: '0' }}>
+                        <DataTable columns={tmFrtOver20Columns.filter((c: any) => c.key !== 'owner')} data={items} loading={false} className="daily-raw daily-raw-red" />
+                      </div>
+                    </details>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         ) : (
           <div style={{ color: '#20C997', padding: '20px', textAlign: 'center', fontWeight: 600 }}>FRT 초과 건 없음 ✓</div>
@@ -4433,9 +4649,19 @@ function KPIV2PageInner() {
             { key: 'lossReasonDetail', header: '취소 상세', render: (v: string) => lossReasonDetailRender(v) },
           ];
 
+          const groupByOwner = (items: any[]) => {
+            const grouped = new Map<string, any[]>();
+            items.forEach((item: any) => {
+              const key = item.owner || '미지정';
+              if (!grouped.has(key)) grouped.set(key, []);
+              grouped.get(key)!.push(item);
+            });
+            return Array.from(grouped.entries()).sort((a, b) => b[1].length - a[1].length);
+          };
+
           return (
             <>
-              {/* 계류 건 */}
+              {/* 계류 건 — 담당자별 그룹핑 */}
               {openItems.length > 0 && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
@@ -4443,11 +4669,29 @@ function KPIV2PageInner() {
                     <TossBadge variant="fill" size="small" color="yellow">{openItems.length}건</TossBadge>
                     <span style={{ fontSize: '13px', color: '#8B95A1' }}>지속 컨택 여부 확인</span>
                   </div>
-                  <DataTable columns={openColumns} data={openItems} loading={false} className="daily-raw daily-raw-orange" />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {groupByOwner(openItems).map(([ownerName, items]) => (
+                      <details key={ownerName} open style={{ border: '1px solid #E8EBED', borderRadius: '12px', overflow: 'hidden' }}>
+                        <summary style={{
+                          padding: '12px 16px', cursor: 'pointer', background: '#F9FAFB',
+                          display: 'flex', alignItems: 'center', gap: '8px',
+                          fontSize: '14px', fontWeight: 600, color: '#191F28',
+                          listStyle: 'none', WebkitAppearance: 'none' as any,
+                        }}>
+                          <span style={{ fontSize: '12px', color: '#8B95A1' }}>▼</span>
+                          <span>{ownerName}</span>
+                          <TossBadge variant="fill" size="xsmall" color="yellow">{items.length}건</TossBadge>
+                        </summary>
+                        <div style={{ padding: '0' }}>
+                          <DataTable columns={openColumns.filter((c: any) => c.key !== 'owner')} data={items} loading={false} className="daily-raw daily-raw-orange" />
+                        </div>
+                      </details>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* 종료 건 */}
+              {/* 종료 건 — 담당자별 그룹핑 */}
               {closedItems.length > 0 && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
@@ -4455,7 +4699,25 @@ function KPIV2PageInner() {
                     <TossBadge variant="fill" size="small" color="elephant">{closedItems.length}건</TossBadge>
                     <span style={{ fontSize: '13px', color: '#8B95A1' }}>종료 사유 분석</span>
                   </div>
-                  <DataTable columns={closedColumns} data={closedItems} loading={false} className="daily-raw" />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {groupByOwner(closedItems).map(([ownerName, items]) => (
+                      <details key={ownerName} open style={{ border: '1px solid #E8EBED', borderRadius: '12px', overflow: 'hidden' }}>
+                        <summary style={{
+                          padding: '12px 16px', cursor: 'pointer', background: '#F9FAFB',
+                          display: 'flex', alignItems: 'center', gap: '8px',
+                          fontSize: '14px', fontWeight: 600, color: '#191F28',
+                          listStyle: 'none', WebkitAppearance: 'none' as any,
+                        }}>
+                          <span style={{ fontSize: '12px', color: '#8B95A1' }}>▼</span>
+                          <span>{ownerName}</span>
+                          <TossBadge variant="fill" size="xsmall" color="elephant">{items.length}건</TossBadge>
+                        </summary>
+                        <div style={{ padding: '0' }}>
+                          <DataTable columns={closedColumns.filter((c: any) => c.key !== 'owner')} data={items} loading={false} className="daily-raw" />
+                        </div>
+                      </details>
+                    ))}
+                  </div>
                 </div>
               )}
             </>
@@ -4465,11 +4727,16 @@ function KPIV2PageInner() {
     );
   }
 
-  // TM 상세 4: SQL 잔량 리스트 (FRT/MQL 패턴 적용)
+  // TM 상세 4: 채널 3월 전체 (CW 제외) flat 리스트
   function renderCSTmBacklogDetail() {
-    const backlogList = csTm?.rawData?.rawOpenOpps || [];
-    const over7 = csTm?.sqlBacklog?.over7 ?? 0;
-    const openTotal = csTm?.sqlBacklog?.openTotal ?? 0;
+    // TM 구간(방문배정/견적/재견적) + 입금일자 미입력
+    const tmStages = new Set(['방문배정', '견적', '재견적']);
+    const tmOpen = csTm?.rawData?.rawOpenOpps || [];
+    const backlogList = tmOpen
+      .filter((o: any) => tmStages.has(o.stageName))
+      .filter((o: any) => !o.advancePaymentDate || o.advancePaymentDate === '-');
+    const over7 = backlogList.filter((o: any) => (o.ageInDays ?? 0) > 7).length;
+    const openTotal = backlogList.length;
     const byOwner = csTm?.sqlBacklog?.byOwner || [];
     if (backlogList.length === 0 && openTotal === 0) return <div style={{ color: '#8B95A1', padding: '20px', textAlign: 'center' }}>SQL 잔량 없음 ✓</div>;
 
@@ -4509,7 +4776,7 @@ function KPIV2PageInner() {
     // 단계 뱃지 렌더러
     const stageBadgeRender = (v: string) => {
       if (!v || v === '-') return <span style={{ color: '#B0B8C1' }}>-</span>;
-      const color = v === '견적' ? 'green' : v === '재견적' ? 'yellow' : 'blue';
+      const color = v === '견적' ? 'green' : v === '재견적' ? 'yellow' : v === '선납금' ? 'purple' : 'blue';
       return <TossBadge variant="weak" size="xsmall" color={color}>{v}</TossBadge>;
     };
 
@@ -4525,10 +4792,6 @@ function KPIV2PageInner() {
       return <TossBadge variant="fill" size="xsmall" color="red">미방문</TossBadge>;
     };
 
-    // 단계별 분리
-    const visitItems = backlogList.filter((r: any) => r.stageName === '방문배정');
-    const quoteItems = backlogList.filter((r: any) => r.stageName === '견적' || r.stageName === '재견적');
-
     // 방문 후 경과일 렌더러
     const daysSinceVisitRender = (_: any, row: any) => {
       if (!row.visitCompleteDate) return <span style={{ color: '#B0B8C1' }}>미방문</span>;
@@ -4536,105 +4799,133 @@ function KPIV2PageInner() {
       return <span style={{ color: days > 7 ? '#F04452' : '#4E5968', fontWeight: days > 7 ? 700 : 400 }}>{days}일</span>;
     };
 
+    // 입금일자 렌더러
+    const paymentDateRender = (v: any) => {
+      if (!v) return <span style={{ color: '#B0B8C1' }}>-</span>;
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return <span style={{ color: '#B0B8C1' }}>-</span>;
+      const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+      const formatted = `${kst.getFullYear()}-${String(kst.getMonth() + 1).padStart(2, '0')}-${String(kst.getDate()).padStart(2, '0')} ${String(kst.getHours()).padStart(2, '0')}:${String(kst.getMinutes()).padStart(2, '0')}`;
+      return <TossBadge variant="weak" size="xsmall" color="green">{formatted}</TossBadge>;
+    };
+    const paymentEnteredRender = (v: any) => {
+      if (!v) return <span style={{ color: '#B0B8C1' }}>-</span>;
+      return <span style={{ color: '#6B7684' }}>{v}</span>;
+    };
+
+    // 통합 컬럼 (채널 전체 CW 제외 flat)
+    const unifiedColumns = [
+      { key: 'name', header: '업체명', render: nameRender },
+      { key: 'stageName', header: '단계', render: stageBadgeRender },
+      { key: 'ownerName', header: '담당자' },
+      { key: 'channel', header: '채널', render: channelSourceRender },
+      { key: 'ageInDays', header: '경과일', render: ageRender },
+      { key: 'advancePaymentDate', header: '입금일자', render: paymentDateRender },
+      { key: 'advancePaymentEnteredAt', header: '입력 시점', render: paymentEnteredRender },
+      { key: 'nextTask', header: '다음 과업', render: nextTaskRender },
+    ];
+
     // 방문배정 컬럼: 방문 갔냐 안갔냐가 핵심
     const visitColumns = [
-      { key: 'name', label: '업체명', render: nameRender },
-      { key: 'ownerName', label: '담당자' },
-      { key: 'channel', label: '채널', render: channelSourceRender },
-      { key: 'ageInDays', label: '경과일', render: ageRender },
-      { key: 'visitStatus', label: '방문 여부', render: visitStatusRender },
-      { key: 'nextTask', label: '다음 과업', render: nextTaskRender },
-      { key: 'lastTouch', label: '마지막 터치' },
+      { key: 'name', header: '업체명', render: nameRender },
+      { key: 'ownerName', header: '담당자' },
+      { key: 'channel', header: '채널', render: channelSourceRender },
+      { key: 'ageInDays', header: '경과일', render: ageRender },
+      { key: 'visitStatus', header: '방문 여부', render: visitStatusRender },
+      { key: 'advancePaymentDate', header: '입금일자', render: paymentDateRender },
+      { key: 'advancePaymentEnteredAt', header: '입력 시점', render: paymentEnteredRender },
+      { key: 'nextTask', header: '다음 과업', render: nextTaskRender },
+      { key: 'lastTouch', header: '마지막 터치' },
     ];
 
     // 견적 컬럼: 방문 후 경과일이 핵심
     const quoteColumns = [
-      { key: 'name', label: '업체명', render: nameRender },
-      { key: 'ownerName', label: '담당자' },
-      { key: 'channel', label: '채널', render: channelSourceRender },
-      { key: 'stageName', label: '단계', render: stageBadgeRender },
-      { key: 'ageInDays', label: '경과일', render: ageRender },
-      { key: 'daysSinceVisit', label: '방문 후 경과', render: daysSinceVisitRender },
-      { key: 'nextTask', label: '다음 과업', render: nextTaskRender },
-      { key: 'lastTouch', label: '마지막 터치' },
+      { key: 'name', header: '업체명', render: nameRender },
+      { key: 'ownerName', header: '담당자' },
+      { key: 'channel', header: '채널', render: channelSourceRender },
+      { key: 'stageName', header: '단계', render: stageBadgeRender },
+      { key: 'ageInDays', header: '경과일', render: ageRender },
+      { key: 'daysSinceVisit', header: '방문 후 경과', render: daysSinceVisitRender },
+      { key: 'advancePaymentDate', header: '입금일자', render: paymentDateRender },
+      { key: 'advancePaymentEnteredAt', header: '입력 시점', render: paymentEnteredRender },
+      { key: 'nextTask', header: '다음 과업', render: nextTaskRender },
+      { key: 'lastTouch', header: '마지막 터치' },
     ];
+
+    // 매장 상태 기준 분리
+    const openStoreList = backlogList.filter((o: any) => o.companyStatus === '영업중');
+    const preOpenList = backlogList.filter((o: any) => o.companyStatus === '오픈전' || o.companyStatus === '오픈전(2달 이상)' || !o.companyStatus || o.companyStatus === '-');
+
+    // 담당자별 그룹핑 함수
+    const groupByOwnerName = (items: any[]) => {
+      const grouped = new Map<string, any[]>();
+      items.forEach((item: any) => {
+        const key = item.ownerName || '미지정';
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key)!.push(item);
+      });
+      return Array.from(grouped.entries()).sort((a, b) => b[1].length - a[1].length);
+    };
+
+    const openGroups = groupByOwnerName(openStoreList);
+    const preOpenGroups = groupByOwnerName(preOpenList);
+
+    const ownerAccordionColumns = unifiedColumns.filter((c: any) => c.key !== 'ownerName');
+
+    const renderOwnerAccordion = (groups: [string, any[]][]) => {
+      if (groups.length === 0) return <div style={{ color: '#8B95A1', padding: '20px', textAlign: 'center' }}>데이터 없음</div>;
+      return groups.map(([owner, items]) => {
+        const ownerOver7 = items.filter((o: any) => (o.ageInDays ?? 0) > 7).length;
+        return (
+        <details key={owner} open style={{ marginBottom: '8px' }}>
+          <summary style={{ cursor: 'pointer', padding: '8px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: '#333D4B' }}>{owner}</span>
+            <TossBadge variant="weak" size="xsmall" color="elephant">{items.length}건</TossBadge>
+            {ownerOver7 > 0 && <TossBadge variant="fill" size="xsmall" color="red">7일+ {ownerOver7}건</TossBadge>}
+          </summary>
+          <DataTable
+            data={items}
+            columns={ownerAccordionColumns}
+            defaultSort="ageInDays"
+            defaultSortDir="desc"
+            pageSize={50}
+            className="daily-raw daily-raw-orange"
+          />
+        </details>
+        );
+      });
+    };
 
     return (
       <div>
-        {/* 섹션 1: 담당자별 SQL 잔량 현황 */}
-        <div style={{ fontSize: '15px', fontWeight: 700, color: '#191F28', marginBottom: '12px' }}>
-          담당자별 SQL 잔량 현황
+        {/* 헤더: 채널 3월 전체 (CW+CL 제외) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          <span style={{ fontSize: '15px', fontWeight: 700, color: '#191F28' }}>TM 구간 입금일자 미입력 (방문배정/견적/재견적)</span>
+          <TossBadge variant="weak" size="small" color="elephant">{backlogList.length}건</TossBadge>
         </div>
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-          <TossBadge variant="weak" size="small" color="elephant">전체 Open {openTotal}건</TossBadge>
-          <TossBadge variant="fill" size="small" color={over7 <= 10 ? 'green' : 'red'}>7일+ 초과 {over7}건</TossBadge>
+
+        {/* 섹션 1: 영업중 */}
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '18px', fontWeight: 800, color: '#191F28' }}>영업중</span>
+            <TossBadge variant="weak" size="small" color="green">{openStoreList.length}건</TossBadge>
+          </div>
+          {renderOwnerAccordion(openGroups)}
         </div>
-        {byOwner.length > 0 && (
-          <table className="metro-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', marginBottom: '24px' }}>
-            <thead>
-              <tr style={{ background: '#F9FAFB' }}>
-                {['담당자', '전체', '7일+ 초과', '단계별 분포'].map(h => (
-                  <th key={h} style={{ padding: '8px 12px', textAlign: h === '단계별 분포' ? 'left' : 'center', fontWeight: 600, color: '#6B7684', borderBottom: '2px solid #E5E8EB' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {byOwner.map((o: any) => (
-                <tr key={o.name} style={{ borderBottom: '1px solid #F2F4F6' }}>
-                  <td style={{ padding: '8px 12px', fontWeight: 600, textAlign: 'center' }}>{o.name}</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'center' }}>{o.total}건</td>
-                  <td style={{ padding: '8px 12px', textAlign: 'center' }}>
-                    <span style={{ color: o.over7 > 0 ? '#F04452' : '#4E5968', fontWeight: o.over7 > 0 ? 700 : 400 }}>{o.over7}건</span>
-                  </td>
-                  <td style={{ padding: '8px 12px' }}>{stageRender(o.stages)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
 
-        {/* 섹션 2: 방문배정 */}
-        {visitItems.length > 0 && (
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '15px', fontWeight: 700, color: '#191F28' }}>🏃 방문배정</span>
-              <TossBadge variant="weak" size="xsmall" color="blue">{visitItems.length}건</TossBadge>
-              <span style={{ fontSize: '12px', color: '#8B95A1' }}>방문 진행 여부 확인</span>
-            </div>
-            <DataTable
-              data={visitItems}
-              columns={visitColumns}
-              defaultSort="ageInDays"
-              defaultSortDir="desc"
-              pageSize={20}
-              className="daily-raw daily-raw-orange"
-            />
+        {/* 섹션 2: 오픈전 */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '18px', fontWeight: 800, color: '#191F28' }}>오픈전</span>
+            <TossBadge variant="weak" size="small" color="blue">{preOpenList.length}건</TossBadge>
           </div>
-        )}
-
-        {/* 섹션 3: 견적 */}
-        {quoteItems.length > 0 && (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <span style={{ fontSize: '15px', fontWeight: 700, color: '#191F28' }}>📄 견적</span>
-              <TossBadge variant="weak" size="xsmall" color="green">{quoteItems.length}건</TossBadge>
-              <span style={{ fontSize: '12px', color: '#8B95A1' }}>견적 발송 후 경과일 관리</span>
-            </div>
-            <DataTable
-              data={quoteItems}
-              columns={quoteColumns}
-              defaultSort="ageInDays"
-              defaultSortDir="desc"
-              pageSize={20}
-              className="daily-raw daily-raw-orange"
-            />
-          </div>
-        )}
+          {renderOwnerAccordion(preOpenGroups)}
+        </div>
       </div>
     );
   }
 
-  const csTmDetailRenderers = [renderCSTmFrtDetail, renderCSTmMqlDetail, renderCSTmBacklogDetail, renderCSTmConversionDetail];
+  const csTmDetailRenderers = [renderCSTmFrtDetail, renderCSTmMqlDetail, renderCSTmBacklogDetail];
 
   // ============ 채널 BO 플로우 ============
   const csBo = data?.channel?.backOffice;
@@ -6020,7 +6311,7 @@ function KPIV2PageInner() {
   const channelTabs = [
     { key: 'ae' as const, label: 'AE', desc: '미팅 → 네고 체류 관리 → MOU 체결', color: '#20C997' },
     { key: 'am' as const, label: 'AM', desc: 'MOU 미팅 → Lead 창출 → 비활성 파트너 → 활성 파트너 관리', color: '#00B8D9' },
-    { key: 'tm' as const, label: 'TM', desc: 'Lead 전환(방문+견적) → FRT → MQL 전환 → SQL 잔량 관리', color: '#F04452' },
+    { key: 'tm' as const, label: 'TM', desc: 'Lead 전환(방문+선납금) → FRT → MQL 전환 → SQL 잔량 관리', color: '#F04452' },
     { key: 'bo' as const, label: '백오피스', desc: 'SQL→CW 전환율, 계약 체결, 일평균 마감, SQL 잔량 관리', color: '#3182F6' },
   ];
 
@@ -6220,14 +6511,14 @@ function KPIV2PageInner() {
       )}
 
       {/* Channel Sales - TM 탭 */}
-      {activeGroup === 'channel' && csActiveTab === 'tm' && !loading && data?.channel?.tm && renderFlowSection(
+      {activeGroup === 'channel' && csActiveTab === 'tm' && data?.channel?.tm && renderFlowSection(
         'TM',
         '',
         csTmFlowSteps, csTmActiveStep, setCsTmActiveStep, csTmDetailRenderers, 'red',
       )}
 
       {/* Channel Sales - 백오피스 탭 */}
-      {activeGroup === 'channel' && csActiveTab === 'bo' && !loading && data?.channel?.backOffice && renderFlowSection(
+      {activeGroup === 'channel' && csActiveTab === 'bo' && data?.channel?.backOffice && renderFlowSection(
         '백오피스',
         '',
         csBoFlowSteps, csBoActiveStep, setCsBoActiveStep, csBoDetailRenderers, 'blue',
@@ -6243,7 +6534,7 @@ function KPIV2PageInner() {
       )}
 
       {/* Channel Sales - TM/BO 로딩 */}
-      {activeGroup === 'channel' && (csActiveTab === 'tm' || csActiveTab === 'bo') && loading && (
+      {activeGroup === 'channel' && (csActiveTab === 'tm' || csActiveTab === 'bo') && !data?.channel && (
         <div style={{ display: 'flex', gap: '16px', marginBottom: '28px' }}>
           {[0, 1, 2, 3].map(i => (
             <div key={i} className="metro-loading" style={{ flex: 1, height: '160px', borderRadius: '16px' }} />

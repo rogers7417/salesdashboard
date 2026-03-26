@@ -41,6 +41,9 @@ Thumbs.db
 !package-lock.json
 /*.wiki
 
+# Agent prompts
+scripts/agent-prompts/
+
 # One-off check/test scripts
 _check*.js
 check-*.js

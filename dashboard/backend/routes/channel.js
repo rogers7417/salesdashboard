@@ -30,12 +30,12 @@ router.get('/', async (req, res) => {
         Owner: e.Owner ? { Name: e.Owner.Name } : null,
       })),
       partners: (rawData.partners || []).map(a => ({
-        Id: a.Id, Name: a.Name, Progress__c: a.Progress__c, MOUstartdate__c: a.MOUstartdate__c,
+        Id: a.Id, Name: a.Name, Progress__c: a.Progress__c, MOUstartdate__c: a.MOUstartdate__c, MOU_ContractDate__c: a.MOU_ContractDate__c,
         Owner: a.Owner ? { Name: a.Owner.Name } : null,
         fm_AccountType__c: a.fm_AccountType__c, CreatedDate: a.CreatedDate,
       })),
       franchiseHQAccounts: (rawData.franchiseHQAccounts || []).map(a => ({
-        Id: a.Id, Name: a.Name, Progress__c: a.Progress__c, MOUstartdate__c: a.MOUstartdate__c,
+        Id: a.Id, Name: a.Name, Progress__c: a.Progress__c, MOUstartdate__c: a.MOUstartdate__c, MOU_ContractDate__c: a.MOU_ContractDate__c,
         Owner: a.Owner ? { Name: a.Owner.Name } : null,
         fm_AccountType__c: a.fm_AccountType__c, CreatedDate: a.CreatedDate,
       })),
@@ -191,9 +191,25 @@ router.get('/am', async (req, res) => {
 
     const stats = await channelReport.generateReport(month || null);
 
+    // 파트너 안착 타임라인 (onboarding partner list에서 구성)
+    const onboardingPartnerList = stats.mouStats?.onboarding?.partner?.list || [];
+    const settlementTimeline = onboardingPartnerList.map(p => ({
+      partnerName: p.name,
+      absoluteFirstLeadDate: p.absoluteFirstLeadDate || null,
+      mouStart: p.mouStart || null,
+      mouContractDate: p.mouContractDate || null,
+      leadToMouDays: (p.mouContractDate && p.absoluteFirstLeadDate)
+        ? Math.round((new Date(p.mouContractDate) - new Date(p.absoluteFirstLeadDate)) / (1000 * 60 * 60 * 24))
+        : null,
+      preMouLeadCount: p.preMouLeadCount || 0,
+      leadsAfterMou3Months: p.leadCountWithinWindow || 0,
+      isSettled: p.isSettled || false
+    }));
+
     res.json({
       period: stats.period,
       amHeatmap: stats.summary?.channelLeadsByOwner?.amHeatmap,
+      settlementTimeline,
       generatedAt: stats.generatedAt
     });
 

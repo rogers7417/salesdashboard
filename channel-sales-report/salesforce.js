@@ -71,7 +71,7 @@ async function collectChannelData(targetMonth = null) {
     SELECT
       Id, Name, Phone, OwnerId, Owner.Name, IsPartner,
       fm_AccountType__c, Progress__c, RecordTypeId,
-      MOUstartdate__c, MOUenddate__c,
+      MOUstartdate__c, MOUenddate__c, MOU_ContractDate__c,
       CreatedDate, LastModifiedDate,
       (SELECT Id, Name, AccountPartner__c, AccountPartner__r.Name, AccountPartner__r.Id FROM AccountPartners__r)
     FROM Account
@@ -92,7 +92,7 @@ async function collectChannelData(targetMonth = null) {
     SELECT
       Id, Name, Phone, OwnerId, Owner.Name, IsPartner,
       fm_AccountType__c, Progress__c, RecordTypeId,
-      MOUstartdate__c, MOUenddate__c,
+      MOUstartdate__c, MOUenddate__c, MOU_ContractDate__c,
       CreatedDate, LastModifiedDate
     FROM Account
     WHERE fm_AccountType__c = '프랜차이즈본사'
@@ -155,6 +155,7 @@ async function collectChannelData(targetMonth = null) {
       progress: hq.Progress__c || '-',
       mouStart: hq.MOUstartdate__c || '-',
       mouEnd: hq.MOUenddate__c || '-',
+      mouContractDate: hq.MOU_ContractDate__c || null,
       brands: [],
       totalStores: 0
     });
@@ -167,6 +168,7 @@ async function collectChannelData(targetMonth = null) {
     progress: '-',
     mouStart: '-',
     mouEnd: '-',
+    mouContractDate: null,
     brands: [],
     totalStores: 0
   });
@@ -183,6 +185,7 @@ async function collectChannelData(targetMonth = null) {
         progress: '-',
         mouStart: '-',
         mouEnd: '-',
+        mouContractDate: null,
         brands: [],
         totalStores: 0
       });

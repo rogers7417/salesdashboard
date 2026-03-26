@@ -102,6 +102,7 @@ export async function fetchChannelAM(month?: string) {
     return data ? {
       period: data.period,
       amHeatmap: data.amHeatmap || data.summary?.amHeatmap,
+      onboarding: data.onboarding || null,
       generatedAt: data.generatedAt,
     } : null;
   }
@@ -233,6 +234,21 @@ export async function fetchInstallTracking() {
   }
   const res = await fetch(`${API_URL}/api/install-tracking`);
   if (!res.ok) throw new Error('Failed to fetch install tracking data');
+  return res.json();
+}
+
+// ============================================
+// Exception TM API
+// ============================================
+export async function fetchExceptionTM(month?: string) {
+  if (USE_S3) {
+    const m = month || getCurrentMonth();
+    return fetchS3(`exception/is-tm/${m}.json`);
+  }
+  const params = new URLSearchParams();
+  if (month) params.set('month', month);
+  const res = await fetch(`${API_URL}/api/exception/is-tm?${params}`);
+  if (!res.ok) throw new Error('Failed to fetch exception TM data');
   return res.json();
 }
 

@@ -273,6 +273,7 @@ interface OwnerBarChartProps {
   stacked?: boolean;
   height?: number;
   nameKey?: string;
+  tooltipFormatter?: (value: number, name: string, entry: any) => [string, string];
 }
 
 export function OwnerBarChart({
@@ -281,6 +282,7 @@ export function OwnerBarChart({
   stacked = false,
   height = 320,
   nameKey = 'name',
+  tooltipFormatter,
 }: OwnerBarChartProps) {
   return (
     <div style={{ background: COLORS.bg, border: `1px solid ${COLORS.border}`, borderRadius: 16, padding: 20 }}>
@@ -307,6 +309,7 @@ export function OwnerBarChart({
               fontSize: 13,
               boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
             }}
+            formatter={tooltipFormatter}
           />
           <Legend
             iconType="circle"

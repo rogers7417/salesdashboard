@@ -112,8 +112,12 @@ function calculateStats(data, targetMonth = null, options = {}) {
       progress: p.Progress__c || '-',
       mouStart: p.MOUstartdate__c || '-',
       mouEnd: p.MOUenddate__c || '-',
+      mouContractDate: p.MOU_ContractDate__c || null,
       isPartner: p.IsPartner,
       createdDate: p.CreatedDate,
+      absoluteFirstLeadDate: totalSourceLeads.length > 0
+        ? totalSourceLeads.reduce((min, l) => l.CreatedDate < min ? l.CreatedDate : min, totalSourceLeads[0].CreatedDate).substring(0, 10)
+        : null,
       referredStoreCount: referredStores.length,
       referredStores: referredStores.map(s => ({
         id: s.Id,
@@ -812,7 +816,7 @@ function calculateStats(data, targetMonth = null, options = {}) {
   sqlPipeline.openList.sort((a, b) => b.ageInDays - a.ageInDays);
 
   // 파트너사별 최근 활동 계산 (Lead + 미팅)
-  const calcPartnerActivity = (partnerList, partnerLeads, franchiseLeads, events) => {
+  const calcPartnerActivity = (partnerList, partnerLeads, franchiseLeads, events, tasks) => {
     const allLeads = [...(partnerLeads || []), ...(franchiseLeads || [])];
 
     return partnerList.map(p => {
@@ -821,6 +825,19 @@ function calculateStats(data, targetMonth = null, options = {}) {
       const last3MonthLeads = myLeads.filter(l => l.CreatedDate?.substring(0, 7) >= threeMonthsAgo);
       const lastLeadDate = myLeads.length > 0
         ? myLeads.reduce((max, l) => l.CreatedDate > max ? l.CreatedDate : max, '').substring(0, 10)
+        : null;
+
+      // MOU 전 리드 카운트
+      const effectiveMouDate = p.mouContractDate || (p.mouStart !== '-' ? p.mouStart : null);
+      const preMouLeadCount = effectiveMouDate
+        ? myLeads.filter(l => (l.CreatedDate?.substring(0, 10) || '') < effectiveMouDate).length
+        : 0;
+
+      // Task 카운트 & 마지막 Task 일자
+      const myTasks = (tasks || []).filter(t => t.WhatId === p.id);
+      const taskCount = myTasks.length;
+      const lastTaskDate = myTasks.length > 0
+        ? myTasks.reduce((max, t) => t.ActivityDate > max ? t.ActivityDate : max, myTasks[0].ActivityDate)
         : null;
 
       // 일별 Lead 데이터
@@ -861,6 +878,9 @@ function calculateStats(data, targetMonth = null, options = {}) {
         dailyLeads,
         dailyActivity,
         meetingCount: myMeetings.length,
+        taskCount,
+        lastTaskDate,
+        preMouLeadCount,
         isActiveThisMonth: thisMonthLeads.length > 0,
         isActiveLast3Months: last3MonthLeads.length > 0
       };
@@ -868,7 +888,7 @@ function calculateStats(data, targetMonth = null, options = {}) {
   };
 
   // 프랜차이즈 본사별 최근 활동 계산 (Lead + 미팅)
-  const calcFranchiseHQActivity = (hqList, franchiseLeads, franchiseStatsMap, events) => {
+  const calcFranchiseHQActivity = (hqList, franchiseLeads, franchiseStatsMap, events, tasks) => {
     return hqList.map(hq => {
       let thisMonthLeads = 0;
       let last3MonthLeads = 0;
@@ -936,6 +956,20 @@ function calculateStats(data, targetMonth = null, options = {}) {
         isWeekend: d.isWeekend
       }));
 
+      // Task 카운트 & 마지막 Task 일자 (본사 + 산하 브랜드)
+      const hqTasks = (tasks || []).filter(t => brandIds.has(t.WhatId));
+      const hqTaskCount = hqTasks.length;
+      const hqLastTaskDate = hqTasks.length > 0
+        ? hqTasks.reduce((max, t) => t.ActivityDate > max ? t.ActivityDate : max, hqTasks[0].ActivityDate)
+        : null;
+
+      // MOU 전 리드 카운트
+      const effectiveHQMouDate = hq.mouContractDate || (hq.mouStart && hq.mouStart !== '-' ? hq.mouStart : null);
+      const allHQLeads = (franchiseLeads || []).filter(l => brandIds.has(l.BrandName__c));
+      const hqPreMouLeadCount = effectiveHQMouDate
+        ? allHQLeads.filter(l => (l.CreatedDate?.substring(0, 10) || '') < effectiveHQMouDate).length
+        : 0;
+
       return {
         ...hq,
         brands: enrichedBrands,
@@ -947,6 +981,9 @@ function calculateStats(data, targetMonth = null, options = {}) {
         lastLeadDate,
         dailyActivity,
         meetingCount: hqMeetings.length,
+        taskCount: hqTaskCount,
+        lastTaskDate: hqLastTaskDate,
+        preMouLeadCount: hqPreMouLeadCount,
         isActiveThisMonth: thisMonthLeads > 0,
         isActiveLast3Months: last3MonthLeads > 0
       };
@@ -958,10 +995,10 @@ function calculateStats(data, targetMonth = null, options = {}) {
   franchiseStats.forEach(f => franchiseStatsMap.set(f.id, f));
 
   // 파트너사에 활동 정보 추가
-  const enrichedPartnerStats = calcPartnerActivity(partnerStats, partnerSourceLeads, franchiseSourceLeads, channelEvents);
+  const enrichedPartnerStats = calcPartnerActivity(partnerStats, partnerSourceLeads, franchiseSourceLeads, channelEvents, channelTasks);
 
   // franchiseHQList에 브랜드별 Lead 정보 + 활동 정보 추가
-  const enrichedFranchiseHQList = calcFranchiseHQActivity(franchiseHQList, franchiseSourceLeads, franchiseStatsMap, channelEvents);
+  const enrichedFranchiseHQList = calcFranchiseHQActivity(franchiseHQList, franchiseSourceLeads, franchiseStatsMap, channelEvents, channelTasks);
 
   // 활동 중인 파트너사/본사 요약
   const activePartnerThisMonth = enrichedPartnerStats.filter(p => p.isActiveThisMonth);
@@ -983,7 +1020,9 @@ function calculateStats(data, targetMonth = null, options = {}) {
     if (mouList.length === 0) return { total: 0, settled: 0, rate: 0, list: [] };
 
     const settledList = mouList.map(item => {
-      const mouDate = new Date(item.mouStart);
+      // 안착 window 시작점: MOU 체결일(MOU_ContractDate__c) 우선, 없으면 mouStart 폴백
+      const effectiveMouDate = item.mouContractDate || item.mouStart;
+      const mouDate = new Date(effectiveMouDate);
       const mouEndWindow = new Date(mouDate.getFullYear(), mouDate.getMonth() + 3, mouDate.getDate());
       const mouEndWindowStr = mouEndWindow.toISOString().substring(0, 10);
 
@@ -996,7 +1035,7 @@ function calculateStats(data, targetMonth = null, options = {}) {
         myLeads = allLeads.filter(l => getLeadAccountId(l) === item.id);
         const leadsInWindow = myLeads.filter(l => {
           const leadDate = l.CreatedDate?.substring(0, 10);
-          return leadDate >= item.mouStart && leadDate <= mouEndWindowStr;
+          return leadDate >= effectiveMouDate && leadDate <= mouEndWindowStr;
         });
         hasLeadWithinWindow = leadsInWindow.length > 0;
         leadCountWithinWindow = leadsInWindow.length;
@@ -1008,7 +1047,7 @@ function calculateStats(data, targetMonth = null, options = {}) {
         myLeads = allLeads.filter(l => brandIds.includes(l.BrandName__c));
         const leadsInWindow = myLeads.filter(l => {
           const leadDate = l.CreatedDate?.substring(0, 10);
-          return leadDate >= item.mouStart && leadDate <= mouEndWindowStr;
+          return leadDate >= effectiveMouDate && leadDate <= mouEndWindowStr;
         });
         hasLeadWithinWindow = leadsInWindow.length > 0;
         leadCountWithinWindow = leadsInWindow.length;
@@ -1028,7 +1067,7 @@ function calculateStats(data, targetMonth = null, options = {}) {
           createdDate: l.CreatedDate?.substring(0, 10),
           isConverted: l.IsConverted || false,
           convertedAccountId: accId || null,
-          isPreMou: (l.CreatedDate?.substring(0, 10) || '') < item.mouStart,
+          isPreMou: (l.CreatedDate?.substring(0, 10) || '') < effectiveMouDate,
           caseCount: cases.length,
           caseSummary: cases.length > 0 ? cases.slice(0, 5).map(c => ({
             type: c.Type || '-',
@@ -1042,7 +1081,7 @@ function calculateStats(data, targetMonth = null, options = {}) {
       });
 
       const totalLeadCount = myLeads.length;
-      const preMouLeadCount = myLeads.filter(l => (l.CreatedDate?.substring(0, 10) || '') < item.mouStart).length;
+      const preMouLeadCount = myLeads.filter(l => (l.CreatedDate?.substring(0, 10) || '') < effectiveMouDate).length;
       const leadCaseCount = leadDetails.reduce((sum, l) => sum + l.caseCount, 0);
 
       // AccountPartner__c 기반 소개 매장 (Lead PartnerName__c와 별도)
@@ -1067,15 +1106,19 @@ function calculateStats(data, targetMonth = null, options = {}) {
       const storeCaseCount = storeDetails.reduce((sum, s) => sum + s.caseCount, 0);
       const totalCaseCount = leadCaseCount + storeCaseCount;
 
-      // MOU 이후 Event(미팅) & Task 카운트
-      let eventCount = 0, taskCount = 0;
+      // Event(미팅) & Task 카운트 (MOU 날짜 무관 — 전체)
+      let eventCount = 0, taskCount = 0, lastTaskDate = null;
       const matchIds = isPartner ? [item.id] : (item.brands || []).map(b => b.id).concat(item.hqId ? [item.hqId] : []);
       const matchSet = new Set(matchIds);
       if (events) {
-        eventCount = events.filter(e => matchSet.has(e.WhatId) && e.ActivityDate >= item.mouStart).length;
+        eventCount = events.filter(e => matchSet.has(e.WhatId)).length;
       }
       if (tasks) {
-        taskCount = tasks.filter(t => matchSet.has(t.WhatId) && t.ActivityDate >= item.mouStart).length;
+        const myTasks = tasks.filter(t => matchSet.has(t.WhatId));
+        taskCount = myTasks.length;
+        if (myTasks.length > 0) {
+          lastTaskDate = myTasks.reduce((latest, t) => t.ActivityDate > latest ? t.ActivityDate : latest, myTasks[0].ActivityDate);
+        }
       }
 
       return {
@@ -1093,6 +1136,7 @@ function calculateStats(data, targetMonth = null, options = {}) {
         storeDetails,
         eventCount,
         taskCount,
+        lastTaskDate,
       };
     });
 
@@ -1116,7 +1160,9 @@ function calculateStats(data, targetMonth = null, options = {}) {
     const brandList = [];
 
     mouHQList.forEach(hq => {
-      const mouDate = new Date(hq.mouStart);
+      // 안착 window 시작점: MOU 체결일 우선, 없으면 mouStart 폴백
+      const effectiveMouDate = hq.mouContractDate || hq.mouStart;
+      const mouDate = new Date(effectiveMouDate);
       const mouEndWindow = new Date(mouDate.getFullYear(), mouDate.getMonth() + 3, mouDate.getDate());
       const mouEndWindowStr = mouEndWindow.toISOString().substring(0, 10);
 
@@ -1124,7 +1170,7 @@ function calculateStats(data, targetMonth = null, options = {}) {
         const brandLeads = (franchiseLeads || []).filter(l => l.BrandName__c === brand.id);
         const leadsInWindow = brandLeads.filter(l => {
           const leadDate = l.CreatedDate?.substring(0, 10);
-          return leadDate >= hq.mouStart && leadDate <= mouEndWindowStr;
+          return leadDate >= effectiveMouDate && leadDate <= mouEndWindowStr;
         });
 
         const hasLeadWithinWindow = leadsInWindow.length > 0;
@@ -1140,6 +1186,7 @@ function calculateStats(data, targetMonth = null, options = {}) {
           hqName: hq.hqName,
           owner: brand.owner || hq.owner,
           mouStart: hq.mouStart,
+          mouContractDate: hq.mouContractDate || null,
           mouEndWindow: mouEndWindowStr,
           storeCount: brand.storeCount,
           totalLeadCount: brand.leadCount || 0,

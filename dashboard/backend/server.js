@@ -29,11 +29,16 @@ const inboundRoutes = require('./routes/inbound');
 const channelRoutes = require('./routes/channel');
 const kpiRoutes = require('./routes/kpi');
 const installTrackingRoutes = require('./routes/install-tracking');
+const exceptionRoutes = require('./routes/exception');
+
+// 캐시 프리워밍용
+const channelReport = require('./services/channel-report');
 
 app.use('/api/inbound', inboundRoutes);
 app.use('/api/channel', channelRoutes);
 app.use('/api/kpi', kpiRoutes);
 app.use('/api/install-tracking', installTrackingRoutes);
+app.use('/api/exception', exceptionRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -108,6 +113,12 @@ app.get('/api', (req, res) => {
         path: '/api/kpi/extract-status',
         method: 'GET',
         description: 'KPI 데이터 추출 상태 확인'
+      },
+      {
+        path: '/api/exception/is-tm',
+        method: 'GET',
+        description: 'Exception IS TM 리포트 (미전환 리드 분석)',
+        params: { month: 'YYYY-MM (기본: 현재 월)' }
       },
       {
         path: '/health',
@@ -329,6 +340,11 @@ const server = app.listen(PORT, () => {
 
   // 자동 폴링 시작
   startPolling();
+
+  // 채널 세일즈 캐시 프리워밍 (서버 시작 시 바로 캐시 채움)
+  channelReport.warmCache().catch(err => {
+    console.error(`⚠️  채널 캐시 프리워밍 실패: ${err.message}`);
+  });
 });
 
 // 포트 충돌 시 graceful 처리

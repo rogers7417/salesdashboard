@@ -397,6 +397,61 @@ export default function InboundReportPage() {
             </div>
           </div>
 
+          {/* FRT → SQL Conversion Correlation */}
+          {is?.frtCorrelation && (
+            <>
+              <SectionTitle>FRT 준수 → SQL 전환율 영향</SectionTitle>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                {[
+                  { label: 'FRT 준수 (≤20분)', data: is.frtCorrelation.frtOk, color: C.green, bg: '#E3FAF0' },
+                  { label: 'FRT 미준수 (>20분)', data: is.frtCorrelation.frtFail, color: C.red, bg: '#FFE8E8' },
+                ].map((item) => (
+                  <CardWrap key={item.label}>
+                    <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                      <div style={{
+                        display: 'inline-block',
+                        padding: '4px 12px',
+                        borderRadius: 8,
+                        background: item.bg,
+                        color: item.color,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        marginBottom: 12,
+                      }}>
+                        {item.label}
+                      </div>
+                      <div style={{ fontSize: 36, fontWeight: 800, color: item.color, margin: '8px 0' }}>
+                        {item.data?.sqlRate ?? 0}%
+                      </div>
+                      <div style={{ fontSize: 13, color: C.secondary }}>
+                        SQL 전환율 ({item.data?.sql ?? 0}/{item.data?.total ?? 0}건)
+                      </div>
+                    </div>
+                  </CardWrap>
+                ))}
+              </div>
+              {(() => {
+                const okRate = is.frtCorrelation.frtOk?.sqlRate ?? 0;
+                const failRate = is.frtCorrelation.frtFail?.sqlRate ?? 0;
+                const diff = okRate - failRate;
+                if (diff === 0) return null;
+                return (
+                  <div style={{
+                    marginTop: 8,
+                    padding: '10px 16px',
+                    background: diff > 0 ? '#E3FAF0' : '#FFF3E0',
+                    borderRadius: 10,
+                    fontSize: 13,
+                    color: C.text,
+                    textAlign: 'center',
+                  }}>
+                    FRT 준수 시 SQL 전환율이 <strong style={{ color: diff > 0 ? C.green : C.red }}>{Math.abs(diff)}%p</strong> {diff > 0 ? '높음' : '낮음'}
+                  </div>
+                );
+              })()}
+            </>
+          )}
+
           {/* Owner Comparison */}
           <SectionTitle>담당자별 비교</SectionTitle>
           <OwnerBarChart
@@ -406,6 +461,13 @@ export default function InboundReportPage() {
               { key: 'frtRate', color: C.teal, name: 'FRT달성률' },
               { key: 'visitRate', color: C.orange, name: '방문전환율' },
             ]}
+            tooltipFormatter={(value: number, name: string, entry: any) => {
+              if (name === 'FRT달성률') {
+                const d = entry?.payload;
+                return [`${value}% (${d?.frtOk ?? 0}/${d?.withTask ?? 0}건)`, name];
+              }
+              return [`${value}%`, name];
+            }}
           />
 
           {/* Task Productivity */}

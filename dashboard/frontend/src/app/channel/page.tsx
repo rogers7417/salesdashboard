@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useReportData } from '@/lib/useReportData';
+import { fetchChannelAM } from '@/lib/api';
+import TossBadge from '@/components/TossBadge';
 import {
   KPICard,
   TrendChart,
@@ -119,6 +121,44 @@ export default function ChannelPage() {
   const ch = data?.channel;
   const prevCh = prevData?.channel;
   const trends = data?.dailyTrends || [];
+
+  // 채널 AM 데이터에서 onboarding.partner.list 가져오기
+  const [channelAMData, setChannelAMData] = useState<any>(null);
+  useEffect(() => {
+    if (!selectedMonth) return;
+    fetchChannelAM(selectedMonth)
+      .then((res) => setChannelAMData(res))
+      .catch(() => setChannelAMData(null));
+  }, [selectedMonth]);
+
+  // 안착 타임라인 데이터 계산
+  const settlementTimeline = useMemo(() => {
+    // API 모드: 백엔드가 이미 계산한 것 직접 사용
+    if (channelAMData?.settlementTimeline?.length > 0) return channelAMData.settlementTimeline;
+    // S3 모드 폴백: raw 데이터에서 계산
+    const list = channelAMData?.onboarding?.partner?.list
+      || channelAMData?.mou?.onboarding?.partner?.list || [];
+    if (list.length === 0) return [];
+    return list.map((item: any) => {
+      const mouDate = item.mouContractDate || item.mouStart;
+      const leadDate = item.absoluteFirstLeadDate;
+      let leadToMouDays: number | null = null;
+      if (mouDate && leadDate && mouDate !== '-') {
+        const diff = new Date(mouDate).getTime() - new Date(leadDate).getTime();
+        leadToMouDays = Math.round(diff / (1000 * 60 * 60 * 24));
+      }
+      return {
+        partnerName: item.name ?? null,
+        absoluteFirstLeadDate: leadDate ?? null,
+        mouStart: item.mouStart ?? item.mouContractDate ?? null,
+        mouContractDate: mouDate !== '-' ? mouDate : null,
+        preMouLeadCount: item.preMouLeadCount ?? 0,
+        leadToMouDays,
+        leadsAfterMou3Months: item.leadCountWithinWindow ?? item.leadCount ?? null,
+        isSettled: item.isSettled ?? null,
+      };
+    });
+  }, [channelAMData]);
 
   // ---- Tab button style ----
   const tabStyle = (active: boolean) => ({
@@ -320,6 +360,95 @@ export default function ChannelPage() {
               rate={am.onboardingRate.rate ?? 0}
               target={am.onboardingRate.target}
             />
+          )}
+
+          {/* 파트너 안착 타임라인 */}
+          {settlementTimeline.length > 0 && (
+            <>
+              <SectionTitle>파트너 안착 타임라인</SectionTitle>
+              <Panel>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <thead>
+                      <tr>
+                        {['파트너사', '최초 Lead 인입', 'MOU 시작일', 'MOU 채결일', 'MOU 전 Lead', 'Lead→MOU 간격', 'MOU 후 Lead', '안착'].map((h) => (
+                          <th
+                            key={h}
+                            style={{
+                              padding: '10px 12px',
+                              textAlign: 'left',
+                              fontWeight: 600,
+                              color: C.secondary,
+                              borderBottom: `2px solid ${C.border}`,
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {settlementTimeline.map((row: any, idx: number) => {
+                        const gap = row.leadToMouDays;
+                        const hasLeadBeforeMou = gap != null && gap > 0;
+                        const formatGap = (g: number | null) => {
+                          if (g == null) return '-';
+                          if (g < 0) return `MOU 후 ${Math.abs(g)}일`;
+                          return `${g}일`;
+                        };
+                        return (
+                          <tr
+                            key={row.partnerName ?? idx}
+                            style={{
+                              background: hasLeadBeforeMou ? '#FFF8E1' : (idx % 2 === 0 ? C.bg : C.bgSub),
+                              transition: 'background 0.15s',
+                            }}
+                          >
+                            <td style={{ padding: '10px 12px', color: C.text, fontWeight: 500, borderBottom: `1px solid ${C.border}` }}>
+                              {row.partnerName ?? '-'}
+                            </td>
+                            <td style={{ padding: '10px 12px', color: C.text, borderBottom: `1px solid ${C.border}` }}>
+                              {row.absoluteFirstLeadDate ?? '-'}
+                            </td>
+                            <td style={{ padding: '10px 12px', color: C.text, borderBottom: `1px solid ${C.border}` }}>
+                              {row.mouStart ?? '-'}
+                            </td>
+                            <td style={{ padding: '10px 12px', color: C.text, borderBottom: `1px solid ${C.border}` }}>
+                              {row.mouContractDate ?? '-'}
+                            </td>
+                            <td style={{ padding: '10px 12px', borderBottom: `1px solid ${C.border}` }}>
+                              {row.preMouLeadCount > 0 ? (
+                                <TossBadge color="blue" variant="weak" size="xsmall">{row.preMouLeadCount}건</TossBadge>
+                              ) : '-'}
+                            </td>
+                            <td style={{ padding: '10px 12px', borderBottom: `1px solid ${C.border}`, color: gap != null ? (gap < 0 ? C.red : C.text) : C.muted }}>
+                              {formatGap(gap)}
+                            </td>
+                            <td style={{ padding: '10px 12px', color: C.text, borderBottom: `1px solid ${C.border}` }}>
+                              {row.leadsAfterMou3Months != null ? `${row.leadsAfterMou3Months}건` : '-'}
+                            </td>
+                            <td style={{ padding: '10px 12px', borderBottom: `1px solid ${C.border}` }}>
+                              {row.isSettled != null ? (
+                                <TossBadge
+                                  color={row.isSettled ? 'green' : 'red'}
+                                  variant="weak"
+                                  size="xsmall"
+                                >
+                                  {row.isSettled ? '안착' : '미안착'}
+                                </TossBadge>
+                              ) : (
+                                <TossBadge color="elephant" variant="weak" size="xsmall">-</TossBadge>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </Panel>
+            </>
           )}
 
           <SectionTitle>활성 파트너 현황</SectionTitle>

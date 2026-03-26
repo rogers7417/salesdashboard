@@ -55,12 +55,14 @@ async function collectData(startDate, endDate) {
   const startUTC = kstToUTC(startDate, true);
   const endUTC = kstToUTC(endDate, false);
 
-  // 1. 인바운드세일즈 User 조회
-  const usersResult = await sf.query(`SELECT Id, Name FROM User WHERE Department = '인바운드세일즈' AND IsActive = true`);
+  // 1. 인바운드세일즈 User 조회 (Team__c 포함)
+  const usersResult = await sf.query(`SELECT Id, Name, Team__c FROM User WHERE Department = '인바운드세일즈' AND IsActive = true`);
   const insideUsers = usersResult.records || [];
   const userIds = insideUsers.map(u => `'${u.Id}'`).join(',');
   const userNameMap = {};
   insideUsers.forEach(u => { userNameMap[u.Id] = u.Name; });
+  // TM 파트 (인사이드세일즈) 유저만 별도 필터
+  const tmUsers = insideUsers.filter(u => u.Team__c === '인사이드세일즈');
 
   // 2. Lead 조회
   const leadQuery = `
@@ -221,10 +223,10 @@ async function collectData(startDate, endDate) {
     }
   }
 
-  // 5. 담당자별 Task (일별 생산량)
+  // 5. 담당자별 Task (일별 생산량 + Lead대상 Task 구분)
   let dailyTasks = [];
   if (userIds) {
-    const dailyTasksResult = await sf.query(`SELECT Id, OwnerId, CreatedDate FROM Task WHERE OwnerId IN (${userIds}) AND CreatedDate >= ${startUTC} AND CreatedDate < ${endUTC}`);
+    const dailyTasksResult = await sf.query(`SELECT Id, OwnerId, Lead__c, CreatedDate FROM Task WHERE OwnerId IN (${userIds}) AND CreatedDate >= ${startUTC} AND CreatedDate < ${endUTC}`);
     dailyTasks = dailyTasksResult.records || [];
   }
 
@@ -331,14 +333,14 @@ async function collectData(startDate, endDate) {
     console.log('Visit 조회 스킵:', err.message);
   }
 
-  return { leads, opportunities, oppDataMap, firstTaskByLead, allTasksByLead, dailyTasks, insideUsers, userNameMap, startDate, endDate, contracts, oppTaskMap, allOpportunities, visits, tasksByOpp };
+  return { leads, opportunities, oppDataMap, firstTaskByLead, allTasksByLead, dailyTasks, insideUsers, tmUsers, userNameMap, startDate, endDate, contracts, oppTaskMap, allOpportunities, visits, tasksByOpp };
 }
 
 /**
  * 통계 계산
  */
 function calculateStats(data) {
-  const { leads, oppDataMap, firstTaskByLead, allTasksByLead, dailyTasks, insideUsers, userNameMap, startDate, endDate, contracts, oppTaskMap = {}, allOpportunities = [], visits = [], tasksByOpp = {} } = data;
+  const { leads, oppDataMap, firstTaskByLead, allTasksByLead, dailyTasks, insideUsers, tmUsers, userNameMap, startDate, endDate, contracts, oppTaskMap = {}, allOpportunities = [], visits = [], tasksByOpp = {} } = data;
 
   // Lead 데이터 가공
   const leadData = leads.map(lead => {
@@ -443,14 +445,19 @@ function calculateStats(data) {
     }
   });
 
-  // TM별 Task 집계 (일평균 계산용)
+  // TM별 Task 집계 (일평균 계산용 + Lead대상 Task 별도 집계)
   const taskByOwner = {};
+  const leadTaskByOwner = {};  // Lead__c가 있는 Task만 카운트
   const taskDates = new Set();
   dailyTasks.forEach(t => {
     const dateStr = t.CreatedDate.split('T')[0];
     taskDates.add(dateStr);
     if (!taskByOwner[t.OwnerId]) taskByOwner[t.OwnerId] = 0;
     taskByOwner[t.OwnerId]++;
+    if (t.Lead__c) {
+      if (!leadTaskByOwner[t.OwnerId]) leadTaskByOwner[t.OwnerId] = 0;
+      leadTaskByOwner[t.OwnerId]++;
+    }
   });
   const workingDays = taskDates.size || 1;
 
@@ -469,52 +476,90 @@ function calculateStats(data) {
   // 인바운드세일즈 팀원 ID 셋 (팀원이 아닌 담당자 필터용)
   const insideUserIds = new Set(insideUsers.map(u => u.Id));
 
-  const tmStats = Object.entries(byOwner)
-    .filter(([id]) => insideUserIds.has(id))  // 인바운드세일즈 팀원만 포함
-    .map(([id, d]) => {
-      const avgFRT = d.frtValues.length > 0 ? Math.round(d.frtValues.reduce((a, b) => a + b, 0) / d.frtValues.length) : null;
+  // TM 파트(인사이드세일즈) 기준으로 tmStats 생성 (Lead 배정 0건인 TM도 포함)
+  const tmStats = tmUsers.map(u => {
+      const id = u.Id;
+      const d = byOwner[id] || null;
       const taskTotal = taskByOwner[id] || 0;
+      const leadTaskTotal = leadTaskByOwner[id] || 0;  // Lead 대상 Task 건수
       const dailyAvgTask = Math.round(taskTotal / workingDays * 10) / 10;
 
-      // 시간대별 통계
-      const timeSlotStats = {};
+      // Lead 배정이 있는 TM: 기존 로직
+      if (d) {
+        const avgFRT = d.frtValues.length > 0 ? Math.round(d.frtValues.reduce((a, b) => a + b, 0) / d.frtValues.length) : null;
+
+        const timeSlotStats = {};
+        ['BUSINESS_HOUR', 'OFF_HOUR', 'WEEKEND'].forEach(slot => {
+          const ts = d.byTimeSlot[slot];
+          const tsAvgFRT = ts.frtValues.length > 0 ? Math.round(ts.frtValues.reduce((a, b) => a + b, 0) / ts.frtValues.length) : null;
+          timeSlotStats[slot] = {
+            total: ts.total,
+            mql: ts.mql,
+            mqlRate: ts.total > 0 ? Math.round(ts.mql / ts.total * 100) : 0,
+            wrongEntry: ts.wrongEntry,
+            wrongEntryRate: ts.total > 0 ? Math.round(ts.wrongEntry / ts.total * 100) : 0,
+            frtOk: ts.frtOk,
+            frtRate: ts.withTask > 0 ? Math.round(ts.frtOk / ts.withTask * 100) : 0,
+            avgFRT: tsAvgFRT
+          };
+        });
+
+        return {
+          ownerId: id,
+          ownerName: d.name,
+          total: d.total,
+          mql: d.mql,
+          sql: d.sql,
+          visit: d.visit,
+          cw: d.cw,
+          frtOk: d.frtOk,
+          withTask: d.withTask,
+          wrongEntry: d.wrongEntry,
+          mqlRate: d.total > 0 ? Math.round(d.mql / d.total * 100) : 0,
+          sqlRate: d.mql > 0 ? Math.round(d.sql / d.mql * 100) : 0,
+          frtRate: d.withTask > 0 ? Math.round(d.frtOk / d.withTask * 100) : 0,
+          wrongEntryRate: d.total > 0 ? Math.round(d.wrongEntry / d.total * 100) : 0,
+          avgFRT,
+          taskTotal,
+          leadTaskTotal,
+          dailyAvgTask,
+          timeSlotStats
+        };
+      }
+
+      // Lead 배정 0건인 TM: Task 활동 기준으로 표시
+      const emptyTimeSlotStats = {};
       ['BUSINESS_HOUR', 'OFF_HOUR', 'WEEKEND'].forEach(slot => {
-        const ts = d.byTimeSlot[slot];
-        const tsAvgFRT = ts.frtValues.length > 0 ? Math.round(ts.frtValues.reduce((a, b) => a + b, 0) / ts.frtValues.length) : null;
-        timeSlotStats[slot] = {
-          total: ts.total,
-          mql: ts.mql,
-          mqlRate: ts.total > 0 ? Math.round(ts.mql / ts.total * 100) : 0,
-          wrongEntry: ts.wrongEntry,
-          wrongEntryRate: ts.total > 0 ? Math.round(ts.wrongEntry / ts.total * 100) : 0,
-          frtOk: ts.frtOk,
-          frtRate: ts.withTask > 0 ? Math.round(ts.frtOk / ts.withTask * 100) : 0,
-          avgFRT: tsAvgFRT
+        emptyTimeSlotStats[slot] = {
+          total: 0, mql: 0, mqlRate: 0, wrongEntry: 0, wrongEntryRate: 0,
+          frtOk: 0, frtRate: 0, avgFRT: null
         };
       });
 
       return {
         ownerId: id,
-        ownerName: d.name,
-        total: d.total,
-        mql: d.mql,
-        sql: d.sql,
-        visit: d.visit,
-        cw: d.cw,
-        frtOk: d.frtOk,
-        withTask: d.withTask,
-        wrongEntry: d.wrongEntry,
-        mqlRate: d.total > 0 ? Math.round(d.mql / d.total * 100) : 0,
-        sqlRate: d.mql > 0 ? Math.round(d.sql / d.mql * 100) : 0,
-        frtRate: d.withTask > 0 ? Math.round(d.frtOk / d.withTask * 100) : 0,
-        wrongEntryRate: d.total > 0 ? Math.round(d.wrongEntry / d.total * 100) : 0,
-        avgFRT,
+        ownerName: u.Name,
+        total: 0,
+        mql: 0,
+        sql: 0,
+        visit: 0,
+        cw: 0,
+        frtOk: 0,
+        withTask: 0,
+        wrongEntry: 0,
+        mqlRate: 0,
+        sqlRate: 0,
+        frtRate: 0,
+        wrongEntryRate: 0,
+        avgFRT: null,
         taskTotal,
+        leadTaskTotal,
         dailyAvgTask,
-        timeSlotStats
+        timeSlotStats: emptyTimeSlotStats,
+        noLeadAssignment: true  // 프론트에서 구분 표시용 플래그
       };
     })
-    .sort((a, b) => b.total - a.total);
+    .sort((a, b) => b.total - a.total || b.taskTotal - a.taskTotal);
 
   // 일별 집계 (FRT, 오인입 포함)
   const byDate = {};
