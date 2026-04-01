@@ -1317,6 +1317,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
       advancePaymentDate: opp.AdvancePaymentDate__c || null,
       advancePaymentEnteredAt: ibAdvPaymentEnteredMap[opp.Id] ? utcToKSTDateTimeStr(ibAdvPaymentEnteredMap[opp.Id]) : null,
       hasQuote: !!quote,
+      quoteCreatedDate: quote ? utcToKSTDateStr(quote.CreatedDate) : null,
       hasContract: !!(opp.ContractOpportunities__r && opp.ContractOpportunities__r.records && opp.ContractOpportunities__r.records.length > 0),
       retouchCount,
       daysSinceLastTask,
@@ -1851,6 +1852,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
         advancePaymentEnteredAt: opp.advancePaymentEnteredAt || null,
         createdDate: oppDetailMap[oppId]?.createdDate || '-',
         hasQuote: opp.hasQuote,
+        quoteCreatedDate: opp.quoteCreatedDate || null,
         hasContract: opp.hasContract || false,
         retouchCount: opp.retouchCount,
         daysSinceLastTask: opp.daysSinceLastTask,
@@ -3532,6 +3534,81 @@ function filterChannelDataForDay(data, dayDate) {
   };
 }
 
+/**
+ * 인바운드 데이터를 날짜 범위로 필터 (월초~당일 누적용)
+ */
+function filterInboundDataForRange(data, rangeStart, rangeEnd) {
+  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, fieldUserIds, carryoverOpps, allClosedOpps, contracts, visits = [] } = data;
+
+  const filteredLeads = leads.filter(l => {
+    let dateStr;
+    if (l.CreatedTime__c) {
+      dateStr = parseKSTDateTime(l.CreatedTime__c)?.dateStr;
+    } else {
+      dateStr = utcToKSTDateStr(l.CreatedDate);
+    }
+    return dateStr && dateStr >= rangeStart && dateStr <= rangeEnd;
+  });
+
+  const filteredLeadIds = new Set(filteredLeads.map(l => l.Id));
+  const filteredOppIds = new Set(filteredLeads.filter(l => l.ConvertedOpportunityId).map(l => l.ConvertedOpportunityId));
+
+  return {
+    leads: filteredLeads,
+    opportunities: opportunities.filter(o => filteredOppIds.has(o.Id)),
+    quotes: quotes.filter(q => filteredOppIds.has(q.OpportunityId)),
+    leadTasks: leadTasks.filter(t => filteredLeadIds.has(t.Lead__c)),
+    dailyTasks: dailyTasks.filter(t => {
+      const d = utcToKSTDateStr(t.CreatedDate);
+      return d >= rangeStart && d <= rangeEnd;
+    }),
+    oppTasks: oppTasks.filter(t => filteredOppIds.has(t.WhatId)),
+    obsLeads: obsLeads.filter(l => {
+      const d = utcToKSTDateStr(l.CreatedDate);
+      return d >= rangeStart && d <= rangeEnd;
+    }),
+    users, userNameMap, fieldUserIds,
+    carryoverOpps: carryoverOpps.filter(o => o.CloseDate >= rangeStart && o.CloseDate <= rangeEnd),
+    allClosedOpps: allClosedOpps.filter(o => o.CloseDate >= rangeStart && o.CloseDate <= rangeEnd),
+    contracts: (contracts || []).filter(c => c.contractStart >= rangeStart && c.contractStart <= rangeEnd),
+    visits,
+    stageChangeHistory: (data.stageChangeHistory || []).filter(h => h.changeDate >= rangeStart && h.changeDate <= rangeEnd),
+  };
+}
+
+/**
+ * 채널 데이터를 날짜 범위로 필터 (월초~당일 누적용)
+ */
+function filterChannelDataForRange(data, rangeStart, rangeEnd) {
+  const filteredChannelLeads = data.channelLeads.filter(l => {
+    let dateStr;
+    if (l.CreatedTime__c) {
+      dateStr = parseKSTDateTime(l.CreatedTime__c)?.dateStr;
+    } else {
+      dateStr = utcToKSTDateStr(l.CreatedDate);
+    }
+    return dateStr && dateStr >= rangeStart && dateStr <= rangeEnd;
+  });
+  const filteredLeadIds = new Set(filteredChannelLeads.map(l => l.Id));
+
+  const filteredSourceLeads = data.sourceLeads.filter(l => {
+    const d = utcToKSTDateStr(l.CreatedDate);
+    return d >= rangeStart && d <= rangeEnd;
+  });
+
+  return {
+    ...data,
+    channelLeads: filteredChannelLeads,
+    channelLeadTasks: data.channelLeadTasks.filter(t => filteredLeadIds.has(t.Lead__c)),
+    sourceLeads: filteredSourceLeads,
+    partnerSourceLeads: filteredSourceLeads.filter(l => l.LeadSource === '파트너사 소개'),
+    franchiseSourceLeads: filteredSourceLeads.filter(l => l.LeadSource === '프랜차이즈소개'),
+    channelEvents: data.channelEvents.filter(e => e.ActivityDate >= rangeStart && e.ActivityDate <= rangeEnd),
+    stageChangeHistory: (data.stageChangeHistory || []).filter(h => h.changeDate >= rangeStart && h.changeDate <= rangeEnd),
+    contracts: (data.contracts || []).filter(c => c.contractStart >= rangeStart && c.contractStart <= rangeEnd),
+  };
+}
+
 // ============================================
 // 메인 실행
 // ============================================
@@ -3673,6 +3750,12 @@ async function main() {
       const dayChannelData = filterChannelDataForDay(channelData, dayStr);
       const dayChannelKPIs = calculateChannelKPIs(dayChannelData, dayStr, dayStr);
 
+      // 월초~당일 누적 (monthToDate)
+      const mtdInboundData = filterInboundDataForRange(inboundData, startDate, dayStr);
+      const mtdInboundKPIs = calculateInboundKPIs(mtdInboundData, startDate, dayStr);
+      const mtdChannelData = filterChannelDataForRange(channelData, startDate, dayStr);
+      const mtdChannelKPIs = calculateChannelKPIs(mtdChannelData, startDate, dayStr);
+
       const dayResult = {
         period: dayStr,
         periodLabel: `${dayStr} (${dayNames[dayOfWeek]}요일)`,
@@ -3690,6 +3773,20 @@ async function main() {
           am: dayChannelKPIs.am,
           tm: dayChannelKPIs.tm,
           backOffice: dayChannelKPIs.backOffice
+        },
+        monthToDate: {
+          dateRange: { startDate: startDate, endDate: dayStr },
+          inbound: {
+            insideSales: mtdInboundKPIs.insideSales,
+            fieldSales: mtdInboundKPIs.fieldSales,
+            backOffice: mtdInboundKPIs.backOffice
+          },
+          channel: {
+            ae: mtdChannelKPIs.ae,
+            am: mtdChannelKPIs.am,
+            tm: mtdChannelKPIs.tm,
+            backOffice: mtdChannelKPIs.backOffice
+          }
         }
       };
 

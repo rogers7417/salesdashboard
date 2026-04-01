@@ -273,4 +273,338 @@ router.get('/weeks', async (req, res) => {
   }
 });
 
+// ============================================================
+// GET /api/kpi/weekly-trend
+// 주차별 핵심 KPI 추이 (월간 아카이브 파일 기반)
+// Query: month=YYYY-MM
+// ============================================================
+router.get('/weekly-trend', async (req, res) => {
+  try {
+    let { month } = req.query;
+    if (!month) {
+      const now = new Date();
+      month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+    if (!/^\d{4}-\d{2}$/.test(month)) {
+      return res.status(400).json({ error: 'Invalid month', message: 'month must be YYYY-MM format' });
+    }
+
+    const [year, mon] = month.split('-').map(Number);
+    const lastDayOfMonth = new Date(year, mon, 0).getDate();
+
+    // 주차 경계일: 7, 14, 21, 월말
+    const boundaries = [7, 14, 21, lastDayOfMonth];
+
+    // 해당 월의 일별 파일 목록
+    const fsSync = require('fs');
+    const allFiles = fsSync.readdirSync(path.join(__dirname, '../../../data'));
+    const dailyDates = allFiles
+      .map(f => {
+        const m = f.match(/^kpi-extract-(\d{4}-\d{2}-\d{2})\.json$/);
+        return m && m[1].startsWith(month) ? m[1] : null;
+      })
+      .filter(Boolean)
+      .sort();
+
+    if (dailyDates.length === 0) {
+      return res.json({ month, weeks: [], comparison: null });
+    }
+
+    // 각 주차별로 월초~경계일 범위의 모든 파일을 읽어 누적 집계
+    // 일별 파일은 당일 하루치 스냅샷이므로, 건수 지표는 합산, 비율은 재계산
+    const monthStart = `${month}-01`;
+    const weeks = [];
+    for (let i = 0; i < boundaries.length; i++) {
+      const boundaryDate = `${month}-${String(boundaries[i]).padStart(2, '0')}`;
+      const filesInRange = dailyDates.filter(d => d >= monthStart && d <= boundaryDate);
+      if (filesInRange.length === 0) continue;
+
+      // 이전 주차와 파일 범위가 동일하면 스킵
+      if (weeks.length > 0) {
+        const prevFiles = weeks[weeks.length - 1]._filesInRange;
+        if (prevFiles && prevFiles.length === filesInRange.length &&
+            prevFiles[prevFiles.length - 1] === filesInRange[filesInRange.length - 1]) continue;
+      }
+
+      // 모든 파일 로드
+      const dataArray = [];
+      for (const date of filesInRange) {
+        try {
+          const content = await fs.readFile(
+            path.join(__dirname, '../../../data', `kpi-extract-${date}.json`), 'utf-8');
+          dataArray.push(JSON.parse(content));
+        } catch (readErr) {
+          if (readErr.code !== 'ENOENT') throw readErr;
+        }
+      }
+      if (dataArray.length === 0) continue;
+
+      const kpis = aggregateWeeklyKPIs(dataArray);
+      weeks.push({
+        weekNum: i + 1,
+        endDate: boundaryDate,
+        sourceFiles: filesInRange.length,
+        sourceRange: `${filesInRange[0]} ~ ${filesInRange[filesInRange.length - 1]}`,
+        _filesInRange: filesInRange, // 내부 비교용 (응답에서 제거)
+        ...kpis,
+      });
+    }
+
+    // _filesInRange 제거
+    weeks.forEach(w => delete w._filesInRange);
+
+    // comparison: 마지막 주차 vs 이전 주차
+    let comparison = null;
+    if (weeks.length >= 2) {
+      const current = weeks[weeks.length - 1];
+      const previous = weeks[weeks.length - 2];
+      comparison = buildComparison(current, previous);
+    }
+
+    res.json({ month, weeks, comparison });
+  } catch (error) {
+    console.error('[API] KPI weekly-trend 오류:', error);
+    res.status(500).json({ error: 'Internal server error', message: error.message });
+  }
+});
+
+/**
+ * 여러 일별 아카이브에서 주차 누적 KPI 집계
+ *
+ * 지표 유형별 집계 방식:
+ * - 일별 활동 건수 (SUM): visitCount, meetingCount, frtOk, totalWithTask, frtOver20, mql, sql
+ * - 비율 지표 (원시 합산 후 재계산): frtComplianceRate, sqlConversionRate
+ * - 시점 스냅샷 (마지막 파일 값): mouSigned, settlementRate, activePartners,
+ *   goldenTimeStalled, sqlBacklog, mqlUnconverted, depositDateMissing7d, boLeadTime,
+ *   cwConversionRate, taskCreationAvg, dailyAvgClose, leadCreationPerDay, mouMeetingPerDay
+ */
+function aggregateWeeklyKPIs(dataArray) {
+  const safe = (obj, ...keys) => {
+    let val = obj;
+    for (const k of keys) {
+      if (val == null) return null;
+      val = val[k];
+    }
+    return val != null ? val : null;
+  };
+
+  // monthToDate가 있으면 누적 데이터 사용, 없으면 fallback
+  const last = dataArray[dataArray.length - 1];
+  const lastIb = last.monthToDate?.inbound || last.inbound || {};
+  const lastCh = last.monthToDate?.channel || last.channel || {};
+
+  // monthToDate가 있으면 이미 누적값이므로 마지막 파일에서 직접 읽기
+  // 없으면 기존 SUM 집계 방식 사용
+  const hasMtd = !!last.monthToDate;
+
+  let sumFrtOk, sumFrtTotal, sumMql, sumSql, sumVisitCount;
+  let sumAeMeeting, sumAmMeeting, amMeetingDaysWithData, sumTmFrtOver20;
+  let taskCreationAvg;
+
+  if (hasMtd) {
+    // monthToDate에서 직접 읽기 (이미 월초~당일 누적)
+    const isFrt = safe(lastIb, 'insideSales', 'frt');
+    sumFrtOk = isFrt?.frtOk || 0;
+    sumFrtTotal = isFrt?.totalWithTask || 0;
+    sumMql = safe(lastIb, 'insideSales', 'mql') || 0;
+    sumSql = safe(lastIb, 'insideSales', 'sql') || 0;
+    sumVisitCount = safe(lastIb, 'insideSales', 'visitCount') || 0;
+    sumAeMeeting = safe(lastCh, 'ae', 'meetingCount', 'total') || 0;
+    sumAmMeeting = safe(lastCh, 'am', 'meetingCount', 'total') || 0;
+    // mtd 누적 미팅을 일평균으로 변환: workdays 또는 파일 수 사용
+    const amWorkdays = safe(lastCh, 'am', 'workdays');
+    amMeetingDaysWithData = (amWorkdays && amWorkdays > 0) ? amWorkdays : dataArray.length;
+    sumTmFrtOver20 = safe(lastCh, 'tm', 'frt', 'frtOver20') || 0;
+
+    // taskCreationAvg: IS 멤버만 필터 (byOwner 이름 기준)
+    const isDailyTask = safe(lastIb, 'insideSales', 'dailyTask', 'byOwner');
+    const isOwnerNames = new Set((safe(lastIb, 'insideSales', 'byOwner') || []).map(u => u.name));
+    taskCreationAvg = null;
+    if (Array.isArray(isDailyTask) && isOwnerNames.size > 0) {
+      const isTaskMembers = isDailyTask.filter(u => isOwnerNames.has(u.name));
+      if (isTaskMembers.length > 0) {
+        const avgVals = isTaskMembers.map(u => u.avgDaily || 0);
+        taskCreationAvg = Math.round(avgVals.reduce((s, v) => s + v, 0) / isTaskMembers.length * 10) / 10;
+      }
+    }
+  } else {
+    // fallback: 기존 SUM 집계
+    sumFrtOk = 0; sumFrtTotal = 0; sumMql = 0; sumSql = 0;
+    sumVisitCount = 0; sumAeMeeting = 0; sumAmMeeting = 0;
+    amMeetingDaysWithData = 0; sumTmFrtOver20 = 0;
+    let sumTotalTasks = 0, taskMemberCount = 0, taskDaysWithData = 0;
+
+    for (const data of dataArray) {
+      const ib = data.inbound || {};
+      const ch = data.channel || {};
+
+      sumFrtOk += safe(ib, 'insideSales', 'frt', 'frtOk') || 0;
+      sumFrtTotal += safe(ib, 'insideSales', 'frt', 'totalWithTask') || 0;
+      sumMql += safe(ib, 'insideSales', 'mql') || 0;
+      sumSql += safe(ib, 'insideSales', 'sql') || 0;
+      sumVisitCount += safe(ib, 'insideSales', 'visitCount') || 0;
+      sumAeMeeting += safe(ch, 'ae', 'meetingCount', 'total') || 0;
+      const amMtg = safe(ch, 'am', 'meetingCount', 'total') || 0;
+      sumAmMeeting += amMtg;
+      if (amMtg > 0) amMeetingDaysWithData++;
+      sumTmFrtOver20 += safe(ch, 'tm', 'frt', 'frtOver20') || 0;
+
+      // IS 멤버만 필터 (byOwner 이름 기준)
+      const isNames = new Set((safe(ib, 'insideSales', 'byOwner') || []).map(u => u.name));
+      const byOwner = safe(ib, 'insideSales', 'dailyTask', 'byOwner');
+      if (Array.isArray(byOwner) && isNames.size > 0) {
+        const isMembers = byOwner.filter(u => isNames.has(u.name));
+        const dayTotal = isMembers.reduce((s, u) => s + (u.totalTasks || 0), 0);
+        if (dayTotal > 0) {
+          sumTotalTasks += dayTotal;
+          taskDaysWithData++;
+          taskMemberCount = isMembers.length;
+        }
+      }
+    }
+
+    taskCreationAvg = (taskMemberCount > 0 && taskDaysWithData > 0)
+      ? Math.round(sumTotalTasks / taskMemberCount / taskDaysWithData * 10) / 10
+      : null;
+  }
+
+  // ── 비율 계산 ──
+  const frtComplianceRate = sumFrtTotal > 0
+    ? Math.round((sumFrtOk / sumFrtTotal) * 1000) / 10
+    : null;
+  const sqlConversionRate = sumMql > 0
+    ? Math.round((sumSql / sumMql) * 1000) / 10
+    : null;
+
+  // FS
+  const fsGolden = safe(lastIb, 'fieldSales', 'goldenTime');
+  const goldenTimeStalled = fsGolden
+    ? (fsGolden.stale8plus || 0) + (fsGolden.stale4to7 || 0)
+    : null;
+  const fsCwByUser = safe(lastIb, 'fieldSales', 'cwConversionRate', 'byUser');
+  let fsCwConversionRate = null;
+  if (Array.isArray(fsCwByUser) && fsCwByUser.length > 0) {
+    const totalCw = fsCwByUser.reduce((s, u) => s + (u.cw || 0), 0);
+    const totalAll = fsCwByUser.reduce((s, u) => s + (u.total || 0), 0);
+    fsCwConversionRate = totalAll > 0 ? Math.round((totalCw / totalAll) * 1000) / 10 : 0;
+  }
+  const staleVisitCount = safe(lastIb, 'fieldSales', 'staleVisit', 'total');
+  const obsLeadCount = safe(lastIb, 'fieldSales', 'obsLeadCount', 'total');
+
+  // IB BO
+  const ibBoDailyClose = safe(lastIb, 'backOffice', 'dailyClose');
+  let dailyAvgClose = null;
+  if (ibBoDailyClose && Array.isArray(ibBoDailyClose.byUser)) {
+    const vals = ibBoDailyClose.byUser
+      .filter(u => u.name !== '(미배정)')
+      .map(u => u.avgDailyClose || 0);
+    dailyAvgClose = vals.length > 0
+      ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length * 10) / 10
+      : 0;
+  }
+  const ibBoSqlBacklog = safe(lastIb, 'backOffice', 'sqlBacklog', 'totalOver7');
+  // IB BO cwConversionRate
+  const ibBoCwByUser = safe(lastIb, 'backOffice', 'cwConversionRate', 'byUser');
+  let ibBoCwConversionRate = null;
+  let ibBoCarryoverRate = null;
+  if (Array.isArray(ibBoCwByUser) && ibBoCwByUser.length > 0) {
+    const filtered = ibBoCwByUser.filter(u => u.name !== '(미배정)');
+    const totalCw = filtered.reduce((s, u) => s + (u.cw || 0), 0);
+    const totalAll = filtered.reduce((s, u) => s + (u.total || 0), 0);
+    ibBoCwConversionRate = totalAll > 0 ? Math.round((totalCw / totalAll) * 1000) / 10 : 0;
+    const carryoverTotal = filtered.reduce((s, u) => s + (u.carryoverTotal || 0), 0);
+    ibBoCarryoverRate = totalAll > 0 ? Math.round((carryoverTotal / totalAll) * 1000) / 10 : 0;
+  }
+
+  // AE
+  const aeMouSigned = safe(lastCh, 'ae', 'mouCount', 'total');
+  const aeNegoEntry = safe(lastCh, 'ae', 'negoEntry', 'thisMonth');
+
+  // AM
+  const settlementRate = safe(lastCh, 'am', 'onboardingRate', 'rate');
+  const activePartners = safe(lastCh, 'am', 'activePartnerCount', 'total');
+  const leadCreationPerDay = safe(lastCh, 'am', 'dailyLeadCount', 'avgDaily');
+
+  // TM
+  const mqlUnconverted = safe(lastCh, 'tm', 'unconvertedMQL', 'count');
+  const depositDateMissing7d = safe(lastCh, 'tm', 'sqlBacklog', 'over7');
+
+  // CH BO
+  const boLeadTime = safe(lastCh, 'backOffice', 'leadTime', 'overdueCount');
+  const chBoSqlBacklog = safe(lastCh, 'backOffice', 'sqlBacklog', 'totalOver7');
+  const chBoCwByUser = safe(lastCh, 'backOffice', 'cwConversionRate', 'byUser');
+  let chBoCwConversionRate = null;
+  if (Array.isArray(chBoCwByUser) && chBoCwByUser.length > 0) {
+    const totalCw = chBoCwByUser.reduce((s, u) => s + (u.cw || 0), 0);
+    const totalAll = chBoCwByUser.reduce((s, u) => s + (u.total || 0), 0);
+    chBoCwConversionRate = totalAll > 0 ? Math.round((totalCw / totalAll) * 1000) / 10 : 0;
+  }
+  const chBoDailyCloseData = safe(lastCh, 'backOffice', 'dailyClose');
+  let chBoDailyClose = null;
+  if (chBoDailyCloseData && Array.isArray(chBoDailyCloseData.byUser)) {
+    const vals = chBoDailyCloseData.byUser
+      .filter(u => u.name !== '(미배정)')
+      .map(u => u.avgDailyClose || 0);
+    chBoDailyClose = vals.length > 0
+      ? Math.round(vals.reduce((s, v) => s + v, 0) / vals.length * 10) / 10
+      : 0;
+  }
+
+  return {
+    inbound: {
+      is: { frtComplianceRate, sqlConversionRate, taskCreationAvg, visitCount: sumVisitCount },
+      fs: { goldenTimeStalled, cwConversionRate: fsCwConversionRate, staleVisitCount, obsLeadCount },
+      bo: { dailyAvgClose, sqlBacklog: ibBoSqlBacklog, cwConversionRate: ibBoCwConversionRate, carryoverRate: ibBoCarryoverRate },
+    },
+    channel: {
+      ae: { meetingCount: sumAeMeeting, mouSigned: aeMouSigned, negoEntry: aeNegoEntry },
+      am: {
+        mouMeetingPerDay: amMeetingDaysWithData > 0
+          ? Math.round(sumAmMeeting / amMeetingDaysWithData * 10) / 10
+          : null,
+        settlementRate,
+        activePartners,
+        leadCreationPerDay,
+      },
+      tm: { frtOverCount: sumTmFrtOver20, mqlUnconverted, depositDateMissing7d },
+      bo: { boLeadTime, sqlBacklog: chBoSqlBacklog, cwConversionRate: chBoCwConversionRate, dailyClose: chBoDailyClose },
+    },
+  };
+}
+
+/**
+ * 최근 2주차 간 비교 (delta 계산)
+ */
+function buildComparison(current, previous) {
+  const result = { inbound: {}, channel: {} };
+
+  const compareSections = [
+    ['inbound', 'is'], ['inbound', 'fs'], ['inbound', 'bo'],
+    ['channel', 'ae'], ['channel', 'am'], ['channel', 'tm'], ['channel', 'bo'],
+  ];
+
+  for (const [group, section] of compareSections) {
+    const cur = current[group]?.[section] || {};
+    const prev = previous[group]?.[section] || {};
+    const diff = {};
+
+    const allKeys = new Set([...Object.keys(cur), ...Object.keys(prev)]);
+    for (const key of allKeys) {
+      const cVal = cur[key];
+      const pVal = prev[key];
+      if (cVal == null && pVal == null) continue;
+      diff[key] = {
+        current: cVal,
+        previous: pVal,
+        delta: (cVal != null && pVal != null) ? Math.round((cVal - pVal) * 10) / 10 : null,
+      };
+    }
+
+    if (!result[group]) result[group] = {};
+    result[group][section] = diff;
+  }
+
+  return result;
+}
+
 module.exports = router;

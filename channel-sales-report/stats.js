@@ -899,7 +899,15 @@ function calculateStats(data, targetMonth = null, options = {}) {
       if (hq.hqId) brandIds.add(hq.hqId);  // 본사 계정에 직접 연결된 미팅도 매칭
 
       const enrichedBrands = hq.brands.map(brand => {
-        const brandLeads = (franchiseLeads || []).filter(l => l.BrandName__c === brand.id);
+        const brandLeads = (franchiseLeads || []).filter(l => {
+          if (l.BrandName__c === brand.id) return true;
+          // ConvertedAccountId → 매장 → 브랜드 역추적
+          if (l.ConvertedAccountId) {
+            const mappedBrand = storeToBrandMap.get(l.ConvertedAccountId);
+            if (mappedBrand === brand.id) return true;
+          }
+          return false;
+        });
         const brandThisMonth = brandLeads.filter(l => l.CreatedDate?.substring(0, 7) === thisMonth).length;
         const brandLast3Month = brandLeads.filter(l => l.CreatedDate?.substring(0, 7) >= threeMonthsAgo).length;
         const brandLastDate = brandLeads.length > 0
@@ -994,6 +1002,14 @@ function calculateStats(data, targetMonth = null, options = {}) {
   const franchiseStatsMap = new Map();
   franchiseStats.forEach(f => franchiseStatsMap.set(f.id, f));
 
+  // 매장 → 브랜드 매핑 (ConvertedAccountId 역추적용)
+  const storeToBrandMap = new Map();
+  if (storesByBrand) {
+    storesByBrand.forEach((stores, brandId) => {
+      stores.forEach(store => storeToBrandMap.set(store.Id, brandId));
+    });
+  }
+
   // 파트너사에 활동 정보 추가
   const enrichedPartnerStats = calcPartnerActivity(partnerStats, partnerSourceLeads, franchiseSourceLeads, channelEvents, channelTasks);
 
@@ -1043,8 +1059,17 @@ function calculateStats(data, targetMonth = null, options = {}) {
           firstLeadDate = leadsInWindow.reduce((min, l) => l.CreatedDate < min ? l.CreatedDate : min, leadsInWindow[0].CreatedDate).substring(0, 10);
         }
       } else {
-        const brandIds = item.brands.map(b => b.id);
-        myLeads = allLeads.filter(l => brandIds.includes(l.BrandName__c));
+        const brandIds = new Set(item.brands.map(b => b.id));
+        // BrandName__c 매칭 + ConvertedAccountId → 매장 → 브랜드 역추적
+        myLeads = allLeads.filter(l => {
+          if (brandIds.has(l.BrandName__c)) return true;
+          // ConvertedAccountId가 해당 브랜드 하위 매장인 경우
+          if (l.ConvertedAccountId) {
+            const mappedBrand = storeToBrandMap.get(l.ConvertedAccountId);
+            if (mappedBrand && brandIds.has(mappedBrand)) return true;
+          }
+          return false;
+        });
         const leadsInWindow = myLeads.filter(l => {
           const leadDate = l.CreatedDate?.substring(0, 10);
           return leadDate >= effectiveMouDate && leadDate <= mouEndWindowStr;

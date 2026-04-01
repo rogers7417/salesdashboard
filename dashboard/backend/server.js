@@ -104,6 +104,12 @@ app.get('/api', (req, res) => {
         description: 'KPI 사용 가능 월 목록'
       },
       {
+        path: '/api/kpi/weekly-trend',
+        method: 'GET',
+        description: 'KPI 주차별 추이 (월간 아카이브 기반)',
+        params: { month: 'YYYY-MM (기본: 현재 월)' }
+      },
+      {
         path: '/api/kpi/refresh',
         method: 'POST',
         description: 'KPI 데이터 수동 새로고침 (Salesforce에서 재추출)',

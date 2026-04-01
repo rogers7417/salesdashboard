@@ -226,6 +226,20 @@ export async function fetchKPIDates(month: string): Promise<{ month: string; dat
 }
 
 // ============================================
+// KPI 주간 추이 API
+// ============================================
+export async function fetchKPIWeeklyTrend(month?: string) {
+  if (USE_S3) {
+    const m = month || getCurrentMonth();
+    return fetchS3(`kpi/weekly-trend/${m}.json`);
+  }
+  const params = month ? `?month=${month}` : '';
+  const res = await fetch(`${API_URL}/api/kpi/weekly-trend${params}`);
+  if (!res.ok) throw new Error('Failed to fetch KPI weekly trend');
+  return res.json();
+}
+
+// ============================================
 // 설치 트래킹 API
 // ============================================
 export async function fetchInstallTracking() {

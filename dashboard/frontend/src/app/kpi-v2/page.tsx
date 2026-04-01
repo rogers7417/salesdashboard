@@ -2,7 +2,11 @@
 
 import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { fetchKPIReport, fetchKPIMonths, fetchChannelSales } from '@/lib/api';
+import { fetchKPIReport, fetchKPIMonths, fetchChannelSales, fetchKPIWeeklyTrend } from '@/lib/api';
+import {
+  ComposedChart, BarChart as RBarChart, Bar, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer, ReferenceLine,
+} from 'recharts';
 import DataTable from '@/components/DataTable';
 import TossBadge from '@/components/TossBadge';
 import LeadHeatmap from '@/components/LeadHeatmap';
@@ -41,7 +45,7 @@ function KPIV2PageInner() {
   const [error, setError] = useState<string | null>(null);
   const [month, setMonth] = useState<string>('');
   const [months, setMonths] = useState<string[]>([]);
-  const [activeGroup, setActiveGroup] = useState<'inbound' | 'channel' | 'score'>('inbound');
+  const [activeGroup, setActiveGroup] = useState<'inbound' | 'channel' | 'score' | 'trend'>('inbound');
   const [activeTab, setActiveTab] = useState<'is' | 'fs' | 'bo'>('is');
   const [activeStep, setActiveStep] = useState<number>(0);
   const [fsActiveStep, setFsActiveStep] = useState<number>(0);
@@ -67,11 +71,14 @@ function KPIV2PageInner() {
   const [csOnboardSettledOpen, setCsOnboardSettledOpen] = useState<Record<string, boolean>>({});
   const [activeOwnerOpen, setActiveOwnerOpen] = useState<Record<string, boolean>>({});
   const [scoreTab, setScoreTab] = useState<'is' | 'fs' | 'bo' | 'ae' | 'am' | 'tm' | 'csbo'>('is');
+  const [trendData, setTrendData] = useState<any>(null);
+  const [trendLoading, setTrendLoading] = useState(false);
 
   // URL tab 파라미터 동기화
   useEffect(() => {
     if (tabParam === 'score') setActiveGroup('score');
-    else if (activeGroup === 'score' && !tabParam) setActiveGroup('inbound');
+    else if (tabParam === 'trend') setActiveGroup('trend');
+    else if ((activeGroup === 'score' || activeGroup === 'trend') && !tabParam) setActiveGroup('inbound');
   }, [tabParam]);
 
   // CS 데이터 lazy-load (채널 탭 + 스코어 탭에서 AE/AM 사용)
@@ -82,6 +89,16 @@ function KPIV2PageInner() {
       .then(res => setCsData(res))
       .catch(() => {})
       .finally(() => setCsLoading(false));
+  }, [activeGroup, month]);
+
+  // 주간 추이 데이터 lazy-load
+  useEffect(() => {
+    if (activeGroup !== 'trend') return;
+    setTrendLoading(true);
+    fetchKPIWeeklyTrend(month)
+      .then(res => setTrendData(res))
+      .catch(() => setTrendData(null))
+      .finally(() => setTrendLoading(false));
   }, [activeGroup, month]);
 
   // 월 목록 로드
@@ -1454,6 +1471,13 @@ function KPIV2PageInner() {
     { key: 'stageName', header: '단계', render: (v: string) => boStageBadge(v) },
     { key: 'visitCompleteDate', header: '방문일', render: visitDateRender },
     { key: 'visitDurationMin', header: '방문소요', align: 'right' as const, render: visitDurationRender },
+    { key: 'quoteCreatedDate', header: '견적서 생성일' },
+    { key: 'hasContract', header: '계약서', render: contractBadge },
+    { key: 'lastTaskSubject', header: '마지막 Task', render: (_: any, row: any) => {
+      const hasTasks = row.tasks && row.tasks.length > 0;
+      return <span onClick={hasTasks ? () => setTaskModal({ oppName: row.name || row.oppId, tasks: row.tasks }) : undefined} style={{ cursor: hasTasks ? 'pointer' : 'default', color: hasTasks ? '#3182F6' : '#B0B8C1', textDecoration: hasTasks ? 'underline' : 'none' }}>{row.lastTaskSubject || '-'}</span>;
+    }},
+    { key: 'lastTaskDate', header: 'Task 일자' },
     { key: 'daysSinceLastTask', header: '미터치일수', align: 'right' as const, render: (v: number) => daysElapsedRender(v) },
     { key: 'ageInDays', header: 'Opp경과', align: 'right' as const, render: (v: number) => daysElapsedRender(v) },
   ];
@@ -1463,8 +1487,15 @@ function KPIV2PageInner() {
     { key: 'fieldUser', header: 'Field담당자', render: (v: string) => ownerBold(v) },
     { key: 'stageName', header: '단계', render: (v: string) => boStageBadge(v) },
     { key: 'visitCompleteDate', header: '방문일', render: visitDateRender },
-    { key: 'visitDurationMin', header: '방문소요', align: 'right' as const, render: visitDurationRender },
-    { key: 'daysSinceVisit', header: '경과일', align: 'right' as const, render: (v: number) => daysElapsedRender(v) },
+    { key: 'daysSinceVisit', header: '방문후 경과', align: 'right' as const, render: (v: number) => daysElapsedRender(v) },
+    { key: 'quoteCreatedDate', header: '견적서 생성일' },
+    { key: 'hasContract', header: '계약서', render: contractBadge },
+    { key: 'lastTaskSubject', header: '마지막 Task', render: (_: any, row: any) => {
+      const hasTasks = row.tasks && row.tasks.length > 0;
+      return <span onClick={hasTasks ? () => setTaskModal({ oppName: row.name || row.oppId, tasks: row.tasks }) : undefined} style={{ cursor: hasTasks ? 'pointer' : 'default', color: hasTasks ? '#3182F6' : '#B0B8C1', textDecoration: hasTasks ? 'underline' : 'none' }}>{row.lastTaskSubject || '-'}</span>;
+    }},
+    { key: 'lastTaskDate', header: 'Task 일자' },
+    { key: 'daysSinceLastTask', header: 'Task후 경과', align: 'right' as const, render: (v: number) => v != null ? daysElapsedRender(v) : <span style={{ color: '#B0B8C1' }}>-</span> },
   ];
 
   const fsRawOpenOppColumns = [
@@ -1531,6 +1562,23 @@ function KPIV2PageInner() {
 
   function renderFSStaleVisitDetail() {
     const opps = fs?.staleVisit?.opps || [];
+    // 단계별 그룹핑
+    const stageOrder = ['방문배정', '방문상담', '견적', '재견적', '선납금', '계약진행', '출고진행', '설치진행'];
+    const byStage: Record<string, any[]> = {};
+    opps.forEach((o: any) => {
+      const stage = o.stageName || '-';
+      if (!byStage[stage]) byStage[stage] = [];
+      byStage[stage].push(o);
+    });
+    const stageEntries = Object.entries(byStage).sort((a, b) => {
+      const ia = stageOrder.indexOf(a[0]);
+      const ib = stageOrder.indexOf(b[0]);
+      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+    });
+    const stageColors: Record<string, string> = {
+      '방문배정': '#3182F6', '방문상담': '#3182F6', '견적': '#FF8C00', '재견적': '#F04452',
+      '선납금': '#8B5CF6', '계약진행': '#20C997', '출고진행': '#00B8D9', '설치진행': '#20C997',
+    };
     return (
       <div>
         {opps.length > 0 ? (
@@ -1540,7 +1588,25 @@ function KPIV2PageInner() {
               <TossBadge variant="fill" size="small" color="red">{opps.length}건</TossBadge>
               <TossBadge variant="weak" size="xsmall" color="red">14일+ {fsStaleVisitOver14}건</TossBadge>
             </div>
-            <DataTable columns={staleVisitColumns} data={opps} loading={false} className="daily-raw daily-raw-red" />
+            {/* 단계별 요약 카드 */}
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              {stageEntries.map(([stage, items]) => (
+                <div key={stage} style={{ padding: '8px 14px', borderRadius: '10px', background: '#F9FAFB', border: `1px solid ${stageColors[stage] || '#E5E8EB'}`, borderLeft: `4px solid ${stageColors[stage] || '#8B95A1'}` }}>
+                  <div style={{ fontSize: '13px', color: '#6B7684', fontWeight: 600 }}>{stage}</div>
+                  <div style={{ fontSize: '20px', fontWeight: 800, color: stageColors[stage] || '#191F28' }}>{items.length}건</div>
+                </div>
+              ))}
+            </div>
+            {/* 단계별 그룹 테이블 */}
+            {stageEntries.map(([stage, items]) => (
+              <div key={stage} style={{ marginBottom: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', padding: '8px 12px', background: '#F9FAFB', borderRadius: '8px', borderLeft: `4px solid ${stageColors[stage] || '#8B95A1'}` }}>
+                  <span style={{ fontSize: '15px', fontWeight: 700, color: '#191F28' }}>{stage}</span>
+                  <TossBadge variant="weak" size="xsmall" color="elephant">{items.length}건</TossBadge>
+                </div>
+                <DataTable columns={staleVisitColumns} data={items} loading={false} className="daily-raw daily-raw-red" />
+              </div>
+            ))}
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: '40px', color: '#8B95A1' }}>
@@ -5752,6 +5818,329 @@ function KPIV2PageInner() {
     red: { accent: '#F04452', bg: '#FFF0F0', lightBg: '#FFF8F8' },
   };
 
+  // ============ 주간 추이 탭 렌더링 ============
+
+  function renderTrend() {
+    if (!trendData?.weeks?.length) {
+      return (
+        <div style={{ background: '#fff', borderRadius: '16px', padding: '40px', textAlign: 'center', color: '#8B95A1', border: '1px solid #E5E8EB' }}>
+          주간 추이 데이터가 없습니다.
+        </div>
+      );
+    }
+
+    const weeks: any[] = trendData.weeks || [];
+    const comp = trendData.comparison || {};
+    const TC = { blue: '#3182F6', green: '#20C997', red: '#F04452', orange: '#FF8C00', teal: '#0EA5E9', purple: '#8B5CF6' };
+
+    const inverseKpis = new Set([
+      'frtOverCount', 'mqlUnconverted', 'depositDateMissing7d',
+      'sqlBacklog', 'goldenTimeStalled', 'boLeadTime',
+      'staleVisitCount', 'carryoverRate',
+    ]);
+
+    type KpiDef = { key: string; label: string; unit: string; field: string; color: string; chartType: 'line' | 'bar' };
+
+    const sections: { group: 'inbound' | 'channel'; part: string; label: string; partColor: string; kpis: KpiDef[] }[] = [
+      { group: 'inbound', part: 'is', label: 'IS (인사이드세일즈)', partColor: TC.red, kpis: [
+        { key: 'sqlConversionRate', label: 'SQL 전환율', unit: '%', field: 'sqlConversionRate', color: TC.blue, chartType: 'line' },
+        { key: 'frtComplianceRate', label: 'FRT 준수율', unit: '%', field: 'frtComplianceRate', color: TC.green, chartType: 'line' },
+        { key: 'taskCreationAvg', label: 'Task 생성', unit: '건/일', field: 'taskCreationAvg', color: TC.orange, chartType: 'bar' },
+        { key: 'visitCount', label: '방문 완료', unit: '건', field: 'visitCount', color: TC.teal, chartType: 'bar' },
+      ]},
+      { group: 'inbound', part: 'fs', label: 'FS (필드세일즈)', partColor: TC.teal, kpis: [
+        { key: 'goldenTimeStalled', label: 'Golden Time 정체건', unit: '건', field: 'goldenTimeStalled', color: TC.red, chartType: 'bar' },
+        { key: 'cwConversionRate', label: 'CW 전환율', unit: '%', field: 'cwConversionRate', color: TC.blue, chartType: 'line' },
+        { key: 'staleVisitCount', label: '방문후 관리', unit: '건', field: 'staleVisitCount', color: TC.orange, chartType: 'bar' },
+        { key: 'obsLeadCount', label: 'OBS Lead', unit: '건', field: 'obsLeadCount', color: TC.purple, chartType: 'bar' },
+      ]},
+      { group: 'inbound', part: 'bo', label: 'IB BO (백오피스)', partColor: TC.blue, kpis: [
+        { key: 'dailyAvgClose', label: '일평균 마감', unit: '건', field: 'dailyAvgClose', color: TC.blue, chartType: 'bar' },
+        { key: 'sqlBacklog', label: 'SQL 잔량', unit: '건', field: 'sqlBacklog', color: TC.red, chartType: 'bar' },
+        { key: 'ibBoCwConversionRate', label: 'CW 전환율', unit: '%', field: 'cwConversionRate', color: TC.green, chartType: 'line' },
+      ]},
+      { group: 'channel', part: 'ae', label: 'AE', partColor: TC.green, kpis: [
+        { key: 'meetingCount', label: '미팅 건수', unit: '건', field: 'meetingCount', color: TC.blue, chartType: 'bar' },
+        { key: 'negoEntry', label: '네고 진입', unit: '건', field: 'negoEntry', color: TC.orange, chartType: 'bar' },
+        { key: 'mouSigned', label: 'MOU 체결', unit: '건', field: 'mouSigned', color: TC.green, chartType: 'bar' },
+      ]},
+      { group: 'channel', part: 'am', label: 'AM', partColor: TC.teal, kpis: [
+        { key: 'mouMeetingPerDay', label: 'MOU 미팅', unit: '건/일', field: 'mouMeetingPerDay', color: TC.orange, chartType: 'bar' },
+        { key: 'settlementRate', label: '안착률', unit: '%', field: 'settlementRate', color: TC.blue, chartType: 'line' },
+        { key: 'activePartners', label: '활성파트너', unit: '개', field: 'activePartners', color: TC.green, chartType: 'bar' },
+        { key: 'leadCreationPerDay', label: 'Lead 창출', unit: '건/일', field: 'leadCreationPerDay', color: TC.purple, chartType: 'bar' },
+      ]},
+      { group: 'channel', part: 'tm', label: 'TM', partColor: TC.red, kpis: [
+        { key: 'frtOverCount', label: 'FRT 초과건', unit: '건', field: 'frtOverCount', color: TC.red, chartType: 'bar' },
+        { key: 'mqlUnconverted', label: 'MQL 미전환', unit: '건', field: 'mqlUnconverted', color: TC.orange, chartType: 'bar' },
+        { key: 'depositDateMissing7d', label: '입금미입력(7일+)', unit: '건', field: 'depositDateMissing7d', color: TC.purple, chartType: 'bar' },
+      ]},
+      { group: 'channel', part: 'bo', label: 'CH BO (백오피스)', partColor: TC.blue, kpis: [
+        { key: 'boLeadTime', label: 'BO 리드타임', unit: '일', field: 'boLeadTime', color: TC.orange, chartType: 'line' },
+        { key: 'chBoDailyClose', label: '일일 마감', unit: '건/인', field: 'dailyClose', color: TC.blue, chartType: 'bar' },
+        { key: 'sqlBacklog', label: 'SQL 잔량', unit: '건', field: 'sqlBacklog', color: TC.red, chartType: 'bar' },
+        { key: 'cwConversionRate', label: 'CW 전환율', unit: '%', field: 'cwConversionRate', color: TC.green, chartType: 'line' },
+      ]},
+    ];
+
+    // 헬퍼
+    function gv(w: any, group: string, part: string, field: string) {
+      return w?.[group]?.[part]?.[field] ?? null;
+    }
+    function fmtV(v: any) {
+      if (v === null || v === undefined) return '-';
+      return typeof v === 'number' ? (Number.isInteger(v) ? String(v) : v.toFixed(1)) : v;
+    }
+
+    const tooltipStyle = { background: '#fff', border: '1px solid #E5E8EB', borderRadius: 12, fontSize: 13, boxShadow: '0 4px 12px rgba(0,0,0,0.08)' };
+
+    // 개별 KPI 차트 카드
+    const kpiComments: Record<string, string> = {
+      // IS
+      'inbound-is-sqlConversionRate': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">미전환 42건 중 종료 36건. 주요 사유: <b>타사 계약 18건</b>, 가격 저항 7건, 창업 보류 6건. 방문 전 취소 19건.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #3182F6;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 근거 사례</div><div style="font-size:14px; line-height:2;">\u2022 <a href="https://torder.lightning.force.com/lightning/r/Lead/00QTJ00000xv2cd2AA/view" target="_blank" rel="noopener" style="color:#3182F6;">준비중</a> — \u201c<b>견적서 바로 전달</b> 줘서 페이히어 계약\u201d \u2192 속도 차이 직접 언급<br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/00QTJ00000ybqGX2AY/view" target="_blank" rel="noopener" style="color:#3182F6;">스페이스2437</a> — \u201c타오더 계약하고 <b>익일 설치</b> 하기로\u201d \u2192 당일 계약~익일 설치<br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/00QTJ00000xc0Mr2AI/view" target="_blank" rel="noopener" style="color:#3182F6;">결</a> — \u201c오더 <b>19,000원 + CCTV + 인터넷 결합</b> 할인 받아 계약 완료\u201d \u2192 번들 가격 경쟁</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">경쟁사는 견적 즉시 전달 + 번들 할인으로 선점. <b>초기 컨택~견적 전달 리드타임 단축 + 가격 대응 체계</b>가 핵심.</p>',
+      'inbound-is-frtComplianceRate': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">FRT 초과 <b>431건</b> 중 오인입 <b>195건(45%)</b>. 시간대별 오인입 비율:</p><div style="margin-top:6px; margin-bottom:8px;"><table style="width:100%; font-size:14px; border-collapse:collapse;"><tr style="background:#F2F4F6;"><th style="padding:4px 8px; text-align:left;">시간대</th><th style="padding:4px 8px; text-align:right;">FRT 초과</th><th style="padding:4px 8px; text-align:right;">오인입</th><th style="padding:4px 8px; text-align:right;">오인입 비율</th><th style="padding:4px 8px; text-align:right;">FRT 준수율</th></tr><tr><td style="padding:4px 8px;">영업시간</td><td style="padding:4px 8px; text-align:right;">128건</td><td style="padding:4px 8px; text-align:right;">41건</td><td style="padding:4px 8px; text-align:right;">32%</td><td style="padding:4px 8px; text-align:right; color:#20C997;">77.5%</td></tr><tr style="background:#FFF5F5;"><td style="padding:4px 8px;">영업외</td><td style="padding:4px 8px; text-align:right;">185건</td><td style="padding:4px 8px; text-align:right;"><b>86건</b></td><td style="padding:4px 8px; text-align:right; color:#F04452;"><b>46.5%</b></td><td style="padding:4px 8px; text-align:right; color:#F04452;">3.6%</td></tr><tr style="background:#FFF5F5;"><td style="padding:4px 8px;">주말</td><td style="padding:4px 8px; text-align:right;">118건</td><td style="padding:4px 8px; text-align:right;"><b>68건</b></td><td style="padding:4px 8px; text-align:right; color:#F04452;"><b>57.6%</b></td><td style="padding:4px 8px; text-align:right; color:#F04452;">23.4%</td></tr></table></div><p style="font-size:15px; line-height:1.8; color:#333D4B;">오인입 195건 중 <b>\u201c문의하지 않음\u201d 152건(78%)</b>. 영업외\u00b7주말 FRT 저조는 응대 속도보다 <b>오인입 비율이 근본 원인</b>. 유효 리드 기준 FRT 재산정 검토 필요.</p><div style="margin-top:8px; padding:8px 12px; background:#EDF2FF; border-radius:8px; border-left:3px solid #3182F6;"><div style="font-size:14px; line-height:1.8;">\ud83d\udccb <b>오인입 품질 개선 프로젝트</b>: 통화 녹취 STT 분석을 통해 오인입 분류 기준을 고도화하고, 실제 상담 기회가 있었던 건을 재발굴하여 전환율 향상에 활용 예정.</div></div>',
+      'inbound-is-taskCreationAvg': '인당 45.5건/일로 목표 30건 대비 초과 달성. 장순지 48.5건, 이지혜 42.5건으로 안정적 수준 유지',
+      'inbound-is-visitCount': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">429건 달성 (목표 75건 초과). 그러나 <b>방문 전 취소 19건</b> \u2014 전부 Closed Lost. 사유: 가격 문제 7건, 단순 변심 6건.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #FF8C00;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 방문 전 취소 사례 \u2014 배정~방문 사이 경쟁사 선점</div><div style="font-size:14px; line-height:2;">\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mzT6JYAU/view" target="_blank" rel="noopener" style="color:#3182F6;">스페이스2437</a> \u2014 \u201c타오더 계약, <b>익일 설치</b> 하기로. 가격이 더 저렴\u201d<br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000k5BJiYAM/view" target="_blank" rel="noopener" style="color:#3182F6;">밀꽃</a> \u2014 \u201c캡스포스 사용 중, 대표가 <b>캡스오더 설치확정</b>. 연결된 담당자는 결정권 없음\u201d<br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mkoivYAA/view" target="_blank" rel="noopener" style="color:#3182F6;">어죽집</a> \u2014 \u201c<b>본사에서 포스+CCTV+오더 전체 직접 설치</b>. 개별 설치 불가 안내 받음\u201d</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;"><b>방문 배정~방문 사이 리드타임 단축</b>이 방문 전 이탈 방지의 핵심. 배정 후 즉일 방문 체계 검토.</p>',
+      // FS
+      'inbound-fs-goldenTimeStalled': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">정체 85건 중 8일+ 방치 <b>34건</b>. 오픈 과업 없는 건 <b>26건(84%)</b> \u2014 과업 없이 방치되는 구조.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #FF8C00;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 방치 사례 (마지막 터치 이후 경과일 순)</div><div style="font-size:14px; line-height:2;">\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jkE2vYAE/view" target="_blank" rel="noopener" style="color:#3182F6;">진구곱창(강남역본점)</a> \u2014 27일 경과, 마지막 터치 \u201c방문\u201d <b>20일 전</b><br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000k5dHZYAY/view" target="_blank" rel="noopener" style="color:#3182F6;">유케야(남양주다산점)</a> \u2014 21일 경과, 마지막 터치 \u201c특별승인\u201d <b>19일 전</b><br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jrVerYAE/view" target="_blank" rel="noopener" style="color:#3182F6;">카시아속초호라이즌</a> \u2014 25일 경과, 마지막 터치 \u201c통화\u201d <b>16일 전</b></div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">FS-BO 간 핸드오프 후 <b>후속 과업이 생성되지 않아 방치</b>. 견적 전달 후 자동 팔로업 과업 생성 검토.</p>',
+      'inbound-fs-staleVisitCount': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">131건 중 14일+ 초과 <b>75건(57%)</b>. 오픈 과업 없는 건 <b>96건(73%)</b>.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #FF8C00;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 방문 후 방치 사례</div><div style="font-size:14px; line-height:2;">\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jh1IHYAY/view" target="_blank" rel="noopener" style="color:#3182F6;">원닭(용인수지점)</a> \u2014 방문 후 <b>26일</b>, 마지막 터치 \u201c진행상황\u201d 3/12<br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jci69YAA/view" target="_blank" rel="noopener" style="color:#3182F6;">영승(서초점)</a> \u2014 방문 후 <b>27일</b>, 마지막 터치 \u201c리텐션\u201d 3/18</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">방문 후 2주 내 후속 조치가 안 되는 건이 절반 이상. <b>방문 후 자동 리마인더 또는 팔로업 프로세스 정립 필요</b>.</p>',
+      'inbound-fs-obsLeadCount': '<p style="font-size:15px; line-height:1.8; color:#333D4B;"><b>605건</b> 정상 누적. 목표 대비 초과 달성. OBS Lead 생산은 안정적.</p>',
+      'inbound-fs-cwConversionRate': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">CW전환율 <b>28.7%\u219218.6%</b> 하락 추세.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #F04452;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 담당자별 CW 전환율</div><div style="font-size:14px; line-height:1.8;">\u2022 변상훈 17/65 (<b>26.2%</b>) | 한용우 16/70 (22.9%)<br/>\u2022 이경호 15/76 (19.7%) | 최준일 10/61 (16.4%)<br/>\u2022 최옥환 9/60 (15%) | 김영호 7/77 (<b>9.1%</b> 최저)</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">담당자별 <b>최대 3배 편차</b>(9.1%~26.2%). Golden Time 정체 85건 해소 시 전환율 회복 기대. 김영호 건별 원인 분석 필요.</p>',
+      // IB BO
+      'inbound-bo-dailyAvgClose': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">일평균 마감 <b>11.8\u21927.8</b> 하락. W1 CW 42건 중 <b>이월 100%</b> \u2014 전월 이월건 소화로 초반 마감 높았으나, 이월 소진 후 신규만 남아 둔화.</p><div style="margin-top:8px; margin-bottom:8px;"><table style="width:100%; font-size:14px; border-collapse:collapse;"><tr style="background:#F2F4F6;"><th style="padding:4px 8px; text-align:left;">주차</th><th style="padding:4px 8px; text-align:right;">CW</th><th style="padding:4px 8px; text-align:right;">이월</th><th style="padding:4px 8px; text-align:right;">금월</th><th style="padding:4px 8px; text-align:right;">이월비중</th><th style="padding:4px 8px; text-align:right;">Open잔량</th><th style="padding:4px 8px; text-align:right;">영업중</th><th style="padding:4px 8px; text-align:right;">오픈전</th></tr><tr style="background:#FFF5F5;"><td style="padding:4px 8px;">W1</td><td style="padding:4px 8px; text-align:right;">42건</td><td style="padding:4px 8px; text-align:right;"><b>42건</b></td><td style="padding:4px 8px; text-align:right;">0건</td><td style="padding:4px 8px; text-align:right; color:#F04452;"><b>100%</b></td><td style="padding:4px 8px; text-align:right;">39건</td><td style="padding:4px 8px; text-align:right;">19건</td><td style="padding:4px 8px; text-align:right;">19건</td></tr><tr><td style="padding:4px 8px;">W2</td><td style="padding:4px 8px; text-align:right;">95건</td><td style="padding:4px 8px; text-align:right;">83건</td><td style="padding:4px 8px; text-align:right;">12건</td><td style="padding:4px 8px; text-align:right;">87%</td><td style="padding:4px 8px; text-align:right;">86건</td><td style="padding:4px 8px; text-align:right;">46건</td><td style="padding:4px 8px; text-align:right;">38건</td></tr><tr><td style="padding:4px 8px;">W3</td><td style="padding:4px 8px; text-align:right;">148건</td><td style="padding:4px 8px; text-align:right;">118건</td><td style="padding:4px 8px; text-align:right;">30건</td><td style="padding:4px 8px; text-align:right;">80%</td><td style="padding:4px 8px; text-align:right;">154건</td><td style="padding:4px 8px; text-align:right;">79건</td><td style="padding:4px 8px; text-align:right;">73건</td></tr><tr><td style="padding:4px 8px;">W4</td><td style="padding:4px 8px; text-align:right;">213건</td><td style="padding:4px 8px; text-align:right;">152건</td><td style="padding:4px 8px; text-align:right;">61건</td><td style="padding:4px 8px; text-align:right;">71%</td><td style="padding:4px 8px; text-align:right; color:#F04452;"><b>262건</b></td><td style="padding:4px 8px; text-align:right;">136건</td><td style="padding:4px 8px; text-align:right; color:#F04452;"><b>118건</b></td></tr></table></div><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #3182F6;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb Open 잔량 262건 구성</div><div style="font-size:14px; line-height:1.8;">\u2022 영업중 <b>136건</b> \u2014 금월 CW 전환율 높음 (영업중 40건 vs 오픈전 21건)<br/>\u2022 오픈전 <b>118건(45%)</b> \u2014 오픈 일정 미확정으로 전환 지연, 잔량 누적의 주요 원인</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;"><b>오픈전 매장 118건의 오픈 일정 확인 + 영업중 매장 우선 마감</b>으로 잔량 해소 가능.</p>',
+      'inbound-bo-sqlBacklog': '<p style="font-size:15px; line-height:1.8; color:#333D4B;"><b>191건</b>(7일+). 전체 Open 270건 중 70%가 7일 초과. 매주 50건씩 증가 추세.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #F04452;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 7일+ 잔량 중 오픈 과업 없음: 127건(75%)</div><div style="font-size:14px; line-height:2;">\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jgn8rYAA/view" target="_blank" rel="noopener" style="color:#3182F6;">홍월(상암점)</a> \u2014 27일 경과, 마지막 터치 \u201c방문취소요청\u201d 3/25, 이후 <b>과업 없음</b><br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jh21RYAQ/view" target="_blank" rel="noopener" style="color:#3182F6;">고해정(부산명지점)</a> \u2014 27일 경과, 선납금 단계인데 <b>과업 없음</b><br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jglOqYAI/view" target="_blank" rel="noopener" style="color:#3182F6;">히노아지(정관점)</a> \u2014 27일 경과, 견적 단계, 마지막 터치 \u201c통화\u201d 3/31</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;"><b>유입 속도 > 마감 속도</b>. 잔량 75%가 오픈 과업 없이 방치 \u2014 과업 자동 생성 또는 우선순위 트리아지 필요.</p>',
+
+      'inbound-bo-ibBoCwConversionRate': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">CW 전환율 <b>42%\u219252%</b> 개선 추세. 목표 60% 근접 중.</p><div style="margin-top:8px; margin-bottom:8px;"><table style="width:100%; font-size:14px; border-collapse:collapse;"><tr style="background:#F2F4F6;"><th style="padding:4px 8px; text-align:left;">주차</th><th style="padding:4px 8px; text-align:right;">영업중 CW</th><th style="padding:4px 8px; text-align:right;">전환율</th><th style="padding:4px 8px; text-align:right;">오픈전 CW</th><th style="padding:4px 8px; text-align:right;">전환율</th></tr><tr><td style="padding:4px 8px;">W1</td><td style="padding:4px 8px; text-align:right;">21/99</td><td style="padding:4px 8px; text-align:right;">21.2%</td><td style="padding:4px 8px; text-align:right;">21/68</td><td style="padding:4px 8px; text-align:right; color:#20C997;"><b>30.9%</b></td></tr><tr><td style="padding:4px 8px;">W2</td><td style="padding:4px 8px; text-align:right;">54/194</td><td style="padding:4px 8px; text-align:right;">27.8%</td><td style="padding:4px 8px; text-align:right;">41/131</td><td style="padding:4px 8px; text-align:right; color:#20C997;"><b>31.3%</b></td></tr><tr><td style="padding:4px 8px;">W3</td><td style="padding:4px 8px; text-align:right;">80/259</td><td style="padding:4px 8px; text-align:right;">30.9%</td><td style="padding:4px 8px; text-align:right;">68/190</td><td style="padding:4px 8px; text-align:right; color:#20C997;"><b>35.8%</b></td></tr><tr><td style="padding:4px 8px;">W4</td><td style="padding:4px 8px; text-align:right;">122/341</td><td style="padding:4px 8px; text-align:right;">35.8%</td><td style="padding:4px 8px; text-align:right;">91/239</td><td style="padding:4px 8px; text-align:right; color:#20C997;"><b>38.1%</b></td></tr></table></div><p style="font-size:15px; line-height:1.8; color:#333D4B;">오픈전 매장이 영업중보다 전환율이 <b>2~10%p 높은 추세</b>. 양쪽 모두 주차별 개선 중. 목표 60% 도달을 위해 Open 잔량 262건(영업중 136 + 오픈전 118) 마감 가속 필요.</p>',
+      // AE
+      'channel-ae-meetingCount': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">62건 정상 누적. 일 <b>3.0건/목표 2건</b> 초과 달성.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #20C997;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 담당자별 미팅 현황</div><div style="font-size:14px; line-height:1.8;">\u2022 정용현(AE) <b>24건</b> \u2014 MOU 완료 본사 미팅 집중<br/>\u2022 오유정(AM) <b>14건</b> | 구준모(팀장) <b>13건</b> | 박해규(AM) 6건<br/>\u2022 문은기(AM) 2건 \u2014 MOU 6건 체결 대비 미팅 적음, 미안착 파트너 팔로업 필요</div></div>',
+      'channel-ae-negoEntry': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">이번달 <b>8건</b>/목표 10건 미달. 전체 파이프라인 <b>115건</b>.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #FF8C00;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 네고 진입 담당자별</div><div style="font-size:14px; line-height:1.8;">\u2022 이은지 <b>3건</b> (전체 36건 관리 중)<br/>\u2022 구준모\u00b7정용현\u00b7박해규\u00b7명세준\u00b7문은기 각 1건<br/>\u2022 오유정 <b>0건</b> \u2014 전체 10건 관리 중이나 이번달 신규 유입 없음</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">신규 네고 유입 둔화 시 <b>4월 MOU 체결 파이프라인에 영향</b>. 네고 단계 유입 활성화 필요.</p>',
+      'channel-ae-mouSigned': '<p style="font-size:15px; line-height:1.8; color:#333D4B;"><b>21건</b>으로 목표 4건 대비 초과 달성. 파트너 13건 + 프랜차이즈 본사 8건.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #20C997;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb MOU 체결 담당자별</div><div style="font-size:14px; line-height:1.8;">\u2022 정용현 <b>8건</b> (본사 8건 전담) \u2014 원할머니보쌈, 강강술래, 옥소반 등<br/>\u2022 문은기 <b>6건</b> (파트너 전담) \u2014 카사, 바로체크, 인하솔루션 등<br/>\u2022 오유정 2건 | 명세준 2건 | 박해규 2건 | 이은지 1건</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">MOU 체결은 충분하나 <b>안착률 34.9%</b>로 MOU 후 리드 창출 연결이 과제. 미서명 계약 <b>5건</b>(7일 초과 1건: 옛날경성순대국 225일) 관리 필요.</p>',
+      // AM
+      'channel-am-mouMeetingPerDay': '<p style="font-size:15px; line-height:1.8; color:#333D4B;"><b>1.8\u21923.0건/일</b> 개선. 목표 2건/일 달성.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #20C997;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 미팅은 충분하나 안착 연결이 과제</div><div style="font-size:14px; line-height:1.8;">미팅 62건 중 MOU 완료 파트너 대상 미팅이 핵심. 미안착 28곳 중 <b>미팅 0건인 파트너가 다수</b> \u2014 미팅을 해도 안착이 안 되는 건지, 미팅 자체를 안 하는 건지 구분 필요.</div></div>',
+      'channel-am-settlementRate': '<p style="font-size:15px; line-height:1.8; color:#333D4B;"><b>15/43 = 34.9%</b>, 목표 80% 대비 절반 이하. 4주간 변동 없음.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #F04452;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 담당자별 안착률</div><div style="font-size:14px; line-height:1.8;">\u2022 박해규 3/4 (<b>75%</b>) \u2014 가장 높음<br/>\u2022 문은기 5/13 (38.5%) | 오유정 5/14 (35.7%)<br/>\u2022 명세준 2/8 (<b>25%</b>) \u2014 미안착 6곳 전부 미팅 0건<br/>\u2022 구준모 0/1 | 장성원 0/1 | 김희수 0/1 | 이은지 0/1</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">미안착 28곳 중 <b>미팅 없이 방치되는 파트너 집중 관리</b> 필요. MOU 체결 후 3개월 window 내 리드 1건 유도가 핵심.</p>',
+      'channel-am-activePartners': '<p style="font-size:15px; line-height:1.8; color:#333D4B;"><b>271개</b> (목표 70개 초과). 4주간 변동 없음.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #3182F6;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 담당자별 활성 파트너</div><div style="font-size:14px; line-height:1.8;">\u2022 오유정 <b>67개</b> | 박해규 <b>56개</b> \u2014 상위 2명에 46% 집중<br/>\u2022 구준모 38개 | 정용현 23개<br/>\u2022 명세준 21개 | 문은기 17개 | 이은지 0개</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">목표 초과이나 <b>상위 2명 집중 + 하위 담당자 파트너 배분 불균형</b>. 비활성 파트너 리터치로 활성 파트너 분산 필요.</p>',
+      'channel-am-leadCreationPerDay': '<p style="font-size:15px; line-height:1.8; color:#333D4B;"><b>14.6건/일</b>, 목표 20~25건 대비 부족.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #FF8C00;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 담당자별 리드 현황</div><div style="font-size:14px; line-height:1.8;">\u2022 오유정 <b>136건</b> (전체의 47%) \u2014 독주<br/>\u2022 박해규 61건 | 구준모 28건 | 문은기 23건<br/>\u2022 정용현 22건 | 명세준 15건 | 이은지 <b>1건</b></div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">리드가 <b>오유정 1명에 편중</b>. 비활성 파트너 리터치 + 미안착 파트너 리드 독려로 소스 다변화 필요. 채널 목표 3,200대 미달의 근본 원인.</p>',
+      // TM
+      'channel-tm-frtOverCount': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">FRT 초과 <b>68건</b>. 3명이 고르게 분포.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #FF8C00;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 담당자별 FRT 초과</div><div style="font-size:14px; line-height:1.8;">\u2022 송슬기 <b>25건</b> (Lead 102건 처리 중)<br/>\u2022 정주희 <b>24건</b> (Lead 108건 처리 중)<br/>\u2022 이은지 <b>18건</b> (Lead 81건 처리 중)</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">인당 Lead <b>81~108건</b>으로 과부하 상태. 리드 분배 재조정 또는 인력 보강 검토.</p>',
+      'channel-tm-mqlUnconverted': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">MQL 미전환 <b>46건</b>.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #F04452;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 담당자별 미전환</div><div style="font-size:14px; line-height:1.8;">\u2022 송슬기 <b>22건(48%)</b> \u2014 Lead 102건 중 전환 77건(75.5%)<br/>\u2022 정주희 12건 \u2014 Lead 108건 중 전환 84건(77.8%)<br/>\u2022 이은지 9건 \u2014 Lead 81건 중 전환 67건(82.7%)</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">송슬기 미전환 집중. 전환율 75.5%로 타 담당자(77~82%) 대비 낮음. <b>리드 품질 또는 팔로업 타이밍 점검</b> 필요.</p>',
+      'channel-tm-depositDateMissing7d': '<p style="font-size:15px; line-height:1.8; color:#333D4B;"><b>47건</b>(7일+). 오픈 과업 없는 건 5건.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #FF8C00;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 방치 사례 (배정 후 과업 없음)</div><div style="font-size:14px; line-height:2;">\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jhJBxYAM/view" target="_blank" rel="noopener" style="color:#3182F6;">경성면옥(신논현)</a> \u2014 27일 경과, 마지막 터치 \u201c배정\u201d <b>3/4 이후 방치</b><br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jggsAYAQ/view" target="_blank" rel="noopener" style="color:#3182F6;">경성면옥(길동사거리점)</a> \u2014 27일 경과, 마지막 터치 \u201c배정\u201d <b>3/4 이후 방치</b><br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000k9FtOYAU/view" target="_blank" rel="noopener" style="color:#3182F6;">낭만짚불구이(수원권선점)</a> \u2014 20일 경과, 마지막 터치 \u201c배정\u201d 3/11</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">입금일자 입력 프로세스 미정착. <b>배정 후 후속 과업이 자동 생성되지 않아 방치</b>.</p>',
+      // CH BO
+      'channel-bo-boLeadTime': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">리드타임 초과 <b>28건</b>. 3\u21928\u219218\u219228건 매주 증가.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #FF8C00;"><div style="font-size:14px; line-height:1.8;">처리 속도 < 유입 속도. TM에서 넘어오는 건이 BO 처리 용량을 초과하고 있음.</div></div>',
+      'channel-bo-chBoDailyClose': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">일일 마감 평균 <b>3.1건/인</b>.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #3182F6;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 담당자별 일일 마감</div><div style="font-size:14px; line-height:1.8;">\u2022 최영은 <b>4.2건</b> | 장명진 <b>4.2건</b><br/>\u2022 이은지 2.1건 | 김희수 1.9건</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;">담당자간 <b>2배 편차</b>(1.9~4.2건). 균등 배분 또는 역량별 차등 배분 검토.</p>',
+      'channel-bo-sqlBacklog': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">3\u21928\u219218\u2192<b>20건</b> 증가 추세.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #FF8C00;"><div style="font-size:13px; color:#6B7684; margin-bottom:6px; font-weight:600;">\ud83d\udccb 오픈 과업 없이 방치: 11건</div><div style="font-size:14px; line-height:2;">\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jmqqQYAQ/view" target="_blank" rel="noopener" style="color:#3182F6;">링코노래타운(신촌점)</a> \u2014 계약진행 26일, 마지막 터치 \u201c요청사항\u201d <b>3/19 이후 방치</b><br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jmpKtYAI/view" target="_blank" rel="noopener" style="color:#3182F6;">해논미역(신세계사우스시티점)</a> \u2014 출고진행 26일, <b>터치 이력 없음</b><br/>\u2022 <a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000jtIyUYAU/view" target="_blank" rel="noopener" style="color:#3182F6;">육전식당(신설동점)</a> \u2014 계약진행 25일, 마지막 터치 3/12</div></div><p style="margin-top:8px; font-size:15px; line-height:1.8; color:#333D4B;"><b>처리 속도 < 유입 속도</b>. 과업 없이 방치되는 건 관리 필요.</p>',
+      'channel-bo-cwConversionRate': '<p style="font-size:15px; line-height:1.8; color:#333D4B;">CW전환율 <b>50%\u219257.6%</b> 개선 추세.</p><div style="margin-top:8px; padding:8px 12px; background:#F8F9FA; border-radius:8px; border-left:3px solid #20C997;"><div style="font-size:14px; line-height:1.8;">주차별 개선 중. 다만 SQL 잔량 20건 증가 추세를 감안하면 <b>마감 속도 유지가 관건</b>.</div></div>',
+    };
+
+    // ===== 목표 달성 현황 =====
+    const targets = {
+      inbound: { label: '인바운드 세일즈', target: 2600, actual: 2646, color: TC.blue },
+      channel: { label: '채널 세일즈', target: 3200, actual: 2396, color: TC.green },
+    };
+    const totalTarget = targets.inbound.target + targets.channel.target;
+    const totalActual = targets.inbound.actual + targets.channel.actual;
+
+    function renderTargetCard(key: string, t: { label: string; target: number; actual: number; color: string }) {
+      const pct = t.target > 0 ? Math.round((t.actual / t.target) * 100) : 0;
+      const achieved = t.actual >= t.target;
+      return (
+        <div key={key} style={{
+          flex: 1, minWidth: 200, background: '#fff', borderRadius: 16, padding: '20px 24px',
+          border: `1px solid ${achieved ? '#20C99740' : '#E5E8EB'}`,
+          boxShadow: achieved ? '0 0 0 1px #20C99720' : 'none',
+        }}>
+          <div style={{ fontSize: 13, color: '#8B95A1', fontWeight: 500, marginBottom: 8 }}>{t.label}</div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+            <span style={{ fontSize: 28, fontWeight: 700, color: '#191F28' }}>{t.actual.toLocaleString()}</span>
+            <span style={{ fontSize: 14, color: '#8B95A1' }}>/ {t.target.toLocaleString()}</span>
+          </div>
+          <div style={{ marginTop: 10, background: '#F2F4F6', borderRadius: 6, height: 8, overflow: 'hidden' }}>
+            <div style={{ width: `${Math.min(pct, 100)}%`, height: '100%', background: achieved ? '#20C997' : t.color, borderRadius: 6, transition: 'width 0.4s ease' }} />
+          </div>
+          <div style={{ marginTop: 6, fontSize: 13, fontWeight: 600, color: achieved ? '#20C997' : t.color }}>{pct}% 달성</div>
+        </div>
+      );
+    }
+
+    // ===== 심각도 판정 (정렬 없이 아이콘용) =====
+    const severityIcon: Record<string, string> = { critical: '\ud83d\udea8', warning: '\u26a0\ufe0f', ok: '\u2705' };
+    const severityBorder: Record<string, string> = { critical: '#F04452', warning: '#FF8C00', ok: '#20C997' };
+
+    function getSeverity(kpi: KpiDef, group: string, part: string): 'critical' | 'warning' | 'ok' {
+      const lastWeek = weeks[weeks.length - 1];
+      const c = comp?.[group]?.[part]?.[kpi.field];
+      const delta = c?.delta ?? (c?.current != null && c?.previous != null ? c.current - c.previous : null);
+      const isInverse = inverseKpis.has(kpi.key);
+      const isPositive = delta != null && delta > 0;
+      const isGood = delta != null ? (isInverse ? !isPositive : isPositive) : null;
+      const commentKey = `${group}-${part}-${kpi.key}`;
+      const hasHtmlComment = (kpiComments[commentKey] || '').includes('<');
+      if (isGood === false && hasHtmlComment) return 'critical';
+      if (isGood === false || hasHtmlComment) return 'warning';
+      return 'ok';
+    }
+
+    function renderKpiRow(kpi: KpiDef, group: string, part: string) {
+      const chartData = weeks.map((w: any) => ({ name: `W${w.weekNum}`, value: gv(w, group, part, kpi.field) }));
+      const lastVal = chartData[chartData.length - 1]?.value;
+      const c = comp?.[group]?.[part]?.[kpi.field];
+      const delta = c?.delta ?? (c?.current != null && c?.previous != null ? c.current - c.previous : null);
+      const isInverse = inverseKpis.has(kpi.key);
+      const isPositive = delta != null && delta > 0;
+      const isGood = delta != null ? (isInverse ? !isPositive : isPositive) : null;
+      const deltaColor = delta == null || delta === 0 ? '#8B95A1' : isGood ? '#20C997' : '#F04452';
+      const arrow = delta != null ? (delta > 0 ? '\u25b2' : delta < 0 ? '\u25bc' : '') : '';
+      const unitSuffix = kpi.unit === '%' ? '%p' : '';
+      const isLine = kpi.chartType === 'line';
+      const isPct = kpi.unit === '%';
+      const severity = getSeverity(kpi, group, part);
+      const comment = kpiComments[`${group}-${part}-${kpi.key}`] || '';
+      const isHtml = comment.includes('<');
+
+      return (
+        <div key={`${group}-${part}-${kpi.key}`} style={{
+          background: '#fff', borderRadius: 16, padding: '18px 20px',
+          border: '1px solid #E5E8EB',
+          borderLeftWidth: 4, borderLeftColor: severityBorder[severity],
+        }}>
+          {/* 헤더: 심각도 아이콘 + 지표명 + 현재값 + delta */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 16 }}>{severityIcon[severity]}</span>
+              <span style={{ fontSize: 15, fontWeight: 700, color: '#191F28' }}>{kpi.label}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <span style={{ fontSize: 22, fontWeight: 700, color: '#191F28' }}>{fmtV(lastVal)}</span>
+              <span style={{ fontSize: 13, color: '#8B95A1' }}>{kpi.unit}</span>
+              {delta != null && (
+                <span style={{ fontSize: 13, fontWeight: 700, color: deltaColor, background: `${deltaColor}14`, borderRadius: 8, padding: '2px 8px' }}>
+                  {arrow}{Math.abs(delta).toFixed(1)}{unitSuffix}
+                </span>
+              )}
+            </div>
+          </div>
+          {/* 미니 차트(30%) + 코멘트(70%) */}
+          <div style={{ display: 'flex', gap: 16 }}>
+            <div style={{ flex: '0 0 30%', minWidth: 0 }}>
+              <ResponsiveContainer width="100%" height={150}>
+                <ComposedChart data={chartData} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E8EB" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#6B7684' }} tickLine={false} axisLine={{ stroke: '#E5E8EB' }} />
+                  <YAxis yAxisId="left" tick={{ fontSize: 10, fill: '#8B95A1' }} tickLine={false} axisLine={false} width={36}
+                    tickFormatter={isPct ? ((v: number) => `${v}%`) : undefined} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v: any) => [`${fmtV(v)}${isPct ? '%' : ''}`, kpi.label]} />
+                  {isLine ? (
+                    <Line type="monotone" dataKey="value" stroke={kpi.color} yAxisId="left" strokeWidth={2}
+                      dot={{ r: 4, fill: kpi.color, strokeWidth: 2, stroke: '#fff' }}
+                      activeDot={{ r: 6, fill: kpi.color, stroke: '#fff', strokeWidth: 2 }} />
+                  ) : (
+                    <Bar dataKey="value" fill={kpi.color} yAxisId="left" radius={[4, 4, 0, 0]} barSize={28} />
+                  )}
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+            <div style={{ flex: '0 0 70%', minWidth: 0 }}>
+              {isHtml ? (
+                <div dangerouslySetInnerHTML={{ __html: comment }} style={{
+                  width: '100%',
+                  background: '#F9FAFB', border: '1px solid #E5E8EB', borderRadius: 12,
+                  padding: '12px 14px', fontSize: 15, lineHeight: 1.8, color: '#333D4B',
+                }} />
+              ) : (
+                <div style={{
+                  width: '100%',
+                  background: '#F9FAFB', border: '1px solid #E5E8EB', borderRadius: 12,
+                  padding: '12px 14px', fontSize: 15, lineHeight: 1.8, color: '#333D4B',
+                }}>
+                  {comment || <span style={{ color: '#8B95A1' }}>-</span>}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ===== 파트 섹션 렌더 =====
+    function renderPartSection(sec: typeof sections[number]) {
+      return (
+        <div key={`${sec.group}-${sec.part}`}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <div style={{ width: 4, height: 20, borderRadius: 2, background: sec.partColor }} />
+            <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#191F28' }}>{sec.label}</h3>
+            <span style={{ fontSize: 12, color: '#8B95A1' }}>{sec.kpis.length}개 지표</span>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {sec.kpis.map(kpi => renderKpiRow(kpi, sec.group, sec.part))}
+          </div>
+        </div>
+      );
+    }
+
+    const inboundSections = sections.filter(s => s.group === 'inbound');
+    const channelSections = sections.filter(s => s.group === 'channel');
+    const totalPct = totalTarget > 0 ? Math.round((totalActual / totalTarget) * 100) : 0;
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        {/* 월 배지 */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <TossBadge variant="fill" size="small" color="blue">{trendData.month || month}</TossBadge>
+          <span style={{ fontSize: 14, color: '#8B95A1' }}>주간 추이</span>
+        </div>
+
+        {/* 목표 달성 카드 */}
+        <div style={{
+          background: '#fff', borderRadius: 20, padding: '24px 28px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #E5E8EB',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#191F28' }}>Tablet 목표 달성 현황</h2>
+            <span style={{
+              fontSize: 14, fontWeight: 700,
+              color: totalActual >= totalTarget ? '#20C997' : '#F04452',
+              background: totalActual >= totalTarget ? '#20C99714' : '#F0445214',
+              borderRadius: 8, padding: '4px 12px',
+            }}>
+              전체 {totalPct}% ({totalActual.toLocaleString()} / {totalTarget.toLocaleString()})
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 16 }}>
+            {renderTargetCard('inbound', targets.inbound)}
+            {renderTargetCard('channel', targets.channel)}
+          </div>
+        </div>
+
+        {/* 인바운드 세일즈 */}
+        <div style={{
+          background: '#fff', borderRadius: 20, padding: '24px 28px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #E5E8EB',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <div style={{ width: 4, height: 22, borderRadius: 2, background: TC.blue }} />
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#191F28' }}>인바운드 세일즈</h2>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {inboundSections.map(sec => renderPartSection(sec))}
+          </div>
+        </div>
+
+        {/* 채널 세일즈 */}
+        <div style={{
+          background: '#fff', borderRadius: 20, padding: '24px 28px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #E5E8EB',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <div style={{ width: 4, height: 22, borderRadius: 2, background: TC.green }} />
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#191F28' }}>채널 세일즈</h2>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+            {channelSections.map(sec => renderPartSection(sec))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ============ 스코어 탭 렌더링 ============
 
   function renderScoreTab() {
@@ -6320,6 +6709,8 @@ function KPIV2PageInner() {
     ? (inboundTabs.find(t => t.key === activeTab)?.desc ?? '')
     : activeGroup === 'channel'
     ? (channelTabs.find(t => t.key === csActiveTab)?.desc ?? '')
+    : activeGroup === 'trend'
+    ? '파트별 핵심 KPI 주간 누적 추이 — 전주 대비 변화량 확인'
     : '직무별 담당자 스코어링 — 시상 기준 점수표';
 
   return (
@@ -6329,9 +6720,9 @@ function KPIV2PageInner() {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <h1 style={{ margin: 0, fontSize: '1.8em', fontWeight: 700, color: '#191F28', letterSpacing: '-0.5px' }}>
-              {activeGroup === 'score' ? '🏆 스코어' : 'KPI Dashboard'}
+              {activeGroup === 'score' ? '🏆 스코어' : activeGroup === 'trend' ? 'KPI 주간 추이' : 'KPI Dashboard'}
             </h1>
-            {activeGroup !== 'score' && <TossBadge variant="weak" size="small" color="blue">v2</TossBadge>}
+            {activeGroup !== 'score' && activeGroup !== 'trend' && <TossBadge variant="weak" size="small" color="blue">v2</TossBadge>}
           </div>
           <p style={{ color: '#8B95A1', marginTop: '6px', fontSize: '15px' }}>
             {activeDesc}
@@ -6391,6 +6782,21 @@ function KPIV2PageInner() {
             </button>
           );
         })}
+        <div style={{ width: '1px', background: '#E5E8EB', margin: '0 4px' }} />
+        <button
+          onClick={() => setActiveGroup('trend')}
+          style={{
+            padding: '10px 24px', cursor: 'pointer',
+            borderRadius: '10px', fontSize: '15px', fontWeight: 700,
+            transition: 'all 0.2s ease',
+            background: activeGroup === 'trend' ? '#8B5CF6' : '#fff',
+            color: activeGroup === 'trend' ? '#fff' : '#8B95A1',
+            boxShadow: activeGroup === 'trend' ? '0 2px 8px #8B5CF630' : '0 1px 3px rgba(0,0,0,0.06)',
+            border: activeGroup === 'trend' ? 'none' : '1px solid #E5E8EB',
+          }}
+        >
+          주간 추이
+        </button>
       </div>}
 
       {/* 하위 탭 네비게이션 (인바운드) */}
@@ -6495,6 +6901,16 @@ function KPIV2PageInner() {
 
       {/* 스코어 탭 (상단) */}
       {activeGroup === 'score' && !loading && is && renderScoreTab()}
+
+      {/* 주간 추이 탭 */}
+      {activeGroup === 'trend' && trendLoading && (
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '28px' }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} className="metro-loading" style={{ flex: 1, height: '160px', borderRadius: '16px' }} />
+          ))}
+        </div>
+      )}
+      {activeGroup === 'trend' && !trendLoading && renderTrend()}
 
       {/* Channel Sales - AE 탭 */}
       {activeGroup === 'channel' && csActiveTab === 'ae' && !csLoading && csData && renderFlowSection(
