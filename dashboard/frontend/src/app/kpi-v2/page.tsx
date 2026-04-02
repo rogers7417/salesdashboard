@@ -6463,53 +6463,44 @@ function KPIV2PageInner() {
 
     // ===== 채널 AE (csData 기반) =====
     function renderAEScore() {
-      const bd = csKpi?.bd;
-      if (!bd) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음 (채널 데이터 로딩 필요)</div>;
-
-      // MOU 체결 owner별 집계 (csMouStats.partner/franchiseHQ.thisMonthList)
-      const mouPartners = csMouStats?.partner?.thisMonthList || [];
-      const mouHQs = csMouStats?.franchiseHQ?.thisMonthList || [];
-      const ownerMouCount: Record<string, number> = {};
-      [...mouPartners, ...mouHQs].forEach((m: any) => {
-        const owner = m.owner || m.Owner?.Name;
-        if (owner) ownerMouCount[owner] = (ownerMouCount[owner] || 0) + 1;
-      });
-
-      // 네고진입 owner별 집계 (negoAccountsEnriched에서 파생)
-      const negoTarget = bd.negoEntryThisMonth?.target ?? 10;
-      const negoByOwner: Record<string, number> = {};
-      negoAccountsEnriched.forEach((a: any) => {
-        if (a.owner && a.owner !== '-') negoByOwner[a.owner] = (negoByOwner[a.owner] || 0) + 1;
-      });
-
-      // 미서명 owner별 (data.channel.ae에서 가져오되 csData 우선)
       const aeKpi = data?.channel?.ae;
+      if (!aeKpi) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음</div>;
+
+      // MOU 체결 owner별 (data.channel.ae.mouCount.byOwner)
+      const mouByOwner = aeKpi?.mouCount?.byOwner || [];
+      const ownerMouCount = new Map(mouByOwner.map((o: any) => [o.name, o.count ?? 0]));
+
+      // 네고진입 owner별 (data.channel.ae.negoEntry.byOwner)
+      const negoTarget = aeKpi?.negoEntry?.target ?? 10;
+      const negoByOwnerArr = aeKpi?.negoEntry?.byOwner || [];
+      const negoByOwner = new Map(negoByOwnerArr.map((o: any) => [o.name, o.thisMonth ?? o.count ?? 0]));
+
+      // 미서명 owner별
       const unsignedMap = new Map((aeKpi?.unsignedContracts?.byOwner || []).map((o: any) => [o.name, o]));
 
-      // 미팅 byOwner (csKpi.meetingsByOwner — mouIncomplete = 네고/MOU전 미팅)
-      const meetingsByOwner = csKpi?.meetingsByOwner || [];
-      const meetingMap = new Map(meetingsByOwner.map((o: any) => [o.name, o.total ?? 0]));
+      // 미팅 byOwner (data.channel.ae.meetingCount.byOwner)
+      const meetingsByOwner = aeKpi?.meetingCount?.byOwner || [];
+      const meetingMap = new Map(meetingsByOwner.map((o: any) => [o.name, o.count ?? o.total ?? 0]));
 
-      // 영업일수 (csKpi.thisMonthDays = 현재 경과일, 영업일 근사값으로 0.7 곱)
-      const workdays = aeKpi?.workdays ?? aeKpi?.totalWeekdays ?? (Math.round((csKpi?.thisMonthDays ?? 12) * 0.7) || 12);
+      // 영업일수
+      const workdays = aeKpi?.workdays ?? aeKpi?.totalWeekdays ?? 12;
       const meetingTarget = 2 * workdays;
 
-      // 멤버 목록: meetingsByOwner + MOU owner + 네고 owner 합집합
+      // 멤버 목록: members 우선, 없으면 byOwner 합집합
       const memberSet = new Set<string>();
-      meetingsByOwner.forEach((o: any) => { if (o.name) memberSet.add(o.name); });
-      Object.keys(ownerMouCount).forEach(n => memberSet.add(n));
-      Object.keys(negoByOwner).forEach(n => memberSet.add(n));
-      // data.channel.ae.members가 있으면 그것으로 필터
       if (aeKpi?.members?.length > 0) {
-        const aeNames = new Set(aeKpi.members.map((m: any) => m.name));
-        memberSet.forEach(n => { if (!aeNames.has(n)) memberSet.delete(n); });
+        aeKpi.members.forEach((m: any) => { if (m.name) memberSet.add(m.name); });
+      } else {
+        meetingsByOwner.forEach((o: any) => { if (o.name) memberSet.add(o.name); });
+        mouByOwner.forEach((o: any) => { if (o.name) memberSet.add(o.name); });
+        negoByOwnerArr.forEach((o: any) => { if (o.name) memberSet.add(o.name); });
       }
 
       const members = Array.from(memberSet).map((name: string) => {
-        const mouCnt = ownerMouCount[name] ?? 0;
-        const negoCnt = negoByOwner[name] ?? 0;
+        const mouCnt = ownerMouCount.get(name) ?? 0;
+        const negoCnt = negoByOwner.get(name) ?? 0;
         const unsigned = unsignedMap.get(name);
-        const overdueCount = unsigned?.overdue ?? 0;
+        const overdueCount = unsigned?.overdueCount ?? unsigned?.overdue ?? 0;
         const meetCnt = meetingMap.get(name) ?? 0;
         return {
           name,
@@ -6531,73 +6522,59 @@ function KPIV2PageInner() {
       ]);
     }
 
-    // ===== 채널 AM (csData 기반) =====
+    // ===== 채널 AM (data.channel.am 기반) =====
     function renderAMScore() {
-      const amKpi = csKpi?.am;
-      if (!amKpi) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음 (채널 데이터 로딩 필요)</div>;
+      const amData = data?.channel?.am;
+      if (!amData) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음</div>;
 
-      // 개인별 리드 (amHeatmap.data — Account Owner 기준, Lead→파트너Account→Owner 매핑)
-      const amHeatmap = csSummary?.channelLeadsByOwner?.amHeatmap;
-      const leadsByOwner = amHeatmap?.data || [];
-      const leadMap = new Map(leadsByOwner.map((o: any) => [o.owner, { total: o.total ?? 0 }]));
+      // 개인별 리드 (data.channel.am.dailyLeadCount.byOwner)
+      const leadsByOwner = amData?.dailyLeadCount?.byOwner || [];
+      const leadMap = new Map(leadsByOwner.map((o: any) => [o.name, { total: o.total ?? 0, avgDaily: o.avgDaily ?? 0 }]));
 
-      // 미팅 byOwner (csKpi.meetingsByOwner — mouComplete = MOU완료 곳 미팅)
-      const meetingsByOwner = csKpi?.meetingsByOwner || [];
-      const meetingMap = new Map(meetingsByOwner.map((o: any) => [o.name, o.mouComplete ?? 0]));
+      // 미팅 byOwner (data.channel.am.meetingByOwner 또는 meetingCount.byOwner)
+      const meetingByOwner = amData?.meetingByOwner || {};
+      const meetingByOwnerArr = amData?.meetingCount?.byOwner || [];
+      const meetingMap = new Map<string, number>();
+      // meetingByOwner가 object {name: count} 형태인 경우
+      Object.entries(meetingByOwner).forEach(([name, count]: [string, any]) => {
+        meetingMap.set(name, count ?? 0);
+      });
+      // meetingCount.byOwner가 array인 경우 (우선)
+      meetingByOwnerArr.forEach((o: any) => {
+        if (o.name) meetingMap.set(o.name, o.mouComplete ?? o.count ?? o.total ?? 0);
+      });
 
       // 영업일수
-      const amData = data?.channel?.am;
-      const workdays = amData?.workdays ?? amData?.totalWeekdays ?? (Math.round((csKpi?.thisMonthDays ?? 12) * 0.7) || 12);
+      const workdays = amData?.workdays ?? amData?.totalWeekdays ?? 12;
       const meetingTarget = 2 * workdays;
 
-      // 안착률 byOwner (csMouStats.onboarding.partner.list + franchiseHQ.list → owner별 집계)
-      const partnerList = csMouStats?.onboarding?.partner?.list || [];
-      const hqList = csMouStats?.onboarding?.franchiseHQ?.list || [];
-      const onboardByOwner: Record<string, { settled: number; total: number }> = {};
-      [...partnerList, ...hqList].forEach((p: any) => {
-        const owner = p.owner || '-';
-        if (!onboardByOwner[owner]) onboardByOwner[owner] = { settled: 0, total: 0 };
-        onboardByOwner[owner].total++;
-        if (p.isSettled || p.settled) onboardByOwner[owner].settled++;
-      });
+      // 안착률 byOwner (data.channel.am.onboardingRate.byOwner)
+      const onboardByOwnerArr = amData?.onboardingRate?.byOwner || [];
+      const onboardMap = new Map(onboardByOwnerArr.map((o: any) => [o.name, { settled: o.settled ?? 0, total: o.total ?? 0, rate: o.rate ?? 0 }]));
 
-      // 활성파트너 byOwner (csPartnerStats + csFranchiseHQList — 최근 90일 리드 발생 기준)
-      const activeByOwner: Record<string, number> = {};
-      (csPartnerStats || []).forEach((p: any) => {
-        if ((p.last3MonthLeadCount ?? 0) > 0) {
-          const owner = p.owner || '-';
-          activeByOwner[owner] = (activeByOwner[owner] || 0) + 1;
-        }
-      });
-      (csFranchiseHQList || []).forEach((h: any) => {
-        if ((h.last3MonthLeadCount ?? 0) > 0) {
-          const owner = h.owner || '-';
-          activeByOwner[owner] = (activeByOwner[owner] || 0) + 1;
-        }
-      });
+      // 활성파트너 byOwner (data.channel.am.activePartnerCount.byOwner)
+      const activeByOwnerArr = amData?.activePartnerCount?.byOwner || [];
+      const activeMap = new Map(activeByOwnerArr.map((o: any) => [o.name, o.total ?? (o.partners ?? 0) + (o.brands ?? 0)]));
 
       const leadTarget = 5; // 일 5건 목표
 
-      // 멤버 목록: channelLeadsByOwner + meetingsByOwner + onboarding 합집합
+      // 멤버 목록: members 우선, 없으면 byOwner 합집합
       const memberSet = new Set<string>();
-      leadsByOwner.forEach((o: any) => { if (o.owner) memberSet.add(o.owner); });
-      meetingsByOwner.forEach((o: any) => { if (o.name) memberSet.add(o.name); });
-      Object.keys(onboardByOwner).filter(n => n !== '-').forEach(n => memberSet.add(n));
-      // data.channel.am.members가 있으면 그것으로 필터
       if (amData?.members?.length > 0) {
-        const amNames = new Set(amData.members.map((m: any) => m.name));
-        memberSet.forEach(n => { if (!amNames.has(n)) memberSet.delete(n); });
+        amData.members.forEach((m: any) => { if (m.name) memberSet.add(m.name); });
+      } else {
+        leadsByOwner.forEach((o: any) => { if (o.name) memberSet.add(o.name); });
+        meetingMap.forEach((_, name) => memberSet.add(name));
+        onboardByOwnerArr.forEach((o: any) => { if (o.name) memberSet.add(o.name); });
       }
 
       const members = Array.from(memberSet).map((name: string) => {
         const leadOwner = leadMap.get(name);
-        const leadTotal = (leadOwner?.total ?? 0);
-        const leadAvgDaily = workdays > 0 ? +(leadTotal / workdays).toFixed(1) : 0;
+        const leadAvgDaily = leadOwner?.avgDaily ?? (workdays > 0 ? +((leadOwner?.total ?? 0) / workdays).toFixed(1) : 0);
         const meetCnt = meetingMap.get(name) ?? 0;
-        const onboard = onboardByOwner[name];
-        const onboardRate = onboard && onboard.total > 0
-          ? +((onboard.settled / onboard.total) * 100).toFixed(1) : 0;
-        const activeCount = activeByOwner[name] ?? 0;
+        const onboard = onboardMap.get(name);
+        const onboardRate = onboard?.rate ?? (onboard && onboard.total > 0 ? +((onboard.settled / onboard.total) * 100).toFixed(1) : 0);
+        const activeCount = activeMap.get(name) ?? 0;
         return {
           name,
           scores: [
@@ -6897,7 +6874,21 @@ function KPIV2PageInner() {
       )}
 
       {/* 스코어 탭 (상단) */}
-      {activeGroup === 'score' && !loading && is && renderScoreTab()}
+      {activeGroup === 'score' && !loading && is && (() => {
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const selectedMonth = month || currentMonth;
+        if (selectedMonth === currentMonth) {
+          return (
+            <div style={{ textAlign: 'center', padding: '80px 40px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
+              <div style={{ fontSize: '20px', fontWeight: 700, color: '#191F28', marginBottom: '8px' }}>마감 후 스코어가 산정됩니다</div>
+              <div style={{ fontSize: '15px', color: '#8B95A1' }}>해당 월의 영업일이 종료된 후 스코어를 확인할 수 있습니다.</div>
+            </div>
+          );
+        }
+        return renderScoreTab();
+      })()}
 
       {/* 주간 추이 탭 */}
       {activeGroup === 'trend' && trendLoading && (

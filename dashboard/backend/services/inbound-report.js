@@ -241,7 +241,7 @@ async function collectData(startDate, endDate) {
         Opportunity__r.FieldUser__c, Opportunity__r.FieldUser__r.Name,
         Opportunity__r.StageName, Opportunity__r.Name,
         Opportunity__r.RecordType.Name, Opportunity__r.CreatedDate,
-        Opportunity__r.fm_CompanyStatus__c
+        Opportunity__r.fm_CompanyStatus__c, Opportunity__r.TotalNumberofEveryTablet__c
       FROM Contract__c
       WHERE Opportunity__c != NULL
         AND ContractDateStart__c >= ${startDate}
@@ -333,14 +333,68 @@ async function collectData(startDate, endDate) {
     console.log('Visit 조회 스킵:', err.message);
   }
 
-  return { leads, opportunities, oppDataMap, firstTaskByLead, allTasksByLead, dailyTasks, insideUsers, tmUsers, userNameMap, startDate, endDate, contracts, oppTaskMap, allOpportunities, visits, tasksByOpp };
+  // 10. OpportunityFieldHistory 조회 (Stage 변경일 기준 CW/CL)
+  let stageChangeHistory = [];
+  try {
+    const histResult = await sf.query(`
+      SELECT OpportunityId, Field, OldValue, NewValue, CreatedDate
+      FROM OpportunityFieldHistory
+      WHERE Field = 'StageName'
+        AND CreatedDate >= ${startUTC}
+        AND CreatedDate < ${endUTC}
+        AND (NewValue = 'Closed Won' OR NewValue = 'Closed Lost')
+      ORDER BY CreatedDate ASC
+    `);
+    const histRecords = histResult.records || [];
+    // Opp별 첫 번째 CW/CL 변경만 유지
+    const cwclMap = {};
+    histRecords.forEach(r => {
+      if (cwclMap[r.OpportunityId]) return;
+      cwclMap[r.OpportunityId] = {
+        oppId: r.OpportunityId,
+        stageName: r.NewValue,
+        isCW: r.NewValue === 'Closed Won',
+        isCL: r.NewValue === 'Closed Lost',
+        changeDate: r.CreatedDate,
+      };
+    });
+    const cwclOppIds = Object.keys(cwclMap);
+
+    // 해당 Opp의 FieldUser 정보 조회
+    if (cwclOppIds.length > 0) {
+      const chunkSize = 200;
+      for (let i = 0; i < cwclOppIds.length; i += chunkSize) {
+        const chunk = cwclOppIds.slice(i, i + chunkSize);
+        const ids = chunk.map(id => `'${id}'`).join(',');
+        const oppResult = await sf.query(`
+          SELECT Id, FieldUser__c, FieldUser__r.Name, CreatedDate, Owner_Department__c
+          FROM Opportunity WHERE Id IN (${ids})
+        `);
+        (oppResult.records || []).forEach(opp => {
+          const h = cwclMap[opp.Id];
+          if (h) {
+            h.fieldUserId = opp.FieldUser__c || null;
+            h.fieldUserName = opp.FieldUser__c ? (opp.FieldUser__r?.Name || userNameMap[opp.FieldUser__c] || opp.FieldUser__c) : null;
+            h.ownerDept = opp.Owner_Department__c || '';
+            h.oppCreatedDate = opp.CreatedDate;
+          }
+        });
+      }
+    }
+    stageChangeHistory = Object.values(cwclMap).filter(h => h.ownerDept === '인바운드세일즈');
+    console.log(`  → StageChangeHistory (인바운드): ${stageChangeHistory.length}건`);
+  } catch (err) {
+    console.log('StageChangeHistory 조회 스킵:', err.message);
+  }
+
+  return { leads, opportunities, oppDataMap, firstTaskByLead, allTasksByLead, dailyTasks, insideUsers, tmUsers, userNameMap, startDate, endDate, contracts, oppTaskMap, allOpportunities, visits, tasksByOpp, stageChangeHistory };
 }
 
 /**
  * 통계 계산
  */
 function calculateStats(data) {
-  const { leads, oppDataMap, firstTaskByLead, allTasksByLead, dailyTasks, insideUsers, tmUsers, userNameMap, startDate, endDate, contracts, oppTaskMap = {}, allOpportunities = [], visits = [], tasksByOpp = {} } = data;
+  const { leads, oppDataMap, firstTaskByLead, allTasksByLead, dailyTasks, insideUsers, tmUsers, userNameMap, startDate, endDate, contracts, oppTaskMap = {}, allOpportunities = [], visits = [], tasksByOpp = {}, stageChangeHistory = [] } = data;
 
   // Lead 데이터 가공
   const leadData = leads.map(lead => {
@@ -1907,6 +1961,57 @@ function calculateStats(data) {
       visitAnalysis,
       fieldRetouchAnalysis,
       postQuoteFieldRetouch,
+      // Stage 변경일(OpportunityFieldHistory) 기준 CW/CL by FieldUser
+      cwByChangeDate: (() => {
+        const targetMonth = startDate.slice(0, 7);
+        const byUserMap = {};
+        stageChangeHistory.forEach(h => {
+          const fieldUser = h.fieldUserName;
+          if (!fieldUser) return;
+          if (!byUserMap[fieldUser]) {
+            byUserMap[fieldUser] = { name: fieldUser, cw: 0, cl: 0, total: 0, carryoverCW: 0, carryoverCL: 0, thisMonthCW: 0, thisMonthCL: 0 };
+          }
+          const s = byUserMap[fieldUser];
+          s.total++;
+          const oppMonth = h.oppCreatedDate ? h.oppCreatedDate.slice(0, 7) : null;
+          const isCarryover = oppMonth !== targetMonth;
+          if (h.isCW) {
+            s.cw++;
+            if (isCarryover) s.carryoverCW++; else s.thisMonthCW++;
+          }
+          if (h.isCL) {
+            s.cl++;
+            if (isCarryover) s.carryoverCL++; else s.thisMonthCL++;
+          }
+        });
+        const byUser = Object.values(byUserMap)
+          .map(s => ({ ...s, cwRate: s.total > 0 ? +(s.cw / s.total * 100).toFixed(1) : 0 }))
+          .sort((a, b) => b.cw - a.cw);
+        return {
+          byUser,
+          totalCW: byUser.reduce((s, u) => s + u.cw, 0),
+          totalCarryoverCW: byUser.reduce((s, u) => s + u.carryoverCW, 0),
+          totalThisMonthCW: byUser.reduce((s, u) => s + u.thisMonthCW, 0),
+          note: 'OpportunityFieldHistory 실제 Stage변경일 기준 CW/CL (이월 포함)'
+        };
+      })(),
+      // 계약 시작일(ContractDateStart__c) 기준 FieldUser별 집계
+      contractByField: (() => {
+        const byUserMap = {};
+        (contracts || []).forEach(c => {
+          const name = c.Opportunity__r?.FieldUser__r?.Name || '(미배정)';
+          if (name === '(미배정)') return;
+          if (!byUserMap[name]) byUserMap[name] = { name, count: 0, tablets: 0 };
+          byUserMap[name].count++;
+          byUserMap[name].tablets += c.Opportunity__r?.TotalNumberofEveryTablet__c || 0;
+        });
+        const byUser = Object.values(byUserMap).sort((a, b) => b.count - a.count);
+        return {
+          byUser,
+          totalCount: byUser.reduce((s, u) => s + u.count, 0),
+          totalTablets: byUser.reduce((s, u) => s + u.tablets, 0),
+        };
+      })(),
     },
     // Inside Back Office (백오피스)
     insideBackOffice: {
