@@ -6874,11 +6874,11 @@ function KPIV2PageInner() {
       )}
 
       {/* 스코어 탭 (상단) */}
-      {activeGroup === 'score' && !loading && is && (() => {
+      {activeGroup === 'score' && !loading && (() => {
         const now = new Date();
         const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        const selectedMonth = month || currentMonth;
-        if (selectedMonth === currentMonth) {
+        const isCurrentMonth = month === currentMonth || !month;
+        if (isCurrentMonth) {
           return (
             <div style={{ textAlign: 'center', padding: '80px 40px' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
@@ -6887,6 +6887,7 @@ function KPIV2PageInner() {
             </div>
           );
         }
+        if (!is) return null;
         return renderScoreTab();
       })()}
 
