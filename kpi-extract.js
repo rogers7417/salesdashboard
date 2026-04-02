@@ -1914,11 +1914,53 @@ function calculateInboundKPIs(data, startDate, endDate) {
     fsLossReasonSummary[reason] = (fsLossReasonSummary[reason] || 0) + 1;
   });
 
+  // FS CW: Stage 변경일(changeDate) 기준 집계 (이월 포함)
+  const fsCwByChangeDateMap = {};
+  stageChangeHistory.forEach(h => {
+    const fieldUser = h.fieldUserName;
+    if (!fieldUser || fieldUser === '-') return;
+    if (!fsCwByChangeDateMap[fieldUser]) {
+      fsCwByChangeDateMap[fieldUser] = { name: fieldUser, cw: 0, cl: 0, total: 0, carryoverCW: 0, carryoverCL: 0, thisMonthCW: 0, thisMonthCL: 0 };
+    }
+    const s = fsCwByChangeDateMap[fieldUser];
+    s.total++;
+    const isCarryover = !thisMonthOppIds.has(h.oppId);
+    if (h.isCW) {
+      s.cw++;
+      if (isCarryover) s.carryoverCW++; else s.thisMonthCW++;
+    }
+    if (h.isCL) {
+      s.cl++;
+      if (isCarryover) s.carryoverCL++; else s.thisMonthCL++;
+    }
+  });
+  const fsCwByChangeDate = Object.values(fsCwByChangeDateMap)
+    .map(s => ({ ...s, cwRate: s.total > 0 ? +(s.cw / s.total * 100).toFixed(1) : 0 }))
+    .sort((a, b) => b.cw - a.cw);
+
+  // 계약 시작일(ContractDateStart__c) 기준 FieldUser별 집계
+  const contractByFieldMap = {};
+  (contracts || []).forEach(c => {
+    const name = c.fieldUser || '-';
+    if (name === '-') return;
+    if (!contractByFieldMap[name]) contractByFieldMap[name] = { name, count: 0, tablets: 0 };
+    contractByFieldMap[name].count++;
+    contractByFieldMap[name].tablets += c.tabletQty || 0;
+  });
+  const contractByFieldList = Object.values(contractByFieldMap).sort((a, b) => b.count - a.count);
+
   const fieldSales = {
     members: teamMembers.필드세일즈,
     cwConversionRate: {
       byUser: fieldStats,
       target: 60
+    },
+    cwByChangeDate: {
+      byUser: fsCwByChangeDate,
+      totalCW: fsCwByChangeDate.reduce((s, u) => s + u.cw, 0),
+      totalCarryoverCW: fsCwByChangeDate.reduce((s, u) => s + u.carryoverCW, 0),
+      totalThisMonthCW: fsCwByChangeDate.reduce((s, u) => s + u.thisMonthCW, 0),
+      note: 'OpportunityFieldHistory 실제 Stage변경일 기준 CW/CL (이월 포함)'
     },
     cwWithCarryover: {
       byUser: fieldCarryoverList,
@@ -1948,6 +1990,11 @@ function calculateInboundKPIs(data, startDate, endDate) {
     },
     agingSummary: fsAgingSummary,
     lossReasonSummary: fsLossReasonSummary,
+    contractByField: {
+      byUser: contractByFieldList,
+      totalCount: contractByFieldList.reduce((s, u) => s + u.count, 0),
+      totalTablets: contractByFieldList.reduce((s, u) => s + u.tablets, 0),
+    },
   };
 
   // ========== Back Office KPIs ==========

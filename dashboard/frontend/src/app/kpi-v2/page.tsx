@@ -6281,29 +6281,32 @@ function KPIV2PageInner() {
     // ===== FS 필드세일즈 — 1등 집중 포상 =====
     function renderFSScore() {
       const fsMemberNames = new Set((fs?.members || []).map((m: any) => m.name));
-      const users = (fs?.cwConversionRate?.byUser || []).filter((u: any) => fsMemberNames.has(u.name));
+      const contractByField = fs?.contractByField?.byUser || [];
+      const contractMap = new Map(contractByField.map((u: any) => [u.name, u]));
+      const baseUsers = (fs?.cwConversionRate?.byUser || []).filter((u: any) => fsMemberNames.has(u.name));
+      const users = baseUsers.map((u: any) => {
+        const ct = contractMap.get(u.name);
+        return { ...u, allCW: ct?.count ?? 0, tablets: ct?.tablets ?? 0 };
+      });
       if (users.length === 0) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음</div>;
-      const sorted = [...users].sort((a: any, b: any) => (b.thisMonthCW ?? 0) - (a.thisMonthCW ?? 0));
+      const sorted = [...users].sort((a: any, b: any) => (b.allCW ?? 0) - (a.allCW ?? 0));
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div style={{ background: 'linear-gradient(135deg, #FFF8E1 0%, #FFE082 100%)', borderRadius: '16px', padding: '32px', textAlign: 'center' }}>
             <div style={{ fontSize: '48px', marginBottom: '8px' }}>🏆</div>
-            <div style={{ fontSize: '14px', color: '#8B95A1', marginBottom: '4px' }}>CW 1위</div>
+            <div style={{ fontSize: '14px', color: '#8B95A1', marginBottom: '4px' }}>계약 1위 (계약시작일 기준)</div>
             <div style={{ fontSize: '28px', fontWeight: 900, color: '#191F28' }}>{sorted[0]?.name ?? '-'}</div>
-            <div style={{ fontSize: '20px', fontWeight: 700, color: '#FF8C00', marginTop: '8px' }}>CW {sorted[0]?.thisMonthCW ?? 0}건 / 전환율 {sorted[0]?.cwRate ?? 0}%</div>
+            <div style={{ fontSize: '20px', fontWeight: 700, color: '#FF8C00', marginTop: '8px' }}>계약 {sorted[0]?.allCW ?? 0}건 / {sorted[0]?.tablets ?? 0}대</div>
           </div>
           <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-            <div style={{ fontSize: '16px', fontWeight: 700, color: '#191F28', marginBottom: '16px' }}>전체 순위 (CW 건수 기준)</div>
+            <div style={{ fontSize: '16px', fontWeight: 700, color: '#191F28', marginBottom: '16px' }}>전체 순위 (계약시작일 기준)</div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
               <thead>
                 <tr style={{ background: '#F9FAFB' }}>
                   <th style={{ ...thStyle, textAlign: 'center', width: '50px' }}>순위</th>
                   <th style={thStyle}>이름</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>SQL</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>CW</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>CL</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>진행중</th>
-                  <th style={{ ...thStyle, textAlign: 'right' }}>전환율</th>
+                  <th style={{ ...thStyle, textAlign: 'right' }}>계약건수</th>
+                  <th style={{ ...thStyle, textAlign: 'right' }}>태블릿</th>
                 </tr>
               </thead>
               <tbody>
@@ -6311,13 +6314,8 @@ function KPIV2PageInner() {
                   <tr key={u.name} style={{ borderBottom: '1px solid #F2F4F6', background: i === 0 ? '#FFFDF5' : '#fff' }}>
                     <td style={{ ...tdStyle, textAlign: 'center', fontWeight: 800, color: i < 3 ? rankColors[i] : '#6B7684', fontSize: '16px' }}>{i + 1}</td>
                     <td style={tdStyle}><span style={{ fontWeight: 700 }}>{u.name}</span></td>
-                    <td style={{ ...tdStyle, textAlign: 'right' }}>{u.total ?? 0}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 700, color: '#20C997' }}>{u.thisMonthCW ?? 0}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right', color: '#F04452' }}>{u.thisMonthCL ?? 0}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right' }}>{u.open ?? 0}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right' }}>
-                      <span style={{ fontWeight: 700, color: (u.cwRate ?? 0) >= 60 ? '#20C997' : '#F04452' }}>{u.cwRate ?? 0}%</span>
-                    </td>
+                    <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 700, color: '#20C997' }}>{u.allCW ?? 0}건</td>
+                    <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 700, color: '#3182F6' }}>{u.tablets ?? 0}대</td>
                   </tr>
                 ))}
               </tbody>
@@ -6369,7 +6367,7 @@ function KPIV2PageInner() {
         return {
           name: u.name ?? name,
           scores: [
-            { label: 'CW전환율', weight: 50, value: cwRate >= 60 ? 50 : 0, detail: `당월 ${cwRate}% (이월 ${carryoverCW}건 / 합산 ${cwRateAll}%)`, color: '#8B5CF6', pct: (cwRate / 60) * 100 },
+            { label: 'CW전환율', weight: 50, value: cwRateAll >= 60 ? 50 : 0, detail: `합산 ${cwRateAll}% (당월 ${thisMonthCW}건 + 이월 ${carryoverCW}건 = ${allCW}건)`, color: '#8B5CF6', pct: (cwRateAll / 60) * 100 },
             { label: '일마감', weight: 10, value: avgDaily >= 5 ? 10 : 0, detail: `${(+avgDaily).toFixed(1)}건/일`, color: '#3182F6', pct: (avgDaily / 5) * 100 },
             { label: 'SQL잔량', weight: 10, value: over7 <= 10 ? 10 : 0, detail: `${over7}건`, color: '#FF8C00', pct: over7 <= 10 ? 100 : Math.max((1 - (over7 - 10) / 20) * 100, 5) },
             { label: '마감률', weight: 30, value: closeRate >= 100 ? 30 : 0, detail: `${tablets}/${perPersonTarget}대 (${closeRate}%)`, color: '#20C997', pct: Math.min(closeRate, 100) },
@@ -6379,7 +6377,7 @@ function KPIV2PageInner() {
       });
       members.forEach(m => { m.total = m.scores.reduce((s, sc) => s + sc.value, 0); });
       return renderScoreSection('인바운드 백오피스 스코어', members, [
-        { label: 'SQL→CW 전환율', weight: '50점', target: '목표: 60% 이상 (이월 포함)' },
+        { label: 'SQL→CW 전환율 (합산)', weight: '50점', target: '목표: 60% 이상 (당월+이월 합산)' },
         { label: '일일 마감 건수', weight: '10점', target: '목표: 일 5건 이상' },
         { label: '7일 초과 SQL 잔량', weight: '10점', target: '목표: 10건 이내' },
         { label: '마감률 (태블릿 댓수)', weight: '30점', target: `목표: 인당 ${perPersonTarget}대 (월 ${monthlyTarget}대/${filteredNames.length}명)` },
@@ -6390,29 +6388,28 @@ function KPIV2PageInner() {
     function renderCsTmScore() {
       const tmMemberNames = new Set((csTm?.members || []).map((m: any) => m.name));
       const tmOwners = (csTm?.byOwner || []).filter((o: any) => tmMemberNames.has(o.name));
+      const tmBacklogByOwner = new Map((csTm?.sqlBacklog?.byOwner || []).map((o: any) => [o.name, o]));
       if (tmOwners.length === 0) return <div style={{ color: '#8B95A1', padding: '40px', textAlign: 'center' }}>데이터 없음</div>;
       const members = tmOwners.map((o: any) => {
-        const avgDailyConv = o.avgDailyConversion ?? 0;
         const frtOver20 = o.frtOver20 ?? 0;
         const unconverted = o.unconvertedMQL ?? 0;
-        const sqlRate = (o.mql ?? 0) > 0 ? +((o.sql / o.mql) * 100).toFixed(1) : 0;
+        const bl = tmBacklogByOwner.get(o.name);
+        const depositMissing = bl?.over7 ?? 0;
         return {
           name: o.name,
           scores: [
-            { label: '전환건수', weight: 50, value: avgDailyConv >= 5 ? 50 : 0, detail: `${avgDailyConv}건/일`, color: '#8B5CF6', pct: (avgDailyConv / 5) * 100 },
-            { label: 'FRT', weight: 10, value: frtOver20 === 0 ? 10 : 0, detail: `초과 ${frtOver20}건`, color: '#20C997', pct: frtOver20 === 0 ? 100 : Math.max((1 - frtOver20 / 10) * 100, 5) },
-            { label: '미전환', weight: 20, value: unconverted === 0 ? 20 : 0, detail: `${unconverted}건`, color: '#FF8C00', pct: unconverted === 0 ? 100 : Math.max((1 - unconverted / 20) * 100, 5) },
-            { label: 'SQL잔량', weight: 20, value: 20, detail: '-', color: '#3182F6' }, // TODO: per-user over7
+            { label: 'FRT', weight: 25, value: frtOver20 === 0 ? 25 : Math.max(0, 25 - frtOver20), detail: `초과 ${frtOver20}건`, color: '#20C997', pct: frtOver20 === 0 ? 100 : Math.max((1 - frtOver20 / 10) * 100, 5) },
+            { label: 'MQL→SQL', weight: 25, value: unconverted === 0 ? 25 : Math.max(0, 25 - unconverted * 2), detail: `미전환 ${unconverted}건`, color: '#FF8C00', pct: unconverted === 0 ? 100 : Math.max((1 - unconverted / 20) * 100, 5) },
+            { label: '입금일자 미입력', weight: 50, value: depositMissing <= 10 ? 50 : Math.max(0, 50 - (depositMissing - 10)), detail: `${depositMissing}건`, color: '#3182F6', pct: depositMissing <= 10 ? 100 : Math.max((1 - (depositMissing - 10) / 30) * 100, 5) },
           ],
           total: 0,
         };
       });
       members.forEach(m => { m.total = m.scores.reduce((s, sc) => s + sc.value, 0); });
       return renderScoreSection('TM 스코어', members, [
-        { label: '영업기회 전환 건수 (일 5건 x 영업일수)', weight: '50점', target: '목표: 일 5건 이상' },
-        { label: 'FRT (20분 초과 0건)', weight: '10점', target: '목표: 초과 0건' },
-        { label: '미전환 건수', weight: '20점', target: '목표: 0건' },
-        { label: '7일 초과 SQL 잔량', weight: '20점', target: '목표: 10건 이내' },
+        { label: 'FRT (20분 초과)', weight: '25점', target: '목표: 초과 0건' },
+        { label: 'MQL→SQL 미전환', weight: '25점', target: '목표: 0건' },
+        { label: '입금일자 미입력 (7일+)', weight: '50점', target: '목표: 10건 이내' },
       ]);
     }
 
@@ -6447,7 +6444,7 @@ function KPIV2PageInner() {
         return {
           name: u.name,
           scores: [
-            { label: 'CW전환율', weight: 50, value: cwRate >= 60 ? 50 : 0, detail: `당월 ${cwRate}% (이월 ${carryoverCW}건 / 합산 ${cwRateAll}%)`, color: '#8B5CF6', pct: (cwRate / 60) * 100 },
+            { label: 'CW전환율', weight: 50, value: cwRateAll >= 60 ? 50 : 0, detail: `합산 ${cwRateAll}% (당월 ${thisMonthCW}건 + 이월 ${carryoverCW}건 = ${allCW}건)`, color: '#8B5CF6', pct: (cwRateAll / 60) * 100 },
             { label: '일마감', weight: 20, value: avgDaily >= 3 ? 20 : 0, detail: `${(+avgDaily).toFixed(1)}건`, color: '#3182F6', pct: (avgDaily / 3) * 100 },
             { label: '리드타임', weight: 10, value: overdue === 0 ? 10 : 0, detail: `초과 ${overdue}건`, color: '#20C997', pct: overdue === 0 ? 100 : Math.max((1 - overdue / 10) * 100, 5) },
             { label: 'SQL잔량', weight: 20, value: over7 <= 10 ? 20 : 0, detail: `${over7}건`, color: '#FF8C00', pct: over7 <= 10 ? 100 : Math.max((1 - (over7 - 10) / 20) * 100, 5) },
