@@ -48,3 +48,8 @@ scripts/agent-prompts/
 _check*.js
 check-*.js
 test-*.js
+
+# Markdown (README·QUICKSTART만 허용)
+*.md
+!README.md
+!QUICKSTART.md
