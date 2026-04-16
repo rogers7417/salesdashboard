@@ -6878,7 +6878,7 @@ function KPIV2PageInner() {
         const now = new Date();
         const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         const isCurrentMonth = month === currentMonth || !month;
-        if (isCurrentMonth) {
+        if (isCurrentMonth && now.getDate() < 16) {
           return (
             <div style={{ textAlign: 'center', padding: '80px 40px' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
