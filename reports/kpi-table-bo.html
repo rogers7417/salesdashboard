@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BO KPI 수정안 — Confluence 양식</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+        :root {
+            --bg: #ffffff;
+            --text: #191f28;
+            --text-sub: #6b7684;
+            --border: #e5e8eb;
+            --border-dark: #d1d6db;
+            --header-bg: #f2f4f6;
+            --accent-blue: #3182f6;
+            --accent-red: #f04452;
+            --accent-green: #00b386;
+            --accent-purple: #8b5cf6;
+            --row-alt: #fafbfc;
+            --tag-blue-bg: #e8f3ff;
+            --tag-blue-text: #1b64da;
+            --tag-red-bg: #fff0f1;
+            --tag-red-text: #e02020;
+            --tag-green-bg: #e8faf5;
+            --tag-green-text: #008a68;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 48px 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 48px;
+        }
+
+        .section {
+            margin-bottom: 56px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .badge-blue { background: var(--accent-blue); }
+        .badge-purple { background: var(--accent-purple); }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .section-meta {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-left: auto;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1px solid var(--border-dark);
+            font-size: 13px;
+        }
+
+        thead th {
+            background: var(--header-bg);
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-dark);
+            border-right: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        thead th:last-child { border-right: none; }
+
+        tbody td {
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            vertical-align: top;
+            line-height: 1.5;
+        }
+
+        tbody td:last-child { border-right: none; }
+
+        tbody tr:nth-child(even) { background: var(--row-alt); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        tbody tr:hover { background: #f0f4ff; }
+
+        /* Column widths */
+        .col-section { width: 90px; font-weight: 600; color: var(--text-sub); }
+        .col-kpi { width: 70px; font-weight: 700; text-align: center; }
+        .col-metric { width: 200px; font-weight: 600; }
+        .col-formula { width: 240px; }
+        .col-def { width: 200px; }
+        .col-note { width: 160px; }
+
+        /* Tags */
+        .tag {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .tag-blue { background: var(--tag-blue-bg); color: var(--tag-blue-text); }
+        .tag-red { background: var(--tag-red-bg); color: var(--tag-red-text); }
+        .tag-green { background: var(--tag-green-bg); color: var(--tag-green-text); }
+
+        .star { color: var(--accent-red); font-weight: 700; }
+
+        .sf-field {
+            font-size: 11px;
+            color: var(--text-sub);
+            font-family: 'SF Mono', 'Fira Code', monospace;
+        }
+
+        /* Print */
+        @media print {
+            body { padding: 24px 16px; }
+            .section { page-break-inside: avoid; }
+            tbody tr:hover { background: inherit; }
+            h1 { font-size: 22px; }
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            body { padding: 24px 16px; }
+            table { font-size: 12px; }
+            thead th, tbody td { padding: 8px 10px; }
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 48px 0;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+<h1>BO KPI 수정안</h1>
+<p class="subtitle">Confluence 양식 · IB / CH 파트별 단일 표 · 2026년 Q2 적용안</p>
+
+<!-- ===== IB BO ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-badge badge-blue">IB</div>
+        <div class="section-title">IB BO KPI 수정안</div>
+        <div class="section-meta">4명 · IS(TM) 리드터치 → FS 방문 → 견적 → BO 처리</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="col-section">구간</th>
+                <th class="col-kpi">KPI</th>
+                <th class="col-metric">평가지표</th>
+                <th class="col-formula">산출산식</th>
+                <th class="col-def">정의</th>
+                <th class="col-note">비고</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 견적→계약 -->
+            <tr>
+                <td class="col-section">견적→계약</td>
+                <td class="col-kpi">①</td>
+                <td>견적→계약 전환율 <strong>55%</strong></td>
+                <td>계약서 건수 ÷ 견적서 건수 × 100<br><span class="sf-field">(ContractCount / QuoteCount)</span></td>
+                <td>견적서 발송 후 계약서 작성까지의 전환 비율</td>
+                <td><span class="tag tag-blue">결과</span> 지표</td>
+            </tr>
+            <tr>
+                <td class="col-section">견적→계약</td>
+                <td class="col-kpi">①-b</td>
+                <td>D+2 Task 완료율 <strong>90%</strong></td>
+                <td>기한 내 완료 Task ÷ 자동생성 Task × 100<br><span class="sf-field">(Task.Status=Completed &amp; DueDate)</span></td>
+                <td>견적 발송 D+2 자동생성 Task의 기한 내 완료 비율</td>
+                <td><span class="tag tag-red">Phase 2</span> SF 자동 Task 전제</td>
+            </tr>
+            <!-- 계약→출고 -->
+            <tr>
+                <td class="col-section">계약→출고</td>
+                <td class="col-kpi">②</td>
+                <td>계약서→출고신청 완료율 <strong>95%</strong></td>
+                <td>출고신청 건수 ÷ 계약서 건수 × 100<br><span class="sf-field">(OrderCount / ContractCount)</span></td>
+                <td>계약서 작성 후 출고신청까지 완료 비율</td>
+                <td><span class="tag tag-green">직접</span> BO 100% 책임</td>
+            </tr>
+            <!-- 월간 실적 -->
+            <tr>
+                <td class="col-section">월간 실적</td>
+                <td class="col-kpi">③</td>
+                <td>인당 월간 태블릿 달성률 <strong>100%</strong></td>
+                <td>실제 출고 대수 ÷ 인당 목표(650대) × 100<br><span class="sf-field">(Opportunity.Quantity / 650)</span></td>
+                <td>월 목표 2,600대 ÷ 4명 = 인당 650대 기준 달성률</td>
+                <td><span class="tag tag-blue">결과</span> 지표</td>
+            </tr>
+            <!-- 주간 실적 -->
+            <tr>
+                <td class="col-section">주간 실적</td>
+                <td class="col-kpi">—</td>
+                <td>주간 계약서 작성 <strong>5건+</strong></td>
+                <td>주간 계약서 작성 건수 합산<br><span class="sf-field">(Contract.CreatedDate = THIS_WEEK)</span></td>
+                <td>주 단위 최소 계약서 작성 활동량</td>
+                <td><span class="tag tag-blue">활동</span> 지표</td>
+            </tr>
+            <!-- WIP 관리 ④-a -->
+            <tr>
+                <td class="col-section">WIP 관리</td>
+                <td class="col-kpi">④-a</td>
+                <td>7일 초과 잔량 <strong>≤10건</strong></td>
+                <td>견적 발송 D+7 초과 &amp; 미계약 건수<br><span class="sf-field">(Quote.CreatedDate + 7 &lt; TODAY &amp; Stage ≠ Contract)</span></td>
+                <td>7일 초과 WIP 상한선 유지<br>10건 = 특수매장 관리 버퍼</td>
+                <td>초과 시 팀장 논의 후 우선순위 재배분</td>
+            </tr>
+            <!-- WIP 관리 ④-b -->
+            <tr>
+                <td class="col-section">WIP 관리</td>
+                <td class="col-kpi">④-b <span class="star">★</span></td>
+                <td>잔량 내 무활동 건 <strong>0건</strong></td>
+                <td>7일 초과 WIP 중 최근 5일 활동 없는 건수<br><span class="sf-field">(LastActivityDate + 5 &lt; TODAY)</span></td>
+                <td>잔량 내 방치 건 제로 유지<br>"줄여라"가 아닌 "관리하라"</td>
+                <td><span class="tag tag-red">핵심</span> 관리 지표</td>
+            </tr>
+            <!-- WIP 관리 보완 -->
+            <tr>
+                <td class="col-section">WIP 관리</td>
+                <td class="col-kpi">보완</td>
+                <td>45일+ 장기 건 정리</td>
+                <td>45일 초과 건 → Closed Lost 또는 팀장 승인<br><span class="sf-field">(Quote.CreatedDate + 45 &lt; TODAY)</span></td>
+                <td>장기 체류 건 자동 정리 및 신규 진입 방지</td>
+                <td>보완 규칙 · CL 전환 또는 팀장 승인</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<hr class="divider">
+
+<!-- ===== CH BO ===== -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-badge badge-purple">CH</div>
+        <div class="section-title">CH BO KPI 수정안</div>
+        <div class="section-meta">AM/AE(송슬기·정주희·명세준) → 견적 → BO 처리</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="col-section">구간</th>
+                <th class="col-kpi">KPI</th>
+                <th class="col-metric">평가지표</th>
+                <th class="col-formula">산출산식</th>
+                <th class="col-def">정의</th>
+                <th class="col-note">비고</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 계약→출고 -->
+            <tr>
+                <td class="col-section">계약→출고</td>
+                <td class="col-kpi">①</td>
+                <td>계약서→출고신청 완료율 <strong>95%</strong></td>
+                <td>출고신청 건수 ÷ 계약서 건수 × 100<br><span class="sf-field">(OrderCount / ContractCount)</span></td>
+                <td>계약서 작성 후 출고신청까지 완료 비율</td>
+                <td><span class="tag tag-green">직접</span> BO 100% 책임<br>AM/AE가 견적→계약 담당</td>
+            </tr>
+            <!-- 월간 실적 -->
+            <tr>
+                <td class="col-section">월간 실적</td>
+                <td class="col-kpi">②</td>
+                <td>인당 월간 태블릿 달성률 <strong>100%</strong></td>
+                <td>출고 대수 ÷ 인당 목표 × 100<br><span class="sf-field">(Opportunity.Quantity / Target)</span></td>
+                <td>인당 월간 태블릿 출고 목표 달성률</td>
+                <td><span class="tag tag-blue">결과</span> 지표</td>
+            </tr>
+            <tr>
+                <td class="col-section">월간 실적</td>
+                <td class="col-kpi">②-b</td>
+                <td>최소 처리 볼륨 <strong>12건+</strong></td>
+                <td>월간 처리(출고신청) 건수 합산<br><span class="sf-field">(Order.CreatedDate = THIS_MONTH)</span></td>
+                <td>월 최소 처리 건수 확보</td>
+                <td><span class="tag tag-blue">활동</span> 지표</td>
+            </tr>
+            <!-- 주간 실적 -->
+            <tr>
+                <td class="col-section">주간 실적</td>
+                <td class="col-kpi">—</td>
+                <td>주간 계약서 작성 <strong>5건+</strong></td>
+                <td>주간 계약서 작성 건수 합산<br><span class="sf-field">(Contract.CreatedDate = THIS_WEEK)</span></td>
+                <td>주 단위 최소 계약서 작성 활동량</td>
+                <td><span class="tag tag-blue">활동</span> 지표</td>
+            </tr>
+            <!-- 리드타임 -->
+            <tr>
+                <td class="col-section">리드타임</td>
+                <td class="col-kpi">③-a</td>
+                <td>제휴 리드타임 5일 이내 <strong>60%</strong></td>
+                <td>5일 이내 출고 건수 ÷ 제휴 전체 건수 × 100<br><span class="sf-field">(Contract→Order ≤ 5days / PartnerTotal)</span></td>
+                <td>제휴 매장 계약서→출고신청 5일 이내 비율</td>
+                <td>제휴 매장 기준</td>
+            </tr>
+            <tr>
+                <td class="col-section">리드타임</td>
+                <td class="col-kpi">③-b</td>
+                <td>개인 리드타임 7일 이내 <strong>60%</strong></td>
+                <td>7일 이내 출고 건수 ÷ 개인 전체 건수 × 100<br><span class="sf-field">(Contract→Order ≤ 7days / IndivTotal)</span></td>
+                <td>개인 매장 계약서→출고신청 7일 이내 비율</td>
+                <td>개인 매장 기준</td>
+            </tr>
+            <!-- WIP 관리 -->
+            <tr>
+                <td class="col-section">WIP 관리</td>
+                <td class="col-kpi">④-a</td>
+                <td>제휴 7일 초과 잔량 <strong>≤5건</strong></td>
+                <td>계약서 D+7 초과 &amp; 미출고 건수 (제휴)<br><span class="sf-field">(Contract.CreatedDate + 7 &lt; TODAY &amp; Partner__c)</span></td>
+                <td>제휴 매장 7일 초과 WIP 상한선</td>
+                <td>제휴 매장</td>
+            </tr>
+            <tr>
+                <td class="col-section">WIP 관리</td>
+                <td class="col-kpi">④-b</td>
+                <td>개인 10일 초과 잔량 <strong>≤5건</strong></td>
+                <td>계약서 D+10 초과 &amp; 미출고 건수 (개인)<br><span class="sf-field">(Contract.CreatedDate + 10 &lt; TODAY &amp; !Partner__c)</span></td>
+                <td>개인 매장 10일 초과 WIP 상한선</td>
+                <td>개인 매장</td>
+            </tr>
+            <tr>
+                <td class="col-section">WIP 관리</td>
+                <td class="col-kpi">④-c <span class="star">★</span></td>
+                <td>5일 무활동 건 <strong>0건</strong></td>
+                <td>WIP 중 최근 5일 활동 없는 건수<br><span class="sf-field">(LastActivityDate + 5 &lt; TODAY)</span></td>
+                <td>WIP 내 방치 건 제로 유지</td>
+                <td><span class="tag tag-red">핵심</span> 관리 지표</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="footer">
+    BO KPI 수정안 · 2026년 Q2 적용 · Sales Operations
+</div>
+
+</body>
+</html>

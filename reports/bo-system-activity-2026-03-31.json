@@ -1,0 +1,138 @@
+{
+  "period": {
+    "start": "2025-12-01",
+    "end": "2026-03-31",
+    "workdays": 87
+  },
+  "rows": [
+    {
+      "name": "최영은",
+      "totalChanges": 3832,
+      "stageChanges": 1595,
+      "otherChanges": 2237,
+      "touchedOpps": 571,
+      "dailyChanges": 44,
+      "changesPerOpp": 6.7,
+      "fieldBreakdown": {
+        "InstallConfirmedDate__c": 438,
+        "PosType__c": 310,
+        "PresidentPhone__c": 273,
+        "StageName": 1595,
+        "IsADBanner__c": 171,
+        "IsADDrink__c": 173,
+        "AdvancePaymentAmount__c": 47,
+        "DepositUser__c": 2,
+        "AdvancePaymentDate__c": 66,
+        "AdvancePaymentRate__c": 61,
+        "SpecialCompanyType__c": 111,
+        "created": 13,
+        "CommuicationPhone__c": 37,
+        "CommuicationType__c": 64,
+        "BOUser__c": 334,
+        "PrepaymentInfo__c": 121,
+        "Owner": 14,
+        "CloseDate": 2
+      }
+    },
+    {
+      "name": "장명진",
+      "totalChanges": 2940,
+      "stageChanges": 1051,
+      "otherChanges": 1889,
+      "touchedOpps": 349,
+      "dailyChanges": 33.8,
+      "changesPerOpp": 8.4,
+      "fieldBreakdown": {
+        "PresidentPhone__c": 270,
+        "PosType__c": 263,
+        "CommuicationType__c": 52,
+        "InstallConfirmedDate__c": 363,
+        "IsADBanner__c": 170,
+        "IsADDrink__c": 170,
+        "StageName": 1051,
+        "CommuicationPhone__c": 43,
+        "SpecialCompanyType__c": 99,
+        "BOUser__c": 242,
+        "AdvancePaymentAmount__c": 17,
+        "AdvancePaymentRate__c": 17,
+        "AdvancePaymentDate__c": 57,
+        "PrepaymentInfo__c": 99,
+        "created": 12,
+        "DepositUser__c": 5,
+        "Owner": 10
+      }
+    },
+    {
+      "name": "김희수",
+      "totalChanges": 784,
+      "stageChanges": 258,
+      "otherChanges": 526,
+      "touchedOpps": 289,
+      "dailyChanges": 9,
+      "changesPerOpp": 2.7,
+      "fieldBreakdown": {
+        "StageName": 258,
+        "BOUser__c": 296,
+        "Owner": 34,
+        "AdvancePaymentDate__c": 8,
+        "PrepaymentInfo__c": 7,
+        "AdvancePaymentRate__c": 6,
+        "AdvancePaymentAmount__c": 6,
+        "InstallConfirmedDate__c": 43,
+        "IsADBanner__c": 17,
+        "IsADDrink__c": 17,
+        "PosType__c": 28,
+        "SpecialCompanyType__c": 13,
+        "PresidentPhone__c": 15,
+        "CommuicationPhone__c": 14,
+        "CommuicationType__c": 8,
+        "CloseDate": 6,
+        "new_LeadSource__c": 2,
+        "created": 5,
+        "DepositUser__c": 1
+      }
+    }
+  ],
+  "topFields": [
+    [
+      "StageName",
+      2904
+    ],
+    [
+      "BOUser__c",
+      872
+    ],
+    [
+      "InstallConfirmedDate__c",
+      844
+    ],
+    [
+      "PosType__c",
+      601
+    ],
+    [
+      "PresidentPhone__c",
+      558
+    ],
+    [
+      "IsADDrink__c",
+      360
+    ],
+    [
+      "IsADBanner__c",
+      358
+    ],
+    [
+      "PrepaymentInfo__c",
+      227
+    ],
+    [
+      "SpecialCompanyType__c",
+      223
+    ],
+    [
+      "AdvancePaymentDate__c",
+      131
+    ]
+  ]
+}

@@ -1,0 +1,4783 @@
+{
+  "period": "2026-03",
+  "type": "신규",
+  "totalStores": 261,
+  "totalTablets": 3811,
+  "generatedAt": "2026-03-20T07:48:08.344Z",
+  "stores": [
+    {
+      "accountId": "001TJ00000j9vV6YAI",
+      "accountName": "임시정부",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 58,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 58
+      },
+      "batteryShipped": true,
+      "batteryQty": 57,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 34452000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hUvHwYAK",
+      "accountName": "김명주뜰안채밥상",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 47,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 47
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 27918000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000OYOi4YAH",
+      "accountName": "청운누룽지백숙",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 46,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "전기공사": 18,
+        "자체전기": 1,
+        "보조배터리 1+1": 27
+      },
+      "batteryShipped": true,
+      "batteryQty": 54,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 35988480,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000Qtmd3YAB",
+      "accountName": "남도예담",
+      "department": "아웃바운드세일즈",
+      "ownerName": "한진희",
+      "tabletQty": 38,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 37
+      },
+      "batteryShipped": true,
+      "batteryQty": 74,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 22492800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dMzL4YAK",
+      "accountName": "낭만짚불구이",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 36,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 36
+      },
+      "batteryShipped": true,
+      "batteryQty": 84,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 24235200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fGeLHYA0",
+      "accountName": "약선당감자탕",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 36,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 36
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 21384000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000heBjyYAE",
+      "accountName": "경성면옥",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 34,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 33
+      },
+      "batteryShipped": true,
+      "batteryQty": 66,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 26579520,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dAvprYAC",
+      "accountName": "꽁당보리밥",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 31,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 31
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 18414000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dAXyuYAG",
+      "accountName": "참돼짓간",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 31,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 31
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 18414000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jTRY8YAO",
+      "accountName": "우와한갈비탕",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 30,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 29
+      },
+      "batteryShipped": true,
+      "batteryQty": 118,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 17740800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ekpgkYAA",
+      "accountName": "장원갑칼국수",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 29,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 29
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 18948600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ekw2KYAQ",
+      "accountName": "더타코부스",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 28,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "보조배터리 1+1": 27,
+        "자체전기": 1
+      },
+      "batteryShipped": true,
+      "batteryQty": 54,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 22096800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dmyhyYAA",
+      "accountName": "코지하우스",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 27,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 24,
+        "보조배터리": 3
+      },
+      "batteryShipped": true,
+      "batteryQty": 1,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 15681600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000gALHcYAO",
+      "accountName": "당나발포차",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 27,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 21,
+        "보조배터리 1+1": 6
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 16299360,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g9y0aYAA",
+      "accountName": "오몬자",
+      "department": "인바운드세일즈",
+      "ownerName": "노하윤",
+      "tabletQty": 26,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 26
+      },
+      "batteryShipped": true,
+      "batteryQty": 25,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 15444000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fxeOQYAY",
+      "accountName": "데이팅술집X",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 26,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 26
+      },
+      "batteryShipped": true,
+      "batteryQty": 25,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 15444000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j0ZIdYAM",
+      "accountName": "육전식당",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 26,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 26
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 15444000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000l9emaYAA",
+      "accountName": "중앙부속구이",
+      "department": "아웃바운드세일즈",
+      "ownerName": "한진희",
+      "tabletQty": 26,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 25
+      },
+      "batteryShipped": true,
+      "batteryQty": 50,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 18968400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ePPgxYAG",
+      "accountName": "죽림보쌈칼국수",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 25,
+      "primaryPowerType": "전기공사",
+      "powerTypeDetail": {
+        "자체전기": 6,
+        "보조배터리 1+1": 8,
+        "전기공사": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 16,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 18334800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j1HudYAE",
+      "accountName": "탐나종합어시장",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 25,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 25
+      },
+      "batteryShipped": true,
+      "batteryQty": 32,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 14850000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000iB028YAC",
+      "accountName": "돈까스잔치",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 25,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 25
+      },
+      "batteryShipped": true,
+      "batteryQty": 34,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 16830000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000WQjYgYAL",
+      "accountName": "의령소바",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 25,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 25
+      },
+      "batteryShipped": true,
+      "batteryQty": 24,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 14850000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jZbpZYAS",
+      "accountName": "브롱스",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 25,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 25
+      },
+      "batteryShipped": true,
+      "batteryQty": 25,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 15800400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eVyIjYAK",
+      "accountName": "펀비어킹",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 24,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 11,
+        "보조배터리 1+1": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 26,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 16236000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jfSMvYAM",
+      "accountName": "청기와숯불촌",
+      "department": "아웃바운드세일즈",
+      "ownerName": "정종찬",
+      "tabletQty": 24,
+      "primaryPowerType": "전기공사",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "전기공사": 23
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 17503200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jTf2sYAC",
+      "accountName": "괭이부리마을",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 24,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 24
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 14921280,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fPvejYAC",
+      "accountName": "문115",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 23,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 23
+      },
+      "batteryShipped": true,
+      "batteryQty": 22,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 15301440,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000YvLSSYA3",
+      "accountName": "계룡대반점",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 23,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 23
+      },
+      "batteryShipped": true,
+      "batteryQty": 32,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 16212240,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g3jIIYAY",
+      "accountName": "깐부치킨",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 23,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 23
+      },
+      "batteryShipped": true,
+      "batteryQty": 22,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 13479840,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hYzA7YAK",
+      "accountName": "펀비어킹",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 23,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 22
+      },
+      "batteryShipped": true,
+      "batteryQty": 44,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 16315200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g6CPjYAM",
+      "accountName": "상인일기숯불갈비전문점",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 22,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 22
+      },
+      "batteryShipped": true,
+      "batteryQty": 4,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 13068000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hVvxTYAS",
+      "accountName": "촌골바닷가",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 21,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 21
+      },
+      "batteryShipped": true,
+      "batteryQty": 25,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 12474000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hWbtQYAS",
+      "accountName": "금복장",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 21,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 21
+      },
+      "batteryShipped": true,
+      "batteryQty": 20,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11682000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g6GOaYAM",
+      "accountName": "코지하우스",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 21,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 19,
+        "보조배터리": 2
+      },
+      "batteryShipped": true,
+      "batteryQty": 2,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 27442800,
+      "contractCount": 2
+    },
+    {
+      "accountId": "001TJ00000jEVzpYAG",
+      "accountName": "바른고기정육점",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 21,
+      "primaryPowerType": "전기공사",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "전기공사": 20
+      },
+      "batteryShipped": true,
+      "batteryQty": 20,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 12889800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jEWHWYA4",
+      "accountName": "인쌩맥주",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 21,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "보조배터리 1+1": 20,
+        "자체전기": 1
+      },
+      "batteryShipped": true,
+      "batteryQty": 40,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 16552800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000he2ARYAY",
+      "accountName": "내촌순대국",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 21,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 21
+      },
+      "batteryShipped": true,
+      "batteryQty": 30,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 14137200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lBVPeYAO",
+      "accountName": "오늘한쌈",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 21,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 21
+      },
+      "batteryShipped": true,
+      "batteryQty": 20,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 12474000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lCJOpYAO",
+      "accountName": "칼국쭈",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 21,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 21
+      },
+      "batteryShipped": true,
+      "batteryQty": 40,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 13305600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eMLblYAG",
+      "accountName": "소복소복",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 20,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 20
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11880000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001IR00001q1jBPYAY",
+      "accountName": "한촌설렁탕",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 20,
+      "primaryPowerType": "(미지정)",
+      "powerTypeDetail": {
+        "(미지정)": 20
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 10216800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eWLv8YAG",
+      "accountName": "할매남원추어탕",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 20,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 20
+      },
+      "batteryShipped": true,
+      "batteryQty": 59,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 14097600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fz5o8YAA",
+      "accountName": "석암생소금구이",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 20,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 20
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 11484000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eQBglYAG",
+      "accountName": "개화",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 20,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 20
+      },
+      "batteryShipped": true,
+      "batteryQty": 19,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11880000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hdfvWYAQ",
+      "accountName": "갯벌의조개",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 20,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 20
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 13464000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hKzgVYAS",
+      "accountName": "굽다",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 20,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 20
+      },
+      "batteryShipped": true,
+      "batteryQty": 36,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11880000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hX4xOYAS",
+      "accountName": "한사리감자탕&뼈구이",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 20,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 20
+      },
+      "batteryShipped": true,
+      "batteryQty": 38,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 14097600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g7FwdYAE",
+      "accountName": "다담석갈비",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 20,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 20
+      },
+      "batteryShipped": true,
+      "batteryQty": 19,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 12117600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jduIEYAY",
+      "accountName": "장원갑칼국수",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 20,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 20
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 13068000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fFzFOYA0",
+      "accountName": "울산게싸노더프리미엄",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 19,
+      "primaryPowerType": "전기공사",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 4,
+        "전기공사": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 13313520,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000gfT1OYAU",
+      "accountName": "장호가양꼬치",
+      "department": "아웃바운드세일즈",
+      "ownerName": "한진희",
+      "tabletQty": 19,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "보조배터리 1+1": 18,
+        "자체전기": 1
+      },
+      "batteryShipped": true,
+      "batteryQty": 36,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 13840200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g3WzTYAU",
+      "accountName": "한일식당",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 19,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 19
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11887920,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dNWf6YAG",
+      "accountName": "혼미",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 19,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 18
+      },
+      "batteryShipped": true,
+      "batteryQty": 36,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11959200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jKBQnYAO",
+      "accountName": "한라맥주",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 19,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 19
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11135520,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j4CqIYAU",
+      "accountName": "연담로",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 19,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 19
+      },
+      "batteryShipped": true,
+      "batteryQty": 94,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11286000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jlYpQYAU",
+      "accountName": "형과아우삼계탕",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 19,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 19
+      },
+      "batteryShipped": true,
+      "batteryQty": 18,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 12038400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jSiHBYA0",
+      "accountName": "꼬스븐뒷고기",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 19,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 19
+      },
+      "batteryShipped": true,
+      "batteryQty": 18,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11286000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000enXbsYAE",
+      "accountName": "옛날경성순대국",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 19,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 15,
+        "보조배터리 1+1": 4
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10248480,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000esMkhYAE",
+      "accountName": "무봉산숯불정육식당",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10692000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000Y4pBiYAJ",
+      "accountName": "장산밀면",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": true,
+      "batteryQty": 17,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11404800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dTMZmYAO",
+      "accountName": "금별맥주",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": true,
+      "batteryQty": 17,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10549440,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000cEGDWYA4",
+      "accountName": "오키보루",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": true,
+      "batteryQty": 18,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11262240,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fzLmUYAU",
+      "accountName": "올데이스포츠위드 피제이피자",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": true,
+      "batteryQty": 31,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11262240,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hX9GmYAK",
+      "accountName": "돌산",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": true,
+      "batteryQty": 17,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10692000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dkgAuYAI",
+      "accountName": "진짜배기명태촌",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11333520,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g7BN2YAM",
+      "accountName": "락휴노래타운",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10549440,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jUJ8FYAW",
+      "accountName": "다락맥주",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": true,
+      "batteryQty": 7,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10692000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eGWhsYAG",
+      "accountName": "김스지네요리주점",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10692000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eHilgYAC",
+      "accountName": "홍백당",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10692000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000bIvPVYA0",
+      "accountName": "코코도르숯불갈비",
+      "department": "인바운드세일즈",
+      "ownerName": "노하윤",
+      "tabletQty": 18,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 18
+      },
+      "batteryShipped": true,
+      "batteryQty": 34,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10692000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eNO7WYAW",
+      "accountName": "일일수작",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 17,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9,
+        "보조배터리 1+1": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 44,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11741400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g4n8RYAQ",
+      "accountName": "님과함께7080",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 17,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 32,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11903760,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000csj77YAA",
+      "accountName": "오리단길",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 17,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 17
+      },
+      "batteryShipped": true,
+      "batteryQty": 17,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10098000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000f7CGYYA2",
+      "accountName": "보리식당",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 17,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 17
+      },
+      "batteryShipped": true,
+      "batteryQty": 2,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10098000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fFtRSYA0",
+      "accountName": "호룡각",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 17,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 17
+      },
+      "batteryShipped": true,
+      "batteryQty": 16,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11444400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fye3IYAQ",
+      "accountName": "해논미역",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 17,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 17
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10098000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jTOomYAG",
+      "accountName": "석봉포차",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 17,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 17
+      },
+      "batteryShipped": true,
+      "batteryQty": 16,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10098000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000isA2lYAE",
+      "accountName": "스시이안앤",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 17,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 17
+      },
+      "batteryShipped": true,
+      "batteryQty": 16,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10636560,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000iu1Q8YAI",
+      "accountName": "원차이나로",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 17,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 17
+      },
+      "batteryShipped": true,
+      "batteryQty": 16,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11444400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000izsrxYAA",
+      "accountName": "펀비어킹",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 17,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 32,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 12038400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000enhpHYAQ",
+      "accountName": "일일수작",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 16,
+      "primaryPowerType": "(미지정)",
+      "powerTypeDetail": {
+        "(미지정)": 16
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11404800,
+      "contractCount": 2
+    },
+    {
+      "accountId": "001TJ00000fz3MbYAI",
+      "accountName": "해물섬",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 15,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9504000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fxUYtYAM",
+      "accountName": "동수원갈비",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 16
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9504000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fGExEYAW",
+      "accountName": "사랑채꼼장어",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 15,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9504000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ivFAlYAM",
+      "accountName": "연우정육식당",
+      "department": "아웃바운드세일즈",
+      "ownerName": "한진희",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14,
+        "보조배터리 1+1": 2
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 11563200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fpkERYAY",
+      "accountName": "다온가야밀면",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 15,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9757440,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000f7TW2YAM",
+      "accountName": "운학막국수",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 30,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 11278080,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hV9HjYAK",
+      "accountName": "우후죽순",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 16,
+      "primaryPowerType": "전기공사",
+      "powerTypeDetail": {
+        "자체전기": 5,
+        "전기공사": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 42,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 11642400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g4I4fYAE",
+      "accountName": "육미명가",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 15,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9504000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000f6O3UYAU",
+      "accountName": "고결담",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 16,
+      "primaryPowerType": "(미지정)",
+      "powerTypeDetail": {
+        "(미지정)": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 15,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9504000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000exU1dYAE",
+      "accountName": "해송정",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 15,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9504000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jHUsyYAG",
+      "accountName": "더진국수육국밥",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 15,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9630720,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jlAooYAE",
+      "accountName": "아이다텐동소바",
+      "department": "아웃바운드세일즈",
+      "ownerName": "한진희",
+      "tabletQty": 16,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 5,
+        "보조배터리 1+1": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 50,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 12592800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000itvPdYAI",
+      "accountName": "우봉집",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 15,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10771200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hU9Q8YAK",
+      "accountName": "우리동네맥세권1998",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 16,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 16
+      },
+      "batteryShipped": true,
+      "batteryQty": 15,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9504000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eeJV9YAM",
+      "accountName": "인생감자탕",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 15,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 15
+      },
+      "batteryShipped": true,
+      "batteryQty": 14,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9385200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g3zBsYAI",
+      "accountName": "족발신선생",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 15,
+      "primaryPowerType": "전기공사",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 6,
+        "전기공사": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 28,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 10434600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000gHm6hYAC",
+      "accountName": "룰루랄라볼링센터",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 15,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 15
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8910000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hdOBZYA2",
+      "accountName": "개미집",
+      "department": "아웃바운드세일즈",
+      "ownerName": "정종찬",
+      "tabletQty": 15,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 56,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 10909800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ishY5YAI",
+      "accountName": "깐부치킨",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 15,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "전기공사": 5,
+        "자체전기": 3,
+        "보조배터리 1+1": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 22,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9741600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000edTLKYA2",
+      "accountName": "까망돼지",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 15,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 28,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10018800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000iypckYAA",
+      "accountName": "돈타코",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 15,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 15
+      },
+      "batteryShipped": true,
+      "batteryQty": 14,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9385200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jBHy9YAG",
+      "accountName": "제줏집",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 15,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 15
+      },
+      "batteryShipped": true,
+      "batteryQty": 14,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8910000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j418YYAQ",
+      "accountName": "코브",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 15,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 15
+      },
+      "batteryShipped": true,
+      "batteryQty": 14,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9088200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000intK8YAI",
+      "accountName": "리얼펍",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 15,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 15
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8910000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lOoGuYAK",
+      "accountName": "한성막횟집",
+      "department": "채널매니지먼트",
+      "ownerName": "정주희",
+      "tabletQty": 15,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 28,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10494000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lCNc9YAG",
+      "accountName": "명태어장",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 15,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 15
+      },
+      "batteryShipped": true,
+      "batteryQty": 28,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9385200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000foOcIYAU",
+      "accountName": "옹기보리",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 14,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8648640,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fog9bYAA",
+      "accountName": "한옥갈비",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8759520,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dLrccYAC",
+      "accountName": "스시이오니",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 26,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 9147600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eG7pjYAC",
+      "accountName": "아구찜",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8759520,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hIUQcYAO",
+      "accountName": "88소곱탄",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 26,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8205120,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000elF5CYAU",
+      "accountName": "돗가비불쭈꾸미",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 14,
+      "primaryPowerType": "(미지정)",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "(미지정)": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8593200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hU3i1YAC",
+      "accountName": "온달왕돈까스",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9424800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j0Dq5YAE",
+      "accountName": "김천교동짬뽕",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 13,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9868320,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jWygnYAC",
+      "accountName": "담백수산",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 13,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8759520,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g9p85YAA",
+      "accountName": "성주가마솥국밥",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 13,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8537760,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lOPvXYAW",
+      "accountName": "도담꼬기",
+      "department": "아웃바운드세일즈",
+      "ownerName": "임대한",
+      "tabletQty": 14,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 26,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 10177200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eNM7QYAW",
+      "accountName": "고원",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8759520,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001IR00001q1lZAYAY",
+      "accountName": "이차돌",
+      "department": "아웃바운드세일즈",
+      "ownerName": "박성빈",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "보조배터리 1+1": 1,
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 2,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 9226800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hI9p6YAC",
+      "accountName": "버뮤다삼각지",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 13,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8316000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jk4etYAA",
+      "accountName": "야키니쿠규",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 14,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 14
+      },
+      "batteryShipped": true,
+      "batteryQty": 26,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8316000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fryOrYAI",
+      "accountName": "앞다리집",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 32,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7722000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000f61dIYAQ",
+      "accountName": "이화돈",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 40,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8133840,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fsC1cYAE",
+      "accountName": "백년족발",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 13,
+      "primaryPowerType": "보조배터리",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리": 12
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 10216800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000XnZt9YAF",
+      "accountName": "낭만짚불구이",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 13,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8751600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g3be8YAA",
+      "accountName": "부산수련회",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 13,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 12
+      },
+      "batteryShipped": true,
+      "batteryQty": 24,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9084240,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g4CU9YAM",
+      "accountName": "역전양평해장국",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 13,
+      "primaryPowerType": "(미지정)",
+      "powerTypeDetail": {
+        "(미지정)": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 3,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8133840,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fSOzOYAW",
+      "accountName": "고래식당",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 16,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7722000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hLfs2YAC",
+      "accountName": "우리상회삽교곱창",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7722000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jAkfhYAC",
+      "accountName": "취담",
+      "department": "아웃바운드세일즈",
+      "ownerName": "정종찬",
+      "tabletQty": 13,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "보조배터리 1+1": 12,
+        "자체전기": 1
+      },
+      "batteryShipped": true,
+      "batteryQty": 24,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 9444600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eHGMdYAO",
+      "accountName": "탕정집쭈꾸미",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7722000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j953ZYAQ",
+      "accountName": "탐나종합어시장",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7722000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ivCUYYA2",
+      "accountName": "군함맥주",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8133840,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000Bsjt3YAB",
+      "accountName": "육식남",
+      "department": "아웃바운드세일즈",
+      "ownerName": "정종찬",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10,
+        "보조배터리 1+1": 3
+      },
+      "batteryShipped": true,
+      "batteryQty": 6,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8371440,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000is9LBYAY",
+      "accountName": "돈심",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10,
+        "전기공사": 3
+      },
+      "batteryShipped": true,
+      "batteryQty": 24,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8133840,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j0DV7YAM",
+      "accountName": "뭉텅",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 13,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 12
+      },
+      "batteryShipped": true,
+      "batteryQty": 24,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8157600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000f8mUaYAI",
+      "accountName": "화락",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7722000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000cMf3rYAC",
+      "accountName": "문창기식당",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7722000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jHp2hYAC",
+      "accountName": "화계도",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7722000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001IR00001q1mlOYAQ",
+      "accountName": "남대문시장즉석떡볶이김밥",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 13,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 12
+      },
+      "batteryShipped": true,
+      "batteryQty": 24,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 9163440,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lNNH9YAO",
+      "accountName": "어부가구운고등어",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8751600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jE46rYAC",
+      "accountName": "백년가교동짬뽕",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 13,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 13
+      },
+      "batteryShipped": true,
+      "batteryQty": 24,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8751600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eeUICYA2",
+      "accountName": "파평옥",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 12,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9,
+        "보조배터리 1+1": 3
+      },
+      "batteryShipped": true,
+      "batteryQty": 6,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7745760,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fE6UBYA0",
+      "accountName": "일일수작",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 12,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "보조배터리 1+1": 5,
+        "자체전기": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 8474400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000icPirYAE",
+      "accountName": "담티통닭",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 12,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 12
+      },
+      "batteryShipped": true,
+      "batteryQty": 11,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7128000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000inx5vYAA",
+      "accountName": "부대찌개대사관",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 12,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 12
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7468560,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j9lKPYAY",
+      "accountName": "포락룽",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 12,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 12
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7603200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jkcYIYAY",
+      "accountName": "연일개미집",
+      "department": "아웃바운드세일즈",
+      "ownerName": "정종찬",
+      "tabletQty": 12,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 44,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 8712000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000iuwRbYAI",
+      "accountName": "혼미",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 12,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 22,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8379360,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000heQhWYAU",
+      "accountName": "다즐임실N치즈피자멕시카나치킨",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 12,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 12
+      },
+      "batteryShipped": true,
+      "batteryQty": 22,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7603200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j9QpgYAE",
+      "accountName": "코젤다크하우스",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 12,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 12
+      },
+      "batteryShipped": true,
+      "batteryQty": 14,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7128000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000l7pZHYAY",
+      "accountName": "보영이네해물칼국수",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 12,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 12
+      },
+      "batteryShipped": true,
+      "batteryQty": 5,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7128000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lNZF1YAO",
+      "accountName": "마시내",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 12,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 12
+      },
+      "batteryShipped": true,
+      "batteryQty": 25,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7983360,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lFfTYYA0",
+      "accountName": "준배막창",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 12,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 12
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7128000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000f7Yh1YAE",
+      "accountName": "을지로화랑",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fGd9DYAS",
+      "accountName": "청담동말자싸롱",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6882480,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fRrX6YAK",
+      "accountName": "달인대보칼국수",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 11,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 6,
+        "전기공사": 4
+      },
+      "batteryShipped": true,
+      "batteryQty": 32,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 8545680,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000f6MJYYA2",
+      "accountName": "삼대포",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hHNfcYAG",
+      "accountName": "치히로",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 11,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 20,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 8850600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dJsoIYAS",
+      "accountName": "조박사소머리국밥",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 13,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6795360,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000e2V7SYAU",
+      "accountName": "황토가든",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 14,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ecbNtYAI",
+      "accountName": "어썸",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 15,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dKBqxYAG",
+      "accountName": "우섬",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000crqyoYAA",
+      "accountName": "낭만짚불구이",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 7405200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hUf8JYAS",
+      "accountName": "과채적탕",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6882480,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j0yn9YAA",
+      "accountName": "치킨파머스",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 11,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 20,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 7326000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hXTqVYAW",
+      "accountName": "미소야",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 11,
+      "primaryPowerType": "전기공사",
+      "powerTypeDetail": {
+        "자체전기": 5,
+        "전기공사": 6
+      },
+      "batteryShipped": true,
+      "batteryQty": 4,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 7761600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hKyxDYAS",
+      "accountName": "부엌문",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 11,
+      "primaryPowerType": "전기공사",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "전기공사": 10
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7753680,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j9jHHYAY",
+      "accountName": "국민떡볶이",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6664680,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000dvWJFYA2",
+      "accountName": "소담한우한돈",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 30,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jDy2rYAC",
+      "accountName": "한사리감자탕&뼈구이",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "전기공사": 5,
+        "자체전기": 6
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fr2KaYAI",
+      "accountName": "깜냥앤맛좀볼래",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7753680,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ja2RBYAY",
+      "accountName": "마루고팥빙수앤깻잎포차",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001IR00001ucPv7YAE",
+      "accountName": "고파",
+      "department": "인바운드세일즈",
+      "ownerName": "배준성",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lJCydYAG",
+      "accountName": "민호네연탄구이",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 11,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 20,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7674480,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lAUBbYAO",
+      "accountName": "청해식육식당",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 5,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lWa7DYAS",
+      "accountName": "효횟집",
+      "department": "아웃바운드세일즈",
+      "ownerName": "한진희",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 7187400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lGrTlYAK",
+      "accountName": "감성차이",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 11,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 11
+      },
+      "batteryShipped": true,
+      "batteryQty": 7,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6534000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eEshtYAC",
+      "accountName": "야야칼국수",
+      "department": "채널매니지먼트",
+      "ownerName": "정주희",
+      "tabletQty": 11,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 20,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 7979400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eGDK9YAO",
+      "accountName": "소통한우곱창",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6256800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g3Yd8YAE",
+      "accountName": "해남짬뽕",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6652800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000foEGhYAM",
+      "accountName": "오지지아이(OGGI)",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5940000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fyy0LYAQ",
+      "accountName": "고도",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5940000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fSNvEYAW",
+      "accountName": "인생극장쪽갈비",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6058800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g5FhhYAE",
+      "accountName": "깨복이",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "보조배터리 1+1": 3,
+        "자체전기": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6494400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hVNqsYAG",
+      "accountName": "불타는신간짬뽕",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7048800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000foNSHYA2",
+      "accountName": "삼탄",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5940000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hI6HkYAK",
+      "accountName": "국수나무",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 6,
+        "보조배터리 1+1": 4
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 6652800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g6tJdYAI",
+      "accountName": "활어회포차",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8,
+        "전기공사": 2
+      },
+      "batteryShipped": true,
+      "batteryQty": 16,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6256800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fRVJTYA4",
+      "accountName": "팔공면옥",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 17,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6732000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000f6QJwYAM",
+      "accountName": "역전양평해장국",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5860800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000f8zJkYAI",
+      "accountName": "백두산양꼬치",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5940000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j0g0aYAA",
+      "accountName": "먹태감성",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5940000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ieO7GYAU",
+      "accountName": "79대포",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 10,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 18,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6296400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000djsapYAA",
+      "accountName": "김밥천국",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 18,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 7048800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000c7CBbYAM",
+      "accountName": "다이키흰고래",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 7128000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fRrByYAK",
+      "accountName": "청춘닭꼬치",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 18,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 5940000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000YcxHOYAZ",
+      "accountName": "소소수산",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5860800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000g61CaYAI",
+      "accountName": "핫뼈감자탕",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 18,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6375600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000OxSGKYA3",
+      "accountName": "미나리산장",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5940000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000l8v4vYAA",
+      "accountName": "행님쪽갈비",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 6138000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lGzHXYA0",
+      "accountName": "국수나무",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 6336000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jkVEzYAM",
+      "accountName": "야끼니꾸규화",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 10,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 10
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6256800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fygpVYAQ",
+      "accountName": "루이47",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 9,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 16,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6264720,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fSO6DYAW",
+      "accountName": "다온식당",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 9,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5559840,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eMrtEYAS",
+      "accountName": "쭈꾸미상회",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 9,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 16,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 6474600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000f8zmsYAA",
+      "accountName": "노리야",
+      "department": "인바운드세일즈",
+      "ownerName": "노하윤",
+      "tabletQty": 9,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 2,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5346000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hXcDzYAK",
+      "accountName": "가화양꼬치&마라샹궈",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 9,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5346000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fT0YAYA0",
+      "accountName": "해신관",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 9,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 32,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5551920,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fRwoPYAS",
+      "accountName": "아늑코지",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 9,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5346000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fyiYGYAY",
+      "accountName": "비비큐",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 9,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5346000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jANoaYAG",
+      "accountName": "해룡각",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 9,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 4,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5702400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eeFnuYAE",
+      "accountName": "쌀국수집",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 9,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 32,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5551920,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fDp3pYAC",
+      "accountName": "반반믹스치킨",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 9,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5346000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000io4BzYAI",
+      "accountName": "연짬뽕",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 9,
+      "primaryPowerType": "전기공사",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 3,
+        "전기공사": 5
+      },
+      "batteryShipped": true,
+      "batteryQty": 22,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6977520,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000N3fFvYAJ",
+      "accountName": "별빛스푼",
+      "department": "인바운드세일즈",
+      "ownerName": "김세진",
+      "tabletQty": 9,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5417280,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lB48VYAS",
+      "accountName": "우상화로구이",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 9,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 10,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5631120,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000l8gk3YAA",
+      "accountName": "드림카츠",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 9,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 9
+      },
+      "batteryShipped": true,
+      "batteryQty": 4,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 6660720,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eVt9nYAC",
+      "accountName": "펀비어킹",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 8,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 2,
+        "보조배터리 1+1": 6
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 5544000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eUf0WYAS",
+      "accountName": "혼시츠",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 7,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4752000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hHxKlYAK",
+      "accountName": "멘지",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 7,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 5471136,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hUEtCYAW",
+      "accountName": "이립",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 7,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4752000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hOQP8YAO",
+      "accountName": "부산대홋코리",
+      "department": "아웃바운드세일즈",
+      "ownerName": "윤효근",
+      "tabletQty": 8,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 14,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5559840,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hHZsBYAW",
+      "accountName": "타닥장작통닭",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 7,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4752000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hXhTfYAK",
+      "accountName": "코요미",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 14,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4752000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ckFnvYAE",
+      "accountName": "낭만짚불구이",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 7,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5385600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hJ0urYAC",
+      "accountName": "주상낙원",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 4,
+        "보조배터리 1+1": 4
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5322240,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jC7SNYA0",
+      "accountName": "그옛날연탄불고기",
+      "department": "아웃바운드세일즈",
+      "ownerName": "백진흠",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 4,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5005440,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j1wL1YAI",
+      "accountName": "대관령포차",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 3,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5005440,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jXmU3YAK",
+      "accountName": "한쿡KOREABBQ",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4752000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jkmpiYAA",
+      "accountName": "투다리",
+      "department": "아웃바운드세일즈",
+      "ownerName": "정종찬",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 6,
+        "보조배터리 1+1": 2
+      },
+      "batteryShipped": true,
+      "batteryQty": 4,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 5385600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000l8JIpYAM",
+      "accountName": "전설의치킨",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 8,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 14,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5243040,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jWo3GYAS",
+      "accountName": "돌담",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 7,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4910400,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jjoVOYAY",
+      "accountName": "풍미식당",
+      "department": "인바운드세일즈",
+      "ownerName": "정건욱",
+      "tabletQty": 8,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 8
+      },
+      "batteryShipped": true,
+      "batteryQty": 9,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4752000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000cbQJ4YAM",
+      "accountName": "애월연어",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 7,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "보조배터리 1+1": 6,
+        "자체전기": 1
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5409360,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fxbP2YAI",
+      "accountName": "여긴어때포차",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 7,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 3,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4158000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fzx21YAA",
+      "accountName": "유럽소주&파스타흔",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 7,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 6,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4158000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000h223nYAA",
+      "accountName": "꾸브라꼬숯불치킨",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 7,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 6,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4158000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000is2OhYAI",
+      "accountName": "교촌치킨",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 7,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 16,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4158000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j9fmuYAA",
+      "accountName": "키리모리",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 7,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 6,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 4352040,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hYT78YAG",
+      "accountName": "별난연육",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 7,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 4,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5844960,
+      "contractCount": 2
+    },
+    {
+      "accountId": "001TJ00000jUJ5FYAW",
+      "accountName": "레스토랑",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 7,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 7
+      },
+      "batteryShipped": true,
+      "batteryQty": 6,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4656960,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lITdFYAW",
+      "accountName": "까몬",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 7,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 6
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 5409360,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jjky2YAA",
+      "accountName": "조이스제주",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 7,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 7
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4158000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fs7rkYAA",
+      "accountName": "운남쌀국수",
+      "department": "채널세일즈팀",
+      "ownerName": "정주희",
+      "tabletQty": 7,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 1,
+        "보조배터리 1+1": 6
+      },
+      "batteryShipped": true,
+      "batteryQty": 12,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 5409360,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000lVkJoYAK",
+      "accountName": "BHC",
+      "department": "아웃바운드세일즈",
+      "ownerName": "한진희",
+      "tabletQty": 7,
+      "primaryPowerType": "전기공사",
+      "powerTypeDetail": {
+        "자체전기": 3,
+        "전기공사": 4
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 4890600,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000azDLfYAM",
+      "accountName": "자담치킨",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 6,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 6
+      },
+      "batteryShipped": true,
+      "batteryQty": 7,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 3754080,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000fG9N5YAK",
+      "accountName": "웅짱치킨&비어",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 6,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 6
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 3445200,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hXVEBYA4",
+      "accountName": "정야",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 6,
+      "primaryPowerType": "보조배터리 1+1",
+      "powerTypeDetail": {
+        "자체전기": 2,
+        "보조배터리 1+1": 4
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 4070880,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000hWumVYAS",
+      "accountName": "담담포차",
+      "department": "채널세일즈팀",
+      "ownerName": "명세준",
+      "tabletQty": 6,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 6
+      },
+      "batteryShipped": true,
+      "batteryQty": 6,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 3564000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jaAlWYAU",
+      "accountName": "강숲",
+      "department": "채널세일즈팀",
+      "ownerName": "송슬기",
+      "tabletQty": 6,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 6
+      },
+      "batteryShipped": true,
+      "batteryQty": 5,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 3991680,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eflcDYAQ",
+      "accountName": "브라더노래타운",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 5,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 5
+      },
+      "batteryShipped": true,
+      "batteryQty": 4,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 2970000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000io0uqYAA",
+      "accountName": "똔땀랍",
+      "department": "인바운드세일즈",
+      "ownerName": "장순지",
+      "tabletQty": 5,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 5
+      },
+      "batteryShipped": true,
+      "batteryQty": 4,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 2970000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000eFTKmYAO",
+      "accountName": "이자카야텐텐",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 5,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 5
+      },
+      "batteryShipped": true,
+      "batteryQty": 4,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 2970000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000j1TfjYAE",
+      "accountName": "여미온",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 5,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 5
+      },
+      "batteryShipped": true,
+      "batteryQty": 8,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 3088800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000ioHBHYA2",
+      "accountName": "완미족발",
+      "department": "채널세일즈팀",
+      "ownerName": "이은지",
+      "tabletQty": 5,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 5
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 3168000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000izVVhYAM",
+      "accountName": "연어의진심연심",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 4,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 4
+      },
+      "batteryShipped": true,
+      "batteryQty": 6,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 2376000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000jDDnGYAW",
+      "accountName": "아이벗치킨",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 3,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 3
+      },
+      "batteryShipped": true,
+      "batteryQty": 2,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 1782000,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001TJ00000iyC8SYAU",
+      "accountName": "88대감",
+      "department": "인바운드세일즈",
+      "ownerName": "이지혜",
+      "tabletQty": 2,
+      "primaryPowerType": "자체전기",
+      "powerTypeDetail": {
+        "자체전기": 2
+      },
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": true,
+      "productAdAgree": true,
+      "contractAmount": 1306800,
+      "contractCount": 1
+    },
+    {
+      "accountId": "001IR00001q1jjWYAQ",
+      "accountName": "육집사",
+      "department": "제휴관리팀",
+      "ownerName": "김유준",
+      "tabletQty": 0,
+      "primaryPowerType": "(미지정)",
+      "powerTypeDetail": {},
+      "batteryShipped": false,
+      "batteryQty": 0,
+      "batteryFree": true,
+      "bannerAdAgree": false,
+      "productAdAgree": false,
+      "contractAmount": 11550000,
+      "contractCount": 1
+    }
+  ]
+}

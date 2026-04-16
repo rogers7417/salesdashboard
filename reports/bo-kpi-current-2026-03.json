@@ -1,0 +1,703 @@
+{
+  "period": "2026-03",
+  "asOf": "2026-03-23",
+  "generatedAt": "2026-03-23T09:58:36.788Z",
+  "criteria": {
+    "recordType": "테이블오더 신규만 (CCTV/추가설치/멀티오더/추가구매 제외)",
+    "conversionRate": "3월 생성 신규 Opp 중 견적있는 건 대비 계약서명완료 (WIP+CL 포함 분모)",
+    "cwConversionRate": "3월 생성 신규 Opp 중 견적있는 건 대비 CW(마감) 건 (WIP+CL+CW 포함 분모)",
+    "weeklyCW": "CW(마감) 건수를 LastStageChangeDate 기준 주차별 집계",
+    "pendingAndActivity": "전체 Open 신규 건 기준, Task 기반 무활동"
+  },
+  "ibBO": {
+    "전수빈": {
+      "name": "전수빈",
+      "pipeline": {
+        "totalOpps": 81,
+        "quotedOpps": 74,
+        "signedOpps": 24,
+        "wipOpps": 45,
+        "clOpps": 8,
+        "noQuoteOpps": 7,
+        "wipStages": {
+          "견적": 36,
+          "선납금": 6,
+          "계약진행": 1,
+          "출고진행": 2
+        }
+      },
+      "conversionRate": {
+        "quotedOpps": 74,
+        "signedQuotedOpps": 24,
+        "rate": "32.4%"
+      },
+      "cwConversionRate": {
+        "quotedOpps": 74,
+        "cwOpps": 21,
+        "rate": "28.4%"
+      },
+      "weeklyCW": {
+        "1": 0,
+        "2": 6,
+        "3": 12,
+        "4": 3
+      },
+      "contracts": {
+        "total": 40,
+        "signed": 36,
+        "pending": 4
+      },
+      "orderCompletionRate": {
+        "signedOpps": 36,
+        "withOrder": 36,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 546,
+      "weeklyContracts": {
+        "1": 10,
+        "2": 18,
+        "3": 12,
+        "4": 0
+      },
+      "openPipeline": {
+        "totalOpen": 78,
+        "stageBreakdown": {
+          "견적": 57,
+          "설치진행": 1,
+          "계약진행": 4,
+          "출고진행": 3,
+          "방문배정": 4,
+          "선납금": 8,
+          "방문상담": 1
+        }
+      },
+      "activityClassification": {
+        "active": 65,
+        "loose": 13,
+        "stale": 0,
+        "noTask": 0,
+        "noTaskStages": {},
+        "staleDetails": [],
+        "noTaskDetails": []
+      },
+      "noActivity7days": {
+        "count": 13,
+        "totalOpenOpps": 78
+      },
+      "over45daysPending": 13
+    },
+    "정지영": {
+      "name": "정지영",
+      "pipeline": {
+        "totalOpps": 81,
+        "quotedOpps": 72,
+        "signedOpps": 16,
+        "wipOpps": 50,
+        "clOpps": 9,
+        "noQuoteOpps": 9,
+        "wipStages": {
+          "견적": 34,
+          "재견적": 5,
+          "출고진행": 3,
+          "선납금": 7,
+          "계약진행": 1
+        }
+      },
+      "conversionRate": {
+        "quotedOpps": 72,
+        "signedQuotedOpps": 16,
+        "rate": "22.2%"
+      },
+      "cwConversionRate": {
+        "quotedOpps": 72,
+        "cwOpps": 13,
+        "rate": "18.1%"
+      },
+      "weeklyCW": {
+        "1": 0,
+        "2": 3,
+        "3": 9,
+        "4": 1
+      },
+      "contracts": {
+        "total": 34,
+        "signed": 31,
+        "pending": 3
+      },
+      "orderCompletionRate": {
+        "signedOpps": 31,
+        "withOrder": 31,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 398,
+      "weeklyContracts": {
+        "1": 10,
+        "2": 13,
+        "3": 10,
+        "4": 1
+      },
+      "openPipeline": {
+        "totalOpen": 90,
+        "stageBreakdown": {
+          "재견적": 15,
+          "방문배정": 10,
+          "견적": 50,
+          "선납금": 10,
+          "설치진행": 1,
+          "출고진행": 3,
+          "계약진행": 1
+        }
+      },
+      "activityClassification": {
+        "active": 78,
+        "loose": 12,
+        "stale": 0,
+        "noTask": 0,
+        "noTaskStages": {},
+        "staleDetails": [],
+        "noTaskDetails": []
+      },
+      "noActivity7days": {
+        "count": 12,
+        "totalOpenOpps": 90
+      },
+      "over45daysPending": 19
+    },
+    "박효정": {
+      "name": "박효정",
+      "pipeline": {
+        "totalOpps": 68,
+        "quotedOpps": 54,
+        "signedOpps": 7,
+        "wipOpps": 43,
+        "clOpps": 7,
+        "noQuoteOpps": 14,
+        "wipStages": {
+          "견적": 31,
+          "재견적": 2,
+          "선납금": 6,
+          "출고진행": 3,
+          "계약진행": 1
+        }
+      },
+      "conversionRate": {
+        "quotedOpps": 54,
+        "signedQuotedOpps": 7,
+        "rate": "13.0%"
+      },
+      "cwConversionRate": {
+        "quotedOpps": 54,
+        "cwOpps": 4,
+        "rate": "7.4%"
+      },
+      "weeklyCW": {
+        "1": 0,
+        "2": 2,
+        "3": 1,
+        "4": 1
+      },
+      "contracts": {
+        "total": 30,
+        "signed": 26,
+        "pending": 4
+      },
+      "orderCompletionRate": {
+        "signedOpps": 26,
+        "withOrder": 26,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 374,
+      "weeklyContracts": {
+        "1": 9,
+        "2": 8,
+        "3": 9,
+        "4": 4
+      },
+      "openPipeline": {
+        "totalOpen": 94,
+        "stageBreakdown": {
+          "견적": 54,
+          "방문배정": 16,
+          "선납금": 13,
+          "계약진행": 3,
+          "설치진행": 1,
+          "재견적": 4,
+          "출고진행": 3
+        }
+      },
+      "activityClassification": {
+        "active": 75,
+        "loose": 19,
+        "stale": 0,
+        "noTask": 0,
+        "noTaskStages": {},
+        "staleDetails": [],
+        "noTaskDetails": []
+      },
+      "noActivity7days": {
+        "count": 19,
+        "totalOpenOpps": 94
+      },
+      "over45daysPending": 19
+    },
+    "조현재": {
+      "name": "조현재",
+      "pipeline": {
+        "totalOpps": 83,
+        "quotedOpps": 72,
+        "signedOpps": 12,
+        "wipOpps": 49,
+        "clOpps": 15,
+        "noQuoteOpps": 11,
+        "wipStages": {
+          "설치진행": 3,
+          "선납금": 7,
+          "견적": 34,
+          "계약진행": 2,
+          "재견적": 1,
+          "출고진행": 2
+        }
+      },
+      "conversionRate": {
+        "quotedOpps": 72,
+        "signedQuotedOpps": 12,
+        "rate": "16.7%"
+      },
+      "cwConversionRate": {
+        "quotedOpps": 72,
+        "cwOpps": 8,
+        "rate": "11.1%"
+      },
+      "weeklyCW": {
+        "1": 0,
+        "2": 3,
+        "3": 4,
+        "4": 1
+      },
+      "contracts": {
+        "total": 29,
+        "signed": 24,
+        "pending": 5
+      },
+      "orderCompletionRate": {
+        "signedOpps": 24,
+        "withOrder": 24,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 295,
+      "weeklyContracts": {
+        "1": 5,
+        "2": 10,
+        "3": 12,
+        "4": 2
+      },
+      "openPipeline": {
+        "totalOpen": 89,
+        "stageBreakdown": {
+          "계약진행": 3,
+          "방문배정": 13,
+          "재견적": 2,
+          "견적": 56,
+          "선납금": 8,
+          "출고진행": 4,
+          "설치진행": 3
+        }
+      },
+      "activityClassification": {
+        "active": 76,
+        "loose": 13,
+        "stale": 0,
+        "noTask": 0,
+        "noTaskStages": {},
+        "staleDetails": [],
+        "noTaskDetails": []
+      },
+      "noActivity7days": {
+        "count": 13,
+        "totalOpenOpps": 89
+      },
+      "over45daysPending": 17
+    }
+  },
+  "chBO": {
+    "최영은": {
+      "name": "최영은",
+      "conversionRate": {
+        "quotedOpps": 38,
+        "signedQuotedOpps": 34,
+        "rate": "89.5%"
+      },
+      "cwConversionRate": {
+        "quotedOpps": 38,
+        "cwOpps": 17,
+        "rate": "44.7%"
+      },
+      "weeklyCW": {
+        "1": 1,
+        "2": 12,
+        "3": 17,
+        "4": 0
+      },
+      "contracts": {
+        "total": 57,
+        "signed": 52,
+        "pending": 5
+      },
+      "orderCompletionRate": {
+        "signedOpps": 50,
+        "withOrder": 50,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 783,
+      "weeklyContracts": {
+        "1": 18,
+        "2": 16,
+        "3": 19,
+        "4": 4
+      },
+      "franchiseLeadTime": {
+        "total": 52,
+        "within5days": 47,
+        "rate": "90.4%"
+      },
+      "individualLeadTime": {
+        "total": 0,
+        "within7days": 0,
+        "rate": "0.0%"
+      },
+      "franchiseOver7daysPending": 1,
+      "individualOver10daysPending": 1,
+      "openPipeline": {
+        "totalOpen": 5
+      },
+      "activityClassification": {
+        "active": 3,
+        "loose": 2,
+        "stale": 0,
+        "noTask": 0,
+        "staleDetails": [],
+        "noTaskDetails": []
+      },
+      "noActivity5days": {
+        "count": 2,
+        "totalOpenContracts": 5
+      },
+      "over45daysPending": 0,
+      "monthlyProcessed": 52
+    },
+    "장명진": {
+      "name": "장명진",
+      "conversionRate": {
+        "quotedOpps": 31,
+        "signedQuotedOpps": 27,
+        "rate": "87.1%"
+      },
+      "cwConversionRate": {
+        "quotedOpps": 31,
+        "cwOpps": 17,
+        "rate": "54.8%"
+      },
+      "weeklyCW": {
+        "1": 0,
+        "2": 12,
+        "3": 15,
+        "4": 6
+      },
+      "contracts": {
+        "total": 52,
+        "signed": 48,
+        "pending": 4
+      },
+      "orderCompletionRate": {
+        "signedOpps": 48,
+        "withOrder": 48,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 753,
+      "weeklyContracts": {
+        "1": 12,
+        "2": 19,
+        "3": 19,
+        "4": 2
+      },
+      "franchiseLeadTime": {
+        "total": 48,
+        "within5days": 44,
+        "rate": "91.7%"
+      },
+      "individualLeadTime": {
+        "total": 0,
+        "within7days": 0,
+        "rate": "0.0%"
+      },
+      "franchiseOver7daysPending": 1,
+      "individualOver10daysPending": 1,
+      "openPipeline": {
+        "totalOpen": 5
+      },
+      "activityClassification": {
+        "active": 4,
+        "loose": 1,
+        "stale": 0,
+        "noTask": 0,
+        "staleDetails": [],
+        "noTaskDetails": []
+      },
+      "noActivity5days": {
+        "count": 1,
+        "totalOpenContracts": 5
+      },
+      "over45daysPending": 0,
+      "monthlyProcessed": 48
+    },
+    "이은지": {
+      "name": "이은지",
+      "conversionRate": {
+        "quotedOpps": 1,
+        "signedQuotedOpps": 0,
+        "rate": "0.0%"
+      },
+      "cwConversionRate": {
+        "quotedOpps": 1,
+        "cwOpps": 0,
+        "rate": "0.0%"
+      },
+      "weeklyCW": {
+        "1": 1,
+        "2": 2,
+        "3": 1,
+        "4": 0
+      },
+      "contracts": {
+        "total": 6,
+        "signed": 5,
+        "pending": 1
+      },
+      "orderCompletionRate": {
+        "signedOpps": 5,
+        "withOrder": 5,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 68,
+      "weeklyContracts": {
+        "1": 4,
+        "2": 2,
+        "3": 0,
+        "4": 0
+      },
+      "franchiseLeadTime": {
+        "total": 5,
+        "within5days": 5,
+        "rate": "100.0%"
+      },
+      "individualLeadTime": {
+        "total": 0,
+        "within7days": 0,
+        "rate": "0.0%"
+      },
+      "franchiseOver7daysPending": 8,
+      "individualOver10daysPending": 8,
+      "openPipeline": {
+        "totalOpen": 8
+      },
+      "activityClassification": {
+        "active": 0,
+        "loose": 0,
+        "stale": 8,
+        "noTask": 0,
+        "staleDetails": [
+          {
+            "contract": "a0tTJ00000AEc1FYAT_카엘리움(부산중구점)_2025.4.15-2028.4.14",
+            "account": "카엘리움",
+            "createdDate": "2025-04-11",
+            "daysOld": 345,
+            "lastTaskDate": "2025-07-07",
+            "daysSinceTask": 259,
+            "totalTasks": 15
+          },
+          {
+            "contract": "a0tTJ00000FhAebYAF_매울양양(경산점)_2025.7.30-2028.7.29",
+            "account": "매울양양",
+            "createdDate": "2025-07-25",
+            "daysOld": 240,
+            "lastTaskDate": "2025-09-18",
+            "daysSinceTask": 186,
+            "totalTasks": 8
+          },
+          {
+            "contract": "a0tTJ00000GYzavYAD_곰실장(대전점)_2025.8.11-2028.8.10",
+            "account": "곰실장",
+            "createdDate": "2025-08-08",
+            "daysOld": 226,
+            "lastTaskDate": "2025-10-20",
+            "daysSinceTask": 154,
+            "totalTasks": 15
+          },
+          {
+            "contract": "a0tTJ00000GmebRYAR_화요리(강남점)_2025.8.14-2028.8.13",
+            "account": "화요리",
+            "createdDate": "2025-08-12",
+            "daysOld": 222,
+            "lastTaskDate": "2025-10-20",
+            "daysSinceTask": 154,
+            "totalTasks": 12
+          },
+          {
+            "contract": "a0tTJ00000JfuzWYAR_깐부치킨(동두천지행역점)_2025.10.2-2028.10.1",
+            "account": "깐부치킨",
+            "createdDate": "2025-09-30",
+            "daysOld": 173,
+            "lastTaskDate": "2025-11-11",
+            "daysSinceTask": 132,
+            "totalTasks": 12
+          },
+          {
+            "contract": "a0tTJ00000NHKmfYAH_괭이부리마을(상동점)_2025.12.2-2028.12.1",
+            "account": "괭이부리마을",
+            "createdDate": "2025-11-28",
+            "daysOld": 114,
+            "lastTaskDate": "2025-12-30",
+            "daysSinceTask": 83,
+            "totalTasks": 10
+          },
+          {
+            "contract": "a0tTJ00000No81xYAB_경성깍두기(광교점)_2025.12.9-2028.12.8",
+            "account": "경성깍두기",
+            "createdDate": "2025-12-05",
+            "daysOld": 107,
+            "lastTaskDate": "2025-12-29",
+            "daysSinceTask": 84,
+            "totalTasks": 22
+          },
+          {
+            "contract": "006TJ00000UxyDOYAZ_일일수작(광주상무점)",
+            "account": "일일수작",
+            "createdDate": "2025-12-22",
+            "daysOld": 90,
+            "lastTaskDate": "2025-12-22",
+            "daysSinceTask": 91,
+            "totalTasks": 18
+          }
+        ],
+        "noTaskDetails": []
+      },
+      "noActivity5days": {
+        "count": 8,
+        "totalOpenContracts": 8
+      },
+      "over45daysPending": 8,
+      "monthlyProcessed": 5
+    },
+    "김희수": {
+      "name": "김희수",
+      "conversionRate": {
+        "quotedOpps": 6,
+        "signedQuotedOpps": 6,
+        "rate": "100.0%"
+      },
+      "cwConversionRate": {
+        "quotedOpps": 6,
+        "cwOpps": 2,
+        "rate": "33.3%"
+      },
+      "weeklyCW": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 2
+      },
+      "contracts": {
+        "total": 8,
+        "signed": 8,
+        "pending": 0
+      },
+      "orderCompletionRate": {
+        "signedOpps": 8,
+        "withOrder": 8,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 100,
+      "weeklyContracts": {
+        "1": 0,
+        "2": 3,
+        "3": 5,
+        "4": 0
+      },
+      "franchiseLeadTime": {
+        "total": 8,
+        "within5days": 8,
+        "rate": "100.0%"
+      },
+      "individualLeadTime": {
+        "total": 0,
+        "within7days": 0,
+        "rate": "0.0%"
+      },
+      "franchiseOver7daysPending": 5,
+      "individualOver10daysPending": 5,
+      "openPipeline": {
+        "totalOpen": 5
+      },
+      "activityClassification": {
+        "active": 0,
+        "loose": 0,
+        "stale": 5,
+        "noTask": 0,
+        "staleDetails": [
+          {
+            "contract": "a0tTJ00000Afv1UYAR_단코투(이태원점)_2025.4.25-2028.4.24",
+            "account": "단코투",
+            "createdDate": "2025-04-23",
+            "daysOld": 333,
+            "lastTaskDate": "2025-06-26",
+            "daysSinceTask": 270,
+            "totalTasks": 12
+          },
+          {
+            "contract": "a0tTJ00000AqHiFYAV_항교막국수(원주점)_2025.4.29-2028.4.28",
+            "account": "항교막국수",
+            "createdDate": "2025-04-25",
+            "daysOld": 331,
+            "lastTaskDate": "2025-05-28",
+            "daysSinceTask": 299,
+            "totalTasks": 10
+          },
+          {
+            "contract": "a0tTJ00000Awe5lYAB_한국할랄케밥(안산점)_2025.4.29-2028.4.28",
+            "account": "한국할랄케밥",
+            "createdDate": "2025-04-28",
+            "daysOld": 328,
+            "lastTaskDate": "2025-05-13",
+            "daysSinceTask": 314,
+            "totalTasks": 8
+          },
+          {
+            "contract": "a0tTJ00000EExOVYA1_역전할머니맥주(중마점)_2025.7.5-2028.7.4",
+            "account": "역전할머니맥주",
+            "createdDate": "2025-07-02",
+            "daysOld": 263,
+            "lastTaskDate": "2025-07-03",
+            "daysSinceTask": 263,
+            "totalTasks": 9
+          },
+          {
+            "contract": "a0tTJ00000GQajTYAT_옛날경성순대국(면목역점)_2025.8.11-2028.8.10",
+            "account": "옛날경성순대국",
+            "createdDate": "2025-08-06",
+            "daysOld": 228,
+            "lastTaskDate": "2025-09-18",
+            "daysSinceTask": 186,
+            "totalTasks": 10
+          }
+        ],
+        "noTaskDetails": []
+      },
+      "noActivity5days": {
+        "count": 5,
+        "totalOpenContracts": 5
+      },
+      "over45daysPending": 5,
+      "monthlyProcessed": 8
+    }
+  }
+}

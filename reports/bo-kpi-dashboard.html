@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BO KPI 현황 대시보드 — 2026년 3월</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #e8ebed;
+    --text-primary: #191f28;
+    --text-secondary: #6b7684;
+    --text-tertiary: #8b95a1;
+    --blue: #3182f6;
+    --blue-light: #e8f3ff;
+    --red: #f04452;
+    --red-light: #fff0f0;
+    --green: #00b386;
+    --green-light: #e8fff4;
+    --orange: #f59f00;
+    --orange-light: #fff8e6;
+    --purple: #8b5cf6;
+    --purple-light: #f3f0ff;
+    --shadow: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-hover: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 1360px; margin: 0 auto; padding: 32px 24px; }
+
+  .header { margin-bottom: 36px; }
+  .header h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+  .header .subtitle { font-size: 15px; color: var(--text-secondary); }
+  .header .meta { display: flex; gap: 12px; margin-top: 12px; align-items: center; }
+  .badge { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+  .badge.blue { background: var(--blue-light); color: var(--blue); }
+  .badge.purple { background: var(--purple-light); color: var(--purple); }
+  .badge.gray { background: #f2f4f6; color: var(--text-secondary); }
+
+  .team-section { margin-bottom: 48px; }
+  .team-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px; padding-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+  }
+  .team-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 10px;
+    font-size: 14px; font-weight: 800; color: #fff;
+  }
+  .team-badge.ib { background: var(--blue); }
+  .team-badge.ch { background: var(--purple); }
+  .team-title { font-size: 20px; font-weight: 700; }
+  .team-count { font-size: 14px; color: var(--text-secondary); margin-left: auto; }
+
+  .person-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+
+  .person-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .person-card:hover { box-shadow: var(--shadow-hover); }
+
+  .person-header {
+    padding: 20px 24px 16px;
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .person-avatar {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; color: #fff;
+  }
+  .person-name { font-size: 17px; font-weight: 700; }
+  .person-summary { margin-left: auto; display: flex; gap: 8px; }
+  .summary-chip {
+    padding: 4px 10px; border-radius: 8px;
+    font-size: 12px; font-weight: 600;
+  }
+  .summary-chip.good { background: var(--green-light); color: var(--green); }
+  .summary-chip.warn { background: var(--orange-light); color: var(--orange); }
+  .summary-chip.bad { background: var(--red-light); color: var(--red); }
+
+  .person-body { padding: 20px 24px 24px; }
+
+  .kpi-item { margin-bottom: 16px; }
+  .kpi-item:last-child { margin-bottom: 0; }
+  .kpi-label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 6px; font-size: 13px;
+  }
+  .kpi-label .name { font-weight: 600; color: var(--text-primary); }
+  .kpi-label .values { color: var(--text-secondary); font-weight: 500; }
+  .kpi-label .values .actual { font-weight: 700; }
+  .kpi-label .values .actual.hit { color: var(--green); }
+  .kpi-label .values .actual.miss { color: var(--red); }
+  .kpi-label .values .actual.warn { color: var(--orange); }
+
+  .progress-track {
+    height: 8px; background: #f2f4f6; border-radius: 4px;
+    overflow: hidden; position: relative;
+  }
+  .progress-bar {
+    height: 100%; border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+  .progress-bar.green { background: var(--green); }
+  .progress-bar.red { background: var(--red); }
+  .progress-bar.orange { background: var(--orange); }
+  .progress-bar.blue { background: var(--blue); }
+
+  .progress-target {
+    position: absolute; top: -2px; bottom: -2px;
+    width: 2px; background: var(--text-primary);
+    opacity: 0.3; border-radius: 1px;
+  }
+
+  .kpi-detail {
+    display: flex; gap: 6px; margin-top: 4px; font-size: 11px; color: var(--text-tertiary);
+  }
+
+  .weekly-row {
+    display: flex; gap: 6px; margin-top: 16px;
+    padding-top: 16px; border-top: 1px solid var(--border);
+  }
+  .weekly-row .week-box {
+    flex: 1; text-align: center; padding: 8px 4px;
+    background: #fafbfc; border-radius: 8px;
+  }
+  .weekly-row .week-box .wk-label { font-size: 11px; color: var(--text-tertiary); font-weight: 500; }
+  .weekly-row .week-box .wk-value { font-size: 16px; font-weight: 700; margin-top: 2px; }
+  .weekly-row .week-box .wk-value.hit { color: var(--green); }
+  .weekly-row .week-box .wk-value.miss { color: var(--red); }
+
+  .conv-pair { display: flex; gap: 12px; margin-bottom: 8px; }
+  .conv-pair .conv-box { flex: 1; background: #fafbfc; border-radius: 10px; padding: 12px 14px; }
+  .conv-pair .conv-label { font-size: 11px; color: var(--text-tertiary); font-weight: 600; margin-bottom: 4px; }
+  .conv-pair .conv-rate { font-size: 22px; font-weight: 800; }
+  .conv-pair .conv-detail { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .conv-pair .conv-rate.hit { color: var(--green); }
+  .conv-pair .conv-rate.warn { color: var(--orange); }
+  .conv-pair .conv-rate.miss { color: var(--red); }
+  .conv-gap { background: var(--orange-light); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; font-size: 12px; color: var(--orange); display: flex; justify-content: space-between; align-items: center; }
+  .conv-gap .gap-label { font-weight: 500; }
+  .conv-gap .gap-value { font-weight: 700; font-size: 14px; }
+
+  .footer { text-align: center; padding: 32px 0; color: var(--text-tertiary); font-size: 13px; }
+
+  @media (max-width: 900px) {
+    .person-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script>
+const DATA = {
+  "period": "2026-03",
+  "asOf": "2026-03-23",
+  "generatedAt": new Date().toISOString(),
+  "criteria": {"recordType":"테이블오더 신규만","conversionRate":"3월 생성 신규 Opp 견적 대비 계약서명완료 (WIP+CL 포함)","pendingAndActivity":"전체 Open 신규 건, Task 기반 무활동"},
+  "ibBO": {
+    "전수빈": {"name":"전수빈","totalContracts":40,"signedContracts":36,"quoteCount":74,"conversionRate":"32.4%","cwConversionRate":"28.4%","orderCompletionRate":"100.0%","ordersCreated":36,"monthlyTablets":546,"weeklyContracts":{"1":10,"2":18,"3":12,"4":0},"weeklyCW":{"1":0,"2":6,"3":12,"4":3},"noActivity7days":13,"over45daysPending":13,"pendingTotal":78,"pipeline":{"totalOpps":81,"quotedOpps":74,"signedOpps":24,"cwOpps":21,"wipOpps":45,"clOpps":8},"activity":{"active":65,"loose":13,"stale":0,"noTask":0}},
+    "정지영": {"name":"정지영","totalContracts":34,"signedContracts":31,"quoteCount":72,"conversionRate":"22.2%","cwConversionRate":"18.1%","orderCompletionRate":"100.0%","ordersCreated":31,"monthlyTablets":398,"weeklyContracts":{"1":10,"2":13,"3":10,"4":1},"weeklyCW":{"1":0,"2":3,"3":9,"4":1},"noActivity7days":12,"over45daysPending":19,"pendingTotal":90,"pipeline":{"totalOpps":81,"quotedOpps":72,"signedOpps":16,"cwOpps":13,"wipOpps":50,"clOpps":9},"activity":{"active":78,"loose":12,"stale":0,"noTask":0}},
+    "박효정": {"name":"박효정","totalContracts":30,"signedContracts":26,"quoteCount":54,"conversionRate":"13.0%","cwConversionRate":"7.4%","orderCompletionRate":"100.0%","ordersCreated":26,"monthlyTablets":374,"weeklyContracts":{"1":9,"2":8,"3":9,"4":4},"weeklyCW":{"1":0,"2":2,"3":1,"4":1},"noActivity7days":19,"over45daysPending":19,"pendingTotal":94,"pipeline":{"totalOpps":68,"quotedOpps":54,"signedOpps":7,"cwOpps":4,"wipOpps":43,"clOpps":7},"activity":{"active":75,"loose":19,"stale":0,"noTask":0}},
+    "조현재": {"name":"조현재","totalContracts":29,"signedContracts":24,"quoteCount":72,"conversionRate":"16.7%","cwConversionRate":"11.1%","orderCompletionRate":"100.0%","ordersCreated":24,"monthlyTablets":295,"weeklyContracts":{"1":5,"2":10,"3":12,"4":2},"weeklyCW":{"1":0,"2":3,"3":4,"4":1},"noActivity7days":13,"over45daysPending":17,"pendingTotal":89,"pipeline":{"totalOpps":83,"quotedOpps":72,"signedOpps":12,"cwOpps":8,"wipOpps":49,"clOpps":15},"activity":{"active":76,"loose":13,"stale":0,"noTask":0}}
+  },
+  "chBO": {
+    "최영은": {"name":"최영은","totalContracts":57,"signedContracts":52,"conversionRate":"89.5%","cwConversionRate":"44.7%","orderCompletionRate":"100.0%","ordersCreated":52,"monthlyTablets":783,"weeklyContracts":{"1":18,"2":16,"3":19,"4":4},"weeklyCW":{"1":1,"2":12,"3":17,"4":0},"cwPipeline":{"quotedOpps":38,"cwOpps":17,"signedOpps":34},"franchiseLeadTime":{"total":52,"within5days":47,"rate":"90.4%"},"individualLeadTime":{"total":0,"within7days":0,"rate":"0.0%"},"franchiseOver7daysPending":1,"individualOver10daysPending":1,"noActivity5days":2,"monthlyProcessed":52,"pendingTotal":5},
+    "장명진": {"name":"장명진","totalContracts":52,"signedContracts":48,"conversionRate":"87.1%","cwConversionRate":"54.8%","orderCompletionRate":"100.0%","ordersCreated":48,"monthlyTablets":753,"weeklyContracts":{"1":12,"2":19,"3":19,"4":2},"weeklyCW":{"1":0,"2":12,"3":15,"4":6},"cwPipeline":{"quotedOpps":31,"cwOpps":17,"signedOpps":27},"franchiseLeadTime":{"total":48,"within5days":44,"rate":"91.7%"},"individualLeadTime":{"total":0,"within7days":0,"rate":"0.0%"},"franchiseOver7daysPending":1,"individualOver10daysPending":1,"noActivity5days":1,"monthlyProcessed":48,"pendingTotal":5},
+    "이은지": {"name":"이은지","totalContracts":6,"signedContracts":5,"conversionRate":"0.0%","cwConversionRate":"0.0%","orderCompletionRate":"100.0%","ordersCreated":5,"monthlyTablets":68,"weeklyContracts":{"1":4,"2":2,"3":0,"4":0},"weeklyCW":{"1":1,"2":2,"3":1,"4":0},"cwPipeline":{"quotedOpps":1,"cwOpps":0,"signedOpps":0},"franchiseLeadTime":{"total":5,"within5days":5,"rate":"100.0%"},"individualLeadTime":{"total":0,"within7days":0,"rate":"0.0%"},"franchiseOver7daysPending":8,"individualOver10daysPending":8,"noActivity5days":8,"monthlyProcessed":5,"pendingTotal":8},
+    "김희수": {"name":"김희수","totalContracts":8,"signedContracts":8,"conversionRate":"100.0%","cwConversionRate":"33.3%","orderCompletionRate":"100.0%","ordersCreated":8,"monthlyTablets":100,"weeklyContracts":{"1":0,"2":3,"3":5,"4":0},"weeklyCW":{"1":0,"2":0,"3":0,"4":2},"cwPipeline":{"quotedOpps":6,"cwOpps":2,"signedOpps":6},"franchiseLeadTime":{"total":8,"within5days":8,"rate":"100.0%"},"individualLeadTime":{"total":0,"within7days":0,"rate":"0.0%"},"franchiseOver7daysPending":5,"individualOver10daysPending":5,"noActivity5days":5,"monthlyProcessed":8,"pendingTotal":5}
+  }
+};
+
+// IB BO targets
+const IB_TARGETS = {
+  cwConversionRate: { label: '견적→CW 전환율', target: 55, unit: '%', direction: 'higher' },
+  conversionRate: { label: '견적→계약 전환율', target: 55, unit: '%', direction: 'higher' },
+  orderCompletionRate: { label: '계약→출고 완료율', target: 95, unit: '%', direction: 'higher' },
+  tabletRate: { label: '월간 태블릿 달성률', target: 100, unit: '%', direction: 'higher', subLabel: '(목표 650대)' },
+  noActivity7days: { label: '무활동 건 (7일+)', target: 0, unit: '건', direction: 'lower' },
+  over45daysPending: { label: '45일+ 장기 건', target: 0, unit: '건', direction: 'lower' },
+};
+
+// CH BO targets
+const CH_TARGETS = {
+  cwConversionRate: { label: '견적→CW 전환율', target: 55, unit: '%', direction: 'higher' },
+  orderCompletionRate: { label: '계약→출고 완료율', target: 95, unit: '%', direction: 'higher' },
+  monthlyProcessed: { label: '월간 처리 볼륨', target: 12, unit: '건', direction: 'higher' },
+  franchiseLeadTimeRate: { label: '제휴 리드타임 5일 이내', target: 60, unit: '%', direction: 'higher' },
+  franchiseOver7daysPending: { label: '제휴 7일 초과 잔량', target: 5, unit: '건', direction: 'lower' },
+  individualOver10daysPending: { label: '개인 10일 초과 잔량', target: 5, unit: '건', direction: 'lower' },
+  noActivity5days: { label: '5일 무활동 건', target: 0, unit: '건', direction: 'lower' },
+};
+
+const COLORS_IB = ['#3182f6', '#00B8D9', '#20C997', '#8B5CF6'];
+const COLORS_CH = ['#8B5CF6', '#F04452', '#00B8D9', '#20C997'];
+
+function pf(v) { return parseFloat(String(v).replace('%', '')); }
+
+function getStatus(actual, target, direction) {
+  if (direction === 'higher') {
+    if (actual >= target) return 'hit';
+    if (actual >= target * 0.8) return 'warn';
+    return 'miss';
+  } else {
+    if (actual <= target) return 'hit';
+    if (actual <= target * 1.5) return 'warn';
+    return 'miss';
+  }
+}
+
+function progressPct(actual, target, direction) {
+  if (direction === 'higher') {
+    return Math.min(100, (actual / target) * 100);
+  } else {
+    if (target === 0) return actual === 0 ? 100 : 0;
+    const ratio = actual / target;
+    if (ratio <= 1) return 100;
+    return Math.max(0, 100 - ((ratio - 1) * 50));
+  }
+}
+
+function barColor(status) {
+  return status === 'hit' ? 'green' : status === 'warn' ? 'orange' : 'red';
+}
+
+function renderKPI(name, actual, target, unit, direction, subLabel) {
+  const status = getStatus(actual, target, direction);
+  const pct = progressPct(actual, target, direction);
+  const displayTarget = direction === 'lower' ? `≤${target}${unit}` : `${target}${unit}`;
+  const displayActual = direction === 'lower' ? `${actual}${unit}` : `${actual}${unit}`;
+  const targetPctPos = direction === 'higher' ? Math.min(100, (target / Math.max(actual, target) * 100)) : null;
+
+  let barPctDisplay;
+  if (direction === 'higher') {
+    barPctDisplay = Math.min(100, (actual / Math.max(target * 1.2, actual) * 100));
+  } else {
+    const maxScale = Math.max(target * 2, actual, 1);
+    barPctDisplay = Math.min(100, (actual / maxScale) * 100);
+  }
+
+  let targetMarker = '';
+  if (direction === 'higher') {
+    const markerPos = (target / Math.max(target * 1.2, actual)) * 100;
+    targetMarker = `<div class="progress-target" style="left:${markerPos}%"></div>`;
+  } else if (target > 0) {
+    const maxScale = Math.max(target * 2, actual, 1);
+    const markerPos = (target / maxScale) * 100;
+    targetMarker = `<div class="progress-target" style="left:${markerPos}%"></div>`;
+  }
+
+  return `
+    <div class="kpi-item">
+      <div class="kpi-label">
+        <span class="name">${name}${subLabel ? ` <span style="font-weight:400;color:var(--text-tertiary);font-size:11px">${subLabel}</span>` : ''}</span>
+        <span class="values"><span class="actual ${status}">${displayActual}</span> / ${displayTarget}</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-bar ${barColor(status)}" style="width:${barPctDisplay}%"></div>
+        ${targetMarker}
+      </div>
+    </div>
+  `;
+}
+
+function renderWeekly(wc, target) {
+  return `
+    <div class="weekly-row">
+      ${[1,2,3,4].map(w => {
+        const v = wc[w] || 0;
+        const cls = v >= target ? 'hit' : 'miss';
+        return `<div class="week-box">
+          <div class="wk-label">${w}주차</div>
+          <div class="wk-value ${cls}">${v}건</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function countStatus(kpis) {
+  let hit = 0, warn = 0, miss = 0;
+  kpis.forEach(k => {
+    const s = getStatus(k.actual, k.target, k.direction);
+    if (s === 'hit') hit++;
+    else if (s === 'warn') warn++;
+    else miss++;
+  });
+  return { hit, warn, miss };
+}
+
+function renderConvPair(convRate, cwRate, convDetail, cwDetail, gap, gapCount) {
+  const convStatus = getStatus(convRate, 55, 'higher');
+  const cwStatus = getStatus(cwRate, 55, 'higher');
+  return `
+    <div class="conv-pair">
+      <div class="conv-box">
+        <div class="conv-label">견적 → 계약서명완료</div>
+        <div class="conv-rate ${convStatus}">${convRate}%</div>
+        <div class="conv-detail">${convDetail}</div>
+      </div>
+      <div class="conv-box">
+        <div class="conv-label">견적 → CW(마감)</div>
+        <div class="conv-rate ${cwStatus}">${cwRate}%</div>
+        <div class="conv-detail">${cwDetail}</div>
+      </div>
+    </div>
+    ${gap > 0 ? `<div class="conv-gap"><span class="gap-label">CMS/설치 대기 갭</span><span class="gap-value">${gap.toFixed(1)}%p (${gapCount}건)</span></div>` : ''}
+  `;
+}
+
+function renderIBPerson(person, color) {
+  const d = person;
+  const cwConvRate = pf(d.cwConversionRate);
+  const convRate = pf(d.conversionRate);
+  const orderRate = pf(d.orderCompletionRate);
+  const tabletRate = +((d.monthlyTablets / 650) * 100).toFixed(1);
+  const convGap = convRate - cwConvRate;
+
+  const kpis = [
+    { actual: cwConvRate, target: 55, direction: 'higher' },
+    { actual: convRate, target: 55, direction: 'higher' },
+    { actual: orderRate, target: 95, direction: 'higher' },
+    { actual: tabletRate, target: 100, direction: 'higher' },
+    { actual: d.noActivity7days, target: 0, direction: 'lower' },
+    { actual: d.over45daysPending, target: 0, direction: 'lower' },
+  ];
+  const { hit, warn, miss } = countStatus(kpis);
+
+  let chips = '';
+  if (hit > 0) chips += `<span class="summary-chip good">${hit} 달성</span>`;
+  if (warn > 0) chips += `<span class="summary-chip warn">${warn} 주의</span>`;
+  if (miss > 0) chips += `<span class="summary-chip bad">${miss} 미달</span>`;
+
+  return `
+    <div class="person-card">
+      <div class="person-header">
+        <div class="person-avatar" style="background:${color}">${d.name[0]}</div>
+        <span class="person-name">${d.name}</span>
+        <div class="person-summary">${chips}</div>
+      </div>
+      <div class="person-body">
+        ${renderConvPair(convRate, cwConvRate,
+          `${d.pipeline.signedOpps}건/${d.pipeline.quotedOpps}건 (WIP ${d.pipeline.wipOpps})`,
+          `${d.pipeline.cwOpps}건/${d.pipeline.quotedOpps}건`,
+          convGap, d.pipeline.signedOpps - d.pipeline.cwOpps)}
+        ${renderKPI('계약→출고 완료율', orderRate, 95, '%', 'higher', `(${d.ordersCreated}건/${d.signedContracts}건)`)}
+        ${renderKPI('월간 태블릿 달성률', tabletRate, 100, '%', 'higher', `(${d.monthlyTablets}대/650대)`)}
+        ${renderKPI('무활동 건 (7일+)', d.noActivity7days, 0, '건', 'lower', `(Open ${d.pendingTotal}건)`)}
+        ${renderKPI('45일+ 장기 건', d.over45daysPending, 0, '건', 'lower', `(Open ${d.pendingTotal}건)`)}
+
+        <div style="margin-top:8px;font-size:12px;color:var(--text-secondary);font-weight:600">주차별 CW 건수</div>
+        ${renderWeekly(d.weeklyCW, 5)}
+      </div>
+    </div>
+  `;
+}
+
+function renderCHPerson(person, color) {
+  const d = person;
+  const convRate = pf(d.conversionRate);
+  const cwConvRate = pf(d.cwConversionRate);
+  const orderRate = pf(d.orderCompletionRate);
+  const franchiseRate = pf(d.franchiseLeadTime.rate);
+  const convGap = convRate - cwConvRate;
+
+  const kpis = [
+    { actual: convRate, target: 55, direction: 'higher' },
+    { actual: cwConvRate, target: 55, direction: 'higher' },
+    { actual: orderRate, target: 95, direction: 'higher' },
+    { actual: d.monthlyProcessed, target: 12, direction: 'higher' },
+    { actual: franchiseRate, target: 60, direction: 'higher' },
+    { actual: d.franchiseOver7daysPending, target: 5, direction: 'lower' },
+    { actual: d.individualOver10daysPending, target: 5, direction: 'lower' },
+    { actual: d.noActivity5days, target: 0, direction: 'lower' },
+  ];
+  const { hit, warn, miss } = countStatus(kpis);
+
+  let chips = '';
+  if (hit > 0) chips += `<span class="summary-chip good">${hit} 달성</span>`;
+  if (warn > 0) chips += `<span class="summary-chip warn">${warn} 주의</span>`;
+  if (miss > 0) chips += `<span class="summary-chip bad">${miss} 미달</span>`;
+
+  const qo = d.cwPipeline ? d.cwPipeline.quotedOpps : 0;
+  const so = d.cwPipeline ? d.cwPipeline.signedOpps : 0;
+  const co = d.cwPipeline ? d.cwPipeline.cwOpps : 0;
+
+  return `
+    <div class="person-card">
+      <div class="person-header">
+        <div class="person-avatar" style="background:${color}">${d.name[0]}</div>
+        <span class="person-name">${d.name}</span>
+        <div class="person-summary">${chips}</div>
+      </div>
+      <div class="person-body">
+        ${renderConvPair(convRate, cwConvRate,
+          `${so}건/${qo}건`,
+          `${co}건/${qo}건`,
+          convGap, so - co)}
+        ${renderKPI('계약→출고 완료율', orderRate, 95, '%', 'higher', `(${d.ordersCreated}건/${d.signedContracts}건)`)}
+        ${renderKPI('월간 처리 볼륨', d.monthlyProcessed, 12, '건', 'higher')}
+        ${renderKPI('제휴 리드타임 5일 이내', franchiseRate, 60, '%', 'higher', `(${d.franchiseLeadTime.within5days}/${d.franchiseLeadTime.total}건)`)}
+        ${renderKPI('제휴 7일 초과 잔량', d.franchiseOver7daysPending, 5, '건', 'lower')}
+        ${renderKPI('개인 10일 초과 잔량', d.individualOver10daysPending, 5, '건', 'lower')}
+        ${renderKPI('5일 무활동 건', d.noActivity5days, 0, '건', 'lower', `(잔량 ${d.pendingTotal}건)`)}
+        <div style="margin-top:8px;font-size:12px;color:var(--text-secondary);font-weight:600">주차별 CW 건수</div>
+        ${renderWeekly(d.weeklyCW, 5)}
+      </div>
+    </div>
+  `;
+}
+
+function render() {
+  const asOf = DATA.asOf;
+  const genAt = new Date(DATA.generatedAt);
+  const kst = new Date(genAt.getTime() + 9 * 3600000);
+  const genLabel = `${kst.getUTCFullYear()}.${String(kst.getUTCMonth()+1).padStart(2,'0')}.${String(kst.getUTCDate()).padStart(2,'0')} ${String(kst.getUTCHours()).padStart(2,'0')}:${String(kst.getUTCMinutes()).padStart(2,'0')}`;
+
+  const ibNames = Object.keys(DATA.ibBO);
+  const chNames = Object.keys(DATA.chBO);
+
+  let html = `
+    <div class="header">
+      <h1>BO KPI 현황 대시보드</h1>
+      <div class="subtitle">2026년 3월 · 담당자별 KPI 목표 대비 실적 현황</div>
+      <div class="meta">
+        <span class="badge blue">데이터 기준 ${asOf}</span>
+        <span class="badge gray">갱신 ${genLabel}</span>
+      </div>
+    </div>
+
+    <div class="team-section">
+      <div class="team-header">
+        <div class="team-badge ib">IB</div>
+        <span class="team-title">인바운드 BO</span>
+        <span class="team-count">${ibNames.length}명</span>
+      </div>
+      <div class="person-grid">
+        ${ibNames.map((n, i) => renderIBPerson(DATA.ibBO[n], COLORS_IB[i % COLORS_IB.length])).join('')}
+      </div>
+    </div>
+
+    <div class="team-section">
+      <div class="team-header">
+        <div class="team-badge ch">CH</div>
+        <span class="team-title">채널 BO</span>
+        <span class="team-count">${chNames.length}명</span>
+      </div>
+      <div class="person-grid">
+        ${chNames.map((n, i) => renderCHPerson(DATA.chBO[n], COLORS_CH[i % COLORS_CH.length])).join('')}
+      </div>
+    </div>
+
+    <div class="footer">
+      BO KPI 현황 대시보드 · 2026년 3월 · Sales Operations
+    </div>
+  `;
+
+  document.getElementById('app').innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>

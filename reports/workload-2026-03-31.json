@@ -1,0 +1,226 @@
+{
+  "period": {
+    "start": "2025-12-01",
+    "end": "2026-03-31",
+    "workdays": 87
+  },
+  "bo": {
+    "rows": [
+      {
+        "name": "전수빈",
+        "assignedOpps": 697,
+        "won": 297,
+        "lost": 285,
+        "stillOpen": 115,
+        "tasks": 242,
+        "dailyTask": "2.8",
+        "touchedOpps": 173,
+        "taskPerOpp": "0.3",
+        "coverage": "25%"
+      },
+      {
+        "name": "정지영",
+        "assignedOpps": 616,
+        "won": 255,
+        "lost": 272,
+        "stillOpen": 89,
+        "tasks": 679,
+        "dailyTask": "7.8",
+        "touchedOpps": 391,
+        "taskPerOpp": "1.1",
+        "coverage": "63%"
+      },
+      {
+        "name": "박효정",
+        "assignedOpps": 583,
+        "won": 217,
+        "lost": 262,
+        "stillOpen": 104,
+        "tasks": 526,
+        "dailyTask": "6.0",
+        "touchedOpps": 260,
+        "taskPerOpp": "0.9",
+        "coverage": "45%"
+      },
+      {
+        "name": "조현재",
+        "assignedOpps": 571,
+        "won": 231,
+        "lost": 236,
+        "stillOpen": 104,
+        "tasks": 227,
+        "dailyTask": "2.6",
+        "touchedOpps": 153,
+        "taskPerOpp": "0.4",
+        "coverage": "27%"
+      },
+      {
+        "name": "강수영",
+        "assignedOpps": 32,
+        "won": 0,
+        "lost": 0,
+        "stillOpen": 32,
+        "tasks": 24,
+        "dailyTask": "0.3",
+        "touchedOpps": 16,
+        "taskPerOpp": "0.8",
+        "coverage": "50%"
+      },
+      {
+        "name": "노하윤",
+        "assignedOpps": 3,
+        "won": 0,
+        "lost": 0,
+        "stillOpen": 3,
+        "tasks": 2300,
+        "dailyTask": "26.4",
+        "touchedOpps": 1040,
+        "taskPerOpp": "766.7",
+        "coverage": "34667%"
+      },
+      {
+        "name": "최환",
+        "assignedOpps": 1,
+        "won": 0,
+        "lost": 1,
+        "stillOpen": 0,
+        "tasks": 704,
+        "dailyTask": "8.1",
+        "touchedOpps": 404,
+        "taskPerOpp": "704.0",
+        "coverage": "40400%"
+      },
+      {
+        "name": "이경호",
+        "assignedOpps": 1,
+        "won": 0,
+        "lost": 1,
+        "stillOpen": 0,
+        "tasks": 387,
+        "dailyTask": "4.4",
+        "touchedOpps": 197,
+        "taskPerOpp": "387.0",
+        "coverage": "19700%"
+      }
+    ],
+    "summary": {
+      "headcount": 8,
+      "medianAssignedOpps": 301.5,
+      "medianDailyTasks": 5.24712643678161,
+      "medianCoverage": 56.73701298701299
+    }
+  },
+  "fs": {
+    "rows": [
+      {
+        "name": "한용우",
+        "assignedOpps": 500,
+        "won": 216,
+        "lost": 189,
+        "stillOpen": 95,
+        "tasks": 596,
+        "dailyTask": "6.9",
+        "visits": 346,
+        "visitsCompleted": 285,
+        "dailyVisit": "3.3",
+        "visitPerOpp": "0.57"
+      },
+      {
+        "name": "이경호",
+        "assignedOpps": 466,
+        "won": 207,
+        "lost": 166,
+        "stillOpen": 93,
+        "tasks": 387,
+        "dailyTask": "4.4",
+        "visits": 323,
+        "visitsCompleted": 292,
+        "dailyVisit": "3.4",
+        "visitPerOpp": "0.63"
+      },
+      {
+        "name": "김영호",
+        "assignedOpps": 445,
+        "won": 178,
+        "lost": 196,
+        "stillOpen": 71,
+        "tasks": 819,
+        "dailyTask": "9.4",
+        "visits": 316,
+        "visitsCompleted": 276,
+        "dailyVisit": "3.2",
+        "visitPerOpp": "0.62"
+      },
+      {
+        "name": "최준일",
+        "assignedOpps": 442,
+        "won": 169,
+        "lost": 187,
+        "stillOpen": 86,
+        "tasks": 491,
+        "dailyTask": "5.6",
+        "visits": 312,
+        "visitsCompleted": 273,
+        "dailyVisit": "3.1",
+        "visitPerOpp": "0.62"
+      },
+      {
+        "name": "변상훈",
+        "assignedOpps": 431,
+        "won": 210,
+        "lost": 158,
+        "stillOpen": 63,
+        "tasks": 665,
+        "dailyTask": "7.6",
+        "visits": 295,
+        "visitsCompleted": 259,
+        "dailyVisit": "3.0",
+        "visitPerOpp": "0.60"
+      },
+      {
+        "name": "최옥환",
+        "assignedOpps": 422,
+        "won": 165,
+        "lost": 175,
+        "stillOpen": 82,
+        "tasks": 872,
+        "dailyTask": "10.0",
+        "visits": 318,
+        "visitsCompleted": 273,
+        "dailyVisit": "3.1",
+        "visitPerOpp": "0.65"
+      },
+      {
+        "name": "고용진",
+        "assignedOpps": 37,
+        "won": 6,
+        "lost": 3,
+        "stillOpen": 28,
+        "tasks": 18,
+        "dailyTask": "0.2",
+        "visits": 30,
+        "visitsCompleted": 28,
+        "dailyVisit": "0.3",
+        "visitPerOpp": "0.76"
+      },
+      {
+        "name": "배준성",
+        "assignedOpps": 14,
+        "won": 9,
+        "lost": 4,
+        "stillOpen": 1,
+        "tasks": 126,
+        "dailyTask": "1.4",
+        "visits": 0,
+        "visitsCompleted": 0,
+        "dailyVisit": "0.0",
+        "visitPerOpp": "0.00"
+      }
+    ],
+    "summary": {
+      "headcount": 8,
+      "medianAssignedOpps": 436.5,
+      "medianDailyVisits": 3.1379310344827585
+    }
+  }
+}

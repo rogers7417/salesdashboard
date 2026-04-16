@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>채널 BO KPI 수정 제안서</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --border: #e8ebed;
+    --text-primary: #191f28; --text-secondary: #6b7684; --text-tertiary: #8b95a1;
+    --blue: #3182f6; --blue-light: #e8f3ff;
+    --red: #f04452; --red-light: #fff0f0;
+    --green: #00b386; --green-light: #e8fff4;
+    --orange: #f59f00; --orange-light: #fff8e6;
+    --purple: #8b5cf6; --purple-light: #f3f0ff;
+    --shadow: 0 2px 8px rgba(0,0,0,0.04); --shadow-hover: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+  .header { margin-bottom: 40px; }
+  .header h1 { font-size: 28px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+  .header .subtitle { font-size: 15px; color: var(--text-secondary); }
+  .header .date-badge { display: inline-block; margin-top: 12px; padding: 6px 14px; background: var(--purple-light); color: var(--purple); border-radius: 20px; font-size: 13px; font-weight: 600; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .kpi-card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); transition: box-shadow 0.2s; }
+  .kpi-card:hover { box-shadow: var(--shadow-hover); }
+  .kpi-card .label { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
+  .kpi-card .value { font-size: 32px; font-weight: 800; margin-bottom: 4px; }
+  .kpi-card .change { font-size: 13px; font-weight: 600; }
+  .kpi-card .change.up { color: var(--green); }
+  .kpi-card .change.down { color: var(--red); }
+  .kpi-card .change.neutral { color: var(--text-tertiary); }
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .section-title .num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--purple); color: white; border-radius: 8px; font-size: 14px; font-weight: 700; }
+  .card { background: var(--card); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; color: var(--text-primary); }
+  .card-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .chart-container { position: relative; width: 100%; height: 320px; }
+  .chart-container.tall { height: 400px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .data-table th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); background: #fafbfc; }
+  .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #fafbfc; }
+  .data-table .num-cell { text-align: right; font-weight: 500; }
+  .data-table .highlight { font-weight: 700; color: var(--purple); }
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .tag.green { background: var(--green-light); color: var(--green); }
+  .tag.red { background: var(--red-light); color: var(--red); }
+  .tag.orange { background: var(--orange-light); color: var(--orange); }
+  .tag.blue { background: var(--blue-light); color: var(--blue); }
+  .tag.purple { background: var(--purple-light); color: var(--purple); }
+  .compare-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+  .compare-table th { padding: 14px 16px; font-weight: 600; text-align: left; background: #fafbfc; border-bottom: 2px solid var(--border); }
+  .compare-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .compare-table .current { background: var(--red-light); color: var(--red); font-weight: 600; }
+  .compare-table .proposed { background: var(--green-light); color: var(--green); font-weight: 600; }
+  .causal-chain { display: flex; align-items: center; justify-content: center; gap: 0; padding: 24px 0; flex-wrap: wrap; }
+  .causal-node { padding: 14px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; text-align: center; min-width: 120px; line-height: 1.4; }
+  .causal-arrow { font-size: 20px; color: var(--text-tertiary); padding: 0 6px; font-weight: 700; }
+  .causal-node.primary { background: var(--purple-light); color: var(--purple); border: 2px solid var(--purple); }
+  .causal-node.secondary { background: var(--orange-light); color: var(--orange); border: 2px solid var(--orange); }
+  .causal-node.minor { background: #f5f6f8; color: var(--text-secondary); border: 2px solid var(--border); }
+  .causal-node.result { background: var(--red-light); color: var(--red); border: 2px solid var(--red); }
+  .stat-box { text-align: center; padding: 20px; background: #fafbfc; border-radius: 12px; }
+  .stat-box .stat-value { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+  .stat-box .stat-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+  .insight { padding: 16px 20px; border-radius: 12px; font-size: 14px; line-height: 1.6; margin-top: 16px; }
+  .insight.warning { background: var(--orange-light); border-left: 4px solid var(--orange); color: #664d00; }
+  .insight.danger { background: var(--red-light); border-left: 4px solid var(--red); color: #8b1a1a; }
+  .insight.info { background: var(--purple-light); border-left: 4px solid var(--purple); color: #4c1d95; }
+  .insight.success { background: var(--green-light); border-left: 4px solid var(--green); color: #005c44; }
+  .footer { text-align: center; padding: 32px 0; color: var(--text-tertiary); font-size: 13px; }
+
+  .pain-banner { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: var(--radius); padding: 32px; margin-bottom: 32px; color: white; }
+  .pain-banner h2 { font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #fff; display: flex; align-items: center; gap: 10px; }
+  .pain-banner h2::before { content: ''; display: inline-block; width: 4px; height: 24px; background: var(--purple); border-radius: 2px; }
+  .pain-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .pain-item { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; border-left: 4px solid var(--purple); }
+  .pain-item.warn { border-left-color: var(--orange); }
+  .pain-item .pain-num { font-size: 28px; font-weight: 800; color: var(--purple); margin-bottom: 4px; }
+  .pain-item.warn .pain-num { color: var(--orange); }
+  .pain-item .pain-label { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+  .pain-item .pain-action { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+  .so-what { background: #1a1a2e; color: white; border-radius: 12px; padding: 18px 22px; margin-top: 16px; display: flex; align-items: flex-start; gap: 12px; }
+  .so-what::before { content: 'ACTION'; font-size: 10px; font-weight: 800; background: var(--purple); color: white; padding: 3px 8px; border-radius: 4px; white-space: nowrap; margin-top: 2px; flex-shrink: 0; }
+  .so-what.positive::before { background: var(--green); content: 'GOOD'; }
+  .so-what.caution::before { background: var(--orange); content: 'WATCH'; }
+  .so-what.decision::before { background: var(--red); content: 'DECISION'; }
+  .so-what-text { font-size: 14px; line-height: 1.6; }
+  .so-what-text strong { color: var(--orange); }
+
+  .kpi-card .status-icon { font-size: 16px; float: right; }
+  .kpi-card .gap-bar { height: 6px; border-radius: 3px; margin-top: 12px; background: #e8ebed; overflow: hidden; }
+  .kpi-card .gap-bar .fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+  .anomaly-highlight { position: relative; }
+  .anomaly-highlight::after { content: ''; position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--red); border-radius: 50%; }
+
+  /* Purple proposal card */
+  .proposal-card { background: var(--card); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); margin-bottom: 16px; border: 2px solid var(--purple); }
+  .proposal-card .card-title { color: var(--purple); }
+
+  /* Before/After stat boxes */
+  .stat-box.purple { background: var(--purple-light); }
+  .stat-box.purple .stat-value { color: var(--purple); }
+
+  /* Process flow */
+  .process-flow { display: flex; align-items: center; gap: 4px; padding: 16px 0; flex-wrap: wrap; }
+  .process-step { padding: 10px 16px; border-radius: 10px; font-size: 12px; font-weight: 600; text-align: center; }
+  .process-step.outside { background: #f0f0f0; color: var(--text-tertiary); border: 1px dashed var(--border); }
+  .process-step.bo-zone { background: var(--purple-light); color: var(--purple); border: 2px solid var(--purple); }
+  .process-arrow { font-size: 16px; color: var(--text-tertiary); font-weight: 700; }
+
+  /* Timeline items */
+  .timeline-item { display: flex; gap: 16px; margin-bottom: 16px; }
+  .timeline-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--purple); margin-top: 6px; flex-shrink: 0; }
+  .timeline-content { flex: 1; }
+  .timeline-content .timeline-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .timeline-content .timeline-desc { font-size: 13px; color: var(--text-secondary); }
+
+  @media (max-width: 768px) {
+    .pain-items { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .header h1 { font-size: 22px; }
+    .kpi-card .value { font-size: 24px; }
+    .causal-chain { flex-direction: column; }
+    .causal-arrow { transform: rotate(90deg); }
+    .container { padding: 16px; }
+    .process-flow { flex-direction: column; }
+    .process-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>채널 BO KPI 수정 제안서</h1>
+    <p class="subtitle">데이터 기반 KPI 구조 개선안 -- 주장 . 근거 . 기대효과</p>
+    <span class="date-badge">2026 Q1 실적 기준 (3월 20일)</span>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- [1] 주장 - 핵심 제안 -->
+  <!-- ============================================== -->
+  <div class="section">
+    <div class="section-title"><span class="num">1</span> 주장 -- 핵심 제안</div>
+
+    <!-- KPI 수정안 한눈에 보기 -->
+    <div class="proposal-card">
+      <div class="card-title">KPI 수정안 한눈에 보기</div>
+      <div style="overflow-x: auto;">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">KPI</th>
+              <th>현행</th>
+              <th>제안</th>
+              <th>핵심 변경</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag purple">1 전환율</span></td>
+              <td class="current">SQL->CW 전환율 60%</td>
+              <td class="proposed">계약서->출고신청 완료율 95%</td>
+              <td>순수 BO 구간 (현재 99.7%)</td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">2 마감률</span></td>
+              <td class="current">CW2+CL1=3건/일</td>
+              <td class="proposed">인당 월간 태블릿 목표 + 주5건+</td>
+              <td>대수 기준 달성률 + 주간 과정 KPI</td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">3 리드타임</span></td>
+              <td class="current">당일 완료</td>
+              <td class="proposed">제휴 5일이내 60% / 개인 7일이내 60%</td>
+              <td>당일->유형별 (20%->35~70%)</td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">4 SQL 잔량</span></td>
+              <td class="current">7일 초과 10건 이내</td>
+              <td class="proposed">제휴 7일초과 5건이내 / 개인 10일초과 5건이내</td>
+              <td>유형별 분리 + 버퍼 조정</td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">5 무활동</span></td>
+              <td class="current">없음</td>
+              <td class="proposed">5일 내 무활동 SQL 0건</td>
+              <td>신규 추가. IB 7일->CH 5일 (빠른 프로세스)</td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">6 최소 볼륨</span></td>
+              <td class="current">없음</td>
+              <td class="proposed">월간 계약서명완료 12건+</td>
+              <td>신규 -- 최소 처리량 보장</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Before/After 비교 3 stat boxes -->
+    <div class="grid-3" style="margin-bottom: 16px;">
+      <div class="stat-box purple">
+        <div class="stat-label">KPI 달성 가능성</div>
+        <div class="stat-value" style="color: var(--purple);">20% -> 70%</div>
+        <div style="font-size:12px; color: var(--text-secondary);">당일완료 20~23% -> 유형별 35~70%</div>
+      </div>
+      <div class="stat-box purple">
+        <div class="stat-label">공정한 측정</div>
+        <div class="stat-value" style="color: var(--purple);">BO 산출물</div>
+        <div style="font-size:12px; color: var(--text-secondary);">CW 기반 -> BO 산출물(계약서) 기준</div>
+      </div>
+      <div class="stat-box purple">
+        <div class="stat-label">CH 특성 반영</div>
+        <div class="stat-value" style="color: var(--purple);">유형 분리</div>
+        <div style="font-size:12px; color: var(--text-secondary);">제휴 50% 비율, AM/AE 직접 전달 프로세스</div>
+      </div>
+    </div>
+
+    <!-- So What -->
+    <div class="so-what">
+      <div class="so-what-text">
+        <strong>이렇게 바꿔야 합니다.</strong> 현행 KPI 4개 모두 CH BO 프로세스에 맞지 않아 달성률 20~23%에 그치고 있습니다. BO가 직접 통제하는 구간(계약서->출고신청)으로 측정 기준을 전환하고, 제휴/개인 유형을 분리하면 공정하고 실질적인 성과 관리가 가능합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- [2] 근거 - 왜 바꿔야 하는가 -->
+  <!-- ============================================== -->
+  <div class="section">
+    <div class="section-title"><span class="num">2</span> 근거 -- 왜 바꿔야 하는가</div>
+
+    <div class="card-subtitle" style="font-size:16px; font-weight:700; margin-bottom:12px; color: var(--text-primary);">2-1. 현행 KPI의 문제</div>
+
+    <!-- Card 1: 전환율 -->
+    <div class="card" style="border-left: 4px solid var(--purple);">
+      <div class="card-title">KPI 1 SQL->CW 전환율 60% -- CH에서 CW는 BO 영역 아님</div>
+
+      <div class="card-subtitle">CH 프로세스 구조</div>
+      <div class="process-flow">
+        <div class="process-step outside">AM/AE<br><span style="font-size:11px;">(송슬기/정주희/명세준)</span></div>
+        <span class="process-arrow">-></span>
+        <div class="process-step outside">견적</div>
+        <span class="process-arrow">-></span>
+        <div class="process-step bo-zone">BO 시작</div>
+        <span class="process-arrow">-></span>
+        <div class="process-step bo-zone">계약서</div>
+        <span class="process-arrow">-></span>
+        <div class="process-step bo-zone">출고신청</div>
+      </div>
+
+      <div class="card-subtitle" style="margin-top:16px;">CH Pipeline 분석 (563건)</div>
+      <div class="chart-container" style="height: 260px;">
+        <canvas id="pipelineChart"></canvas>
+      </div>
+
+      <div class="grid-2" style="margin-top: 16px;">
+        <div class="stat-box">
+          <div class="stat-value" style="color: var(--green);">99.7%</div>
+          <div class="stat-label">계약서->출고신청 완료율 (349/350)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" style="color: var(--red);">0건</div>
+          <div class="stat-label">CL 122건 중 계약서 도달 건수</div>
+        </div>
+      </div>
+
+      <div class="insight danger" style="margin-top: 16px;">
+        CL 122건(21.7%)은 전부 계약서 도달 전 이탈 -- AM/AE 단계에서 발생하는 것으로 BO 통제 밖입니다. BO가 직접 영향력을 행사할 수 있는 구간은 계약서->출고신청(99.7%)뿐입니다.
+      </div>
+    </div>
+
+    <!-- Card 2: 마감률 -->
+    <div class="card" style="border-left: 4px solid var(--purple);">
+      <div class="card-title">KPI 2 CW2+CL1=일3건 -- 의미 없는 구분 + U자형</div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <div class="timeline-title">CW와 CL을 구분해서 합산하는 기준 자체가 무의미</div>
+          <div class="timeline-desc">CW2+CL1을 일 단위로 합산하면 U자형 패턴(월초/월말 집중)이 발생하며, 일균등 달성이 구조적으로 불가능합니다.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot" style="background: var(--orange);"></div>
+        <div class="timeline-content">
+          <div class="timeline-title">U자형 패턴: CH도 월말 집중 동일하게 발생</div>
+          <div class="timeline-desc">BP 본래 의도는 대수 기준 달성이며, 일 단위 건수 합산은 본래 목적과 어긋납니다.</div>
+        </div>
+      </div>
+
+      <div class="card-subtitle" style="margin-top:16px;">3월 BO별 태블릿 처리 현황</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>BO</th><th class="num-cell">태블릿 대수</th><th>비고</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>최영은</td><td class="num-cell"><strong>553대</strong></td><td><span class="tag green">상위</span></td></tr>
+          <tr><td>장명진</td><td class="num-cell"><strong>629대</strong></td><td><span class="tag green">최상위</span></td></tr>
+          <tr><td>이은지</td><td class="num-cell"><strong>196대</strong></td><td><span class="tag orange">하위</span></td></tr>
+          <tr><td>김희수</td><td class="num-cell"><strong>135대</strong></td><td><span class="tag red">최하위</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="insight warning">
+        대수 기준으로 전환하면 BO 간 실질 기여도 차이가 명확히 드러나며, 주간 과정 KPI(주5건+)를 병행하면 월말 집중 없이 균등 처리를 유도할 수 있습니다.
+      </div>
+    </div>
+
+    <!-- Card 3: 리드타임 -->
+    <div class="card" style="border-left: 4px solid var(--red);">
+      <div class="card-title">KPI 3 당일 완료 -- 달성률 20~23%로 비현실적</div>
+
+      <div class="grid-2" style="margin-bottom:16px;">
+        <div>
+          <div class="card-subtitle">BO별 당일완료율</div>
+          <div class="chart-container" style="height:260px;">
+            <canvas id="sameDayChart"></canvas>
+          </div>
+        </div>
+        <div>
+          <div class="card-subtitle">매장 유형별 리드타임 분포</div>
+          <div class="chart-container" style="height:260px;">
+            <canvas id="leadtimeChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="stat-box" style="background: var(--red-light);">
+          <div class="stat-label">제휴 매장 리드타임 중앙값</div>
+          <div class="stat-value" style="color: var(--red);">5일</div>
+          <div style="font-size:12px; color:var(--text-secondary);">가맹본부 결재 필요</div>
+        </div>
+        <div class="stat-box" style="background: var(--orange-light);">
+          <div class="stat-label">개인 매장 리드타임 중앙값</div>
+          <div class="stat-value" style="color: var(--orange);">7일</div>
+          <div style="font-size:12px; color:var(--text-secondary);">자금 확인 등</div>
+        </div>
+      </div>
+
+      <div class="causal-chain" style="margin-top: 16px;">
+        <div class="causal-node primary">제휴 비율 ~50%</div>
+        <span class="causal-arrow">+</span>
+        <div class="causal-node secondary">가맹본부 결재 필요</div>
+        <span class="causal-arrow">=</span>
+        <div class="causal-node result">당일 완료 구조적 불가</div>
+      </div>
+
+      <div class="insight danger">
+        전원 당일완료 목표 미달: 장명진 45%, 최영은 48%, 이은지 23%. 제휴 매장은 가맹본부 결재가 필수이므로 당일 완료가 <strong>구조적으로 불가능</strong>합니다.
+      </div>
+    </div>
+
+    <!-- Card 4: SQL 잔량 -->
+    <div class="card" style="border-left: 4px solid var(--orange);">
+      <div class="card-title">KPI 4 7일 초과 10건 -- 유형 미분리</div>
+
+      <table class="data-table">
+        <thead>
+          <tr><th>BO</th><th class="num-cell">7일 초과 비율</th><th>달성 여부</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>장명진</td><td class="num-cell"><strong>45%</strong></td><td><span class="tag red">미달</span></td></tr>
+          <tr><td>최영은</td><td class="num-cell"><strong>32%</strong></td><td><span class="tag red">미달</span></td></tr>
+          <tr><td>이은지</td><td class="num-cell"><strong>56%</strong></td><td><span class="tag red">미달</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="grid-2" style="margin-top: 16px;">
+        <div class="insight info">
+          <strong>제휴 매장:</strong> 가맹본부 결재로 구조적 지연 발생. 7일 기준은 합리적이나, 통제 불가 요인 고려 시 별도 관리 필요.
+        </div>
+        <div class="insight warning">
+          <strong>개인 매장:</strong> 자금/의사결정 지연으로 리드타임 분산. 10일 기준으로 완화하여 현실적 목표 설정 필요.
+        </div>
+      </div>
+
+      <div class="so-what caution" style="margin-top: 16px;">
+        <div class="so-what-text">
+          전원 10건 초과 -- 제휴와 개인에 동일한 7일 기준을 적용하는 것은 <strong>유형별 구조적 차이를 무시</strong>하는 것입니다. 분리 측정이 필수입니다.
+        </div>
+      </div>
+    </div>
+
+    <!-- 2-2. CH 프로세스 특성 -->
+    <div class="card-subtitle" style="font-size:16px; font-weight:700; margin-bottom:12px; margin-top:24px; color: var(--text-primary);">2-2. CH 프로세스 특성</div>
+
+    <!-- Card 5: 제휴 50% -->
+    <div class="card" style="border-left: 4px solid var(--purple);">
+      <div class="card-title">제휴 50% -- CH 고유 구조</div>
+
+      <div class="grid-3">
+        <div>
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">CH는 제휴(가맹점) 비율이 ~50%</div>
+              <div class="timeline-desc">제휴 매장은 가맹본부 승인 -> 본부 일정에 따라 일괄 처리 -> 리드타임 편차가 큼</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background: var(--orange);"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">개인 매장</div>
+              <div class="timeline-desc">점주 직접 결정 -> 자금 확인 후 진행. 개인별 사정에 따라 속도 차이 발생</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background: var(--red);"></div>
+            <div class="timeline-content">
+              <div class="timeline-title">IB와 근본적으로 다른 프로세스</div>
+              <div class="timeline-desc">IB는 매장 상태(영업중/오픈전) 기준이지만, CH는 매장 유형(제휴/개인) 기준 -> KPI도 분리 필요</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 6: AM/AE 직접 전달 -->
+    <div class="card" style="border-left: 4px solid var(--purple);">
+      <div class="card-title">AM/AE 직접 전달 -- IB의 IS->FS와 다른 구조</div>
+
+      <div class="grid-2">
+        <div>
+          <div class="card-subtitle">CH 프로세스</div>
+          <div class="causal-chain">
+            <div class="causal-node primary">AM/AE<br><span style="font-size:11px;">송슬기/정주희/명세준</span></div>
+            <span class="causal-arrow">-></span>
+            <div class="causal-node minor">매장 방문<br>견적/계약</div>
+            <span class="causal-arrow">-></span>
+            <div class="causal-node primary">BO<br><span style="font-size:11px;">계약서->출고신청</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="card-subtitle">IB 프로세스</div>
+          <div class="causal-chain">
+            <div class="causal-node minor">IS<br><span style="font-size:11px;">리드 생성</span></div>
+            <span class="causal-arrow">-></span>
+            <div class="causal-node minor">FS<br><span style="font-size:11px;">압박/전환</span></div>
+            <span class="causal-arrow">-></span>
+            <div class="causal-node minor">BO<br><span style="font-size:11px;">전환+계약+출고</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight info">
+        CH에서 BO는 계약서 작성->출고신청만 담당합니다. IB처럼 FS 압박 역할이 없으므로 전환율 KPI는 <strong>순수 BO 구간(계약서->출고신청)만 측정</strong>해야 합니다.
+      </div>
+    </div>
+
+    <!-- Card 7: CH 달성률 65% -->
+    <div class="card" style="border-left: 4px solid var(--red);">
+      <div class="card-title">CH 달성률 65% -- 3개월 연속 미달</div>
+
+      <div class="grid-2">
+        <div>
+          <div class="chart-container" style="height: 280px;">
+            <canvas id="monthlyChart"></canvas>
+          </div>
+        </div>
+        <div>
+          <div class="stat-box" style="background: var(--red-light); margin-bottom: 12px;">
+            <div class="stat-label">Q1 CH 누적 달성</div>
+            <div class="stat-value" style="color: var(--red);">5,231대</div>
+            <div style="font-size:12px; color:var(--text-secondary);">목표 8,073대 대비</div>
+          </div>
+          <div class="stat-box" style="background: var(--orange-light); margin-bottom: 12px;">
+            <div class="stat-label">IB 대비 격차</div>
+            <div class="stat-value" style="color: var(--orange);">-18%p</div>
+            <div style="font-size:12px; color:var(--text-secondary);">IB 83% vs CH 65%</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">월별 추세</div>
+            <div class="stat-value" style="color: var(--red);">하락</div>
+            <div style="font-size:12px; color:var(--text-secondary);">76% -> 64% -> 58%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight danger">
+        3개월 연속 하락 추세(76% -> 64% -> 58%). KPI 구조 문제가 달성률 저하에 기여하고 있으며, <strong>현행 KPI를 유지할 경우 하락 추세 반전이 어렵습니다.</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- [3] 기대효과 -->
+  <!-- ============================================== -->
+  <div class="section">
+    <div class="section-title"><span class="num">3</span> 기대효과</div>
+
+    <!-- 3-1. 현행 유지 vs 변경 -->
+    <div class="card">
+      <div class="card-title">3-1. 현행 유지 시 vs 변경 시</div>
+      <div style="overflow-x: auto;">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>효과</th>
+              <th>현행 유지 시 (위험)</th>
+              <th>KPI 변경 시 (기대)</th>
+              <th>차이</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>KPI 달성 가능성</strong></td>
+              <td class="current">당일완료 20~23%</td>
+              <td class="proposed">유형별 35~70%</td>
+              <td><span class="tag green">공정성 UP</span></td>
+            </tr>
+            <tr>
+              <td><strong>측정 정확성</strong></td>
+              <td class="current">CW 기반 (BO 통제 밖)</td>
+              <td class="proposed">계약서 기반 (BO 산출물)</td>
+              <td><span class="tag green">정확성 UP</span></td>
+            </tr>
+            <tr>
+              <td><strong>유형별 관리</strong></td>
+              <td class="current">제휴/개인 동일 기준</td>
+              <td class="proposed">제휴/개인 분리 측정</td>
+              <td><span class="tag green">세분화 UP</span></td>
+            </tr>
+            <tr>
+              <td><strong>최소 처리량</strong></td>
+              <td class="current">보장 기준 없음</td>
+              <td class="proposed">월 12건+ 최소 볼륨</td>
+              <td><span class="tag green">안정성 UP</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 3-2. BO별 달성률 시뮬레이션 -->
+    <div class="card">
+      <div class="card-title">3-2. BO별 달성률 시뮬레이션 (제안 기준)</div>
+
+      <div class="card-subtitle">리드타임 달성률 비교</div>
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>BO</th>
+              <th class="num-cell">제휴 5일이내</th>
+              <th class="num-cell">개인 7일이내</th>
+              <th class="num-cell">현행 (당일)</th>
+              <th>변화</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>장명진</strong></td>
+              <td class="num-cell highlight">~60%</td>
+              <td class="num-cell highlight">~55%</td>
+              <td class="num-cell" style="color:var(--red);">45%</td>
+              <td><span class="tag green">+15~20%p</span></td>
+            </tr>
+            <tr>
+              <td><strong>최영은</strong></td>
+              <td class="num-cell highlight">~65%</td>
+              <td class="num-cell highlight">~50%</td>
+              <td class="num-cell" style="color:var(--red);">48%</td>
+              <td><span class="tag green">+2~17%p</span></td>
+            </tr>
+            <tr>
+              <td><strong>이은지</strong></td>
+              <td class="num-cell highlight">~40%</td>
+              <td class="num-cell highlight">~35%</td>
+              <td class="num-cell" style="color:var(--red);">23%</td>
+              <td><span class="tag green">+12~17%p</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-subtitle" style="margin-top: 20px;">잔량 기준 비교</div>
+      <div style="overflow-x: auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>BO</th>
+              <th class="num-cell">제휴 7일초과</th>
+              <th class="num-cell">개인 10일초과</th>
+              <th class="num-cell">현행 (7일 전체)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>장명진</strong></td>
+              <td class="num-cell">45%</td>
+              <td class="num-cell" style="color: var(--text-tertiary);">TBD</td>
+              <td class="num-cell" style="color:var(--red);">45%</td>
+            </tr>
+            <tr>
+              <td><strong>최영은</strong></td>
+              <td class="num-cell">32%</td>
+              <td class="num-cell" style="color: var(--text-tertiary);">TBD</td>
+              <td class="num-cell" style="color:var(--red);">32%</td>
+            </tr>
+            <tr>
+              <td><strong>이은지</strong></td>
+              <td class="num-cell">56%</td>
+              <td class="num-cell" style="color: var(--text-tertiary);">TBD</td>
+              <td class="num-cell" style="color:var(--red);">56%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="insight success">
+        유형별 분리 기준 적용 시, 리드타임 달성률이 전 BO에서 <strong>+12~20%p 이상 개선</strong>됩니다. 현실적이면서도 도전적인 목표 설정이 가능합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- [4] 결론 - 주장 반복 -->
+  <!-- ============================================== -->
+  <div class="section">
+    <div class="section-title"><span class="num">4</span> 결론 -- 주장 반복</div>
+
+    <!-- 수정안 재요약 -->
+    <div class="proposal-card">
+      <div class="card-title">수정안 재요약</div>
+      <div style="overflow-x: auto;">
+        <table class="data-table" style="font-size: 13px;">
+          <thead>
+            <tr><th>KPI</th><th>현행</th><th>제안</th><th>핵심 변경</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag purple">1</span> 전환율</td>
+              <td style="color:var(--red);">SQL->CW 60%</td>
+              <td style="color:var(--green); font-weight:600;">계약서->출고 95%</td>
+              <td>순수 BO 구간</td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">2</span> 마감률</td>
+              <td style="color:var(--red);">CW2+CL1=3건/일</td>
+              <td style="color:var(--green); font-weight:600;">태블릿 대수+주5건</td>
+              <td>대수 기준</td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">3</span> 리드타임</td>
+              <td style="color:var(--red);">당일 완료</td>
+              <td style="color:var(--green); font-weight:600;">제휴5일/개인7일 60%</td>
+              <td>유형별 분리</td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">4</span> 잔량</td>
+              <td style="color:var(--red);">7일초과 10건</td>
+              <td style="color:var(--green); font-weight:600;">제휴7일/개인10일 5건</td>
+              <td>유형별 분리</td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">5</span> 무활동</td>
+              <td style="color:var(--text-tertiary);">없음</td>
+              <td style="color:var(--green); font-weight:600;">5일 무활동 0건</td>
+              <td>신규 추가</td>
+            </tr>
+            <tr>
+              <td><span class="tag purple">6</span> 최소 볼륨</td>
+              <td style="color:var(--text-tertiary);">없음</td>
+              <td style="color:var(--green); font-weight:600;">월 12건+</td>
+              <td>신규 추가</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 즉시 실행 vs 중기 -->
+    <div class="grid-2">
+      <div class="card" style="border-top: 4px solid var(--green);">
+        <div class="card-title" style="color: var(--green);">즉시 실행</div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background: var(--green);"></div>
+          <div class="timeline-content">
+            <div class="timeline-title">KPI 1/3/4 수치 변경 적용</div>
+            <div class="timeline-desc">전환율 기준 변경, 리드타임 유형별 분리, 잔량 기준 완화</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background: var(--green);"></div>
+          <div class="timeline-content">
+            <div class="timeline-title">KPI 2 태블릿 대수 기준 전환</div>
+            <div class="timeline-desc">건수 합산 -> 인당 대수 달성률로 변경</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background: var(--green);"></div>
+          <div class="timeline-content">
+            <div class="timeline-title">보완 KPI 5/6 추가</div>
+            <div class="timeline-desc">무활동 방지(5일) + 최소 볼륨(월 12건)</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="border-top: 4px solid var(--purple);">
+        <div class="card-title" style="color: var(--purple);">중기 과제</div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-title">제휴/개인 세분화 리포팅 시스템</div>
+            <div class="timeline-desc">매장 유형별 자동 분류 및 KPI 대시보드 구축</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-title">AM/AE별 파이프라인 품질 모니터링</div>
+            <div class="timeline-desc">AM/AE 단계 CL 원인 분석 및 품질 지표 도입</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 경영진 의사결정 요청 -->
+    <div class="so-what decision" style="margin-top: 16px;">
+      <div class="so-what-text">
+        CH BO KPI 4개 모두 구조적 문제 확인. 특히 <strong>당일 완료율(20~23%)</strong>과 <strong>CW 기반 측정</strong>은 CH 프로세스(제휴 50%)에 맞지 않음. 유형별 분리 + BO 산출물 기준으로 전환하면 공정한 측정과 실질적 성과 관리가 가능합니다. <strong>판단해주십시오.</strong>
+      </div>
+    </div>
+
+    <!-- IB vs CH 비교 -->
+    <div class="card" style="margin-top: 16px;">
+      <div class="card-title">IB vs CH 비교</div>
+      <div style="overflow-x: auto;">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>KPI</th>
+              <th>IB BO</th>
+              <th>CH BO</th>
+              <th>차이 사유</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1 전환율</strong></td>
+              <td>3단계 (결과+과정+직접)</td>
+              <td style="color: var(--purple); font-weight: 600;">계약서->출고 95%</td>
+              <td>IB: FS 압박 역할 포함</td>
+            </tr>
+            <tr>
+              <td><strong>2 마감률</strong></td>
+              <td>인당 650대+주5건</td>
+              <td style="color: var(--purple); font-weight: 600;">인당 태블릿+주5건</td>
+              <td>공통 구조</td>
+            </tr>
+            <tr>
+              <td><strong>3 리드타임</strong></td>
+              <td>영업중5일/오픈전14일 80%</td>
+              <td style="color: var(--purple); font-weight: 600;">제휴5일/개인7일 60%</td>
+              <td>IB=매장상태, CH=매장유형</td>
+            </tr>
+            <tr>
+              <td><strong>4 잔량</strong></td>
+              <td>3계층 (상한+활동+예방)</td>
+              <td style="color: var(--purple); font-weight: 600;">유형별 분리</td>
+              <td>IB: 해석보정, CH: 유형분리</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    CH BO KPI 수정 제안서 -- 기획팀 분석 -- 데이터 기준일: 2026.03.20
+  </div>
+
+</div>
+
+<script>
+  Chart.defaults.font.family = "'Pretendard', sans-serif";
+  Chart.defaults.font.size = 12;
+
+  // 1. Pipeline Funnel (horizontal bar)
+  new Chart(document.getElementById('pipelineChart'), {
+    type: 'bar',
+    data: {
+      labels: ['견적 발송', 'CL', 'WIP', '계약서', '출고신청'],
+      datasets: [{
+        label: '건수',
+        data: [563, 122, 82, 350, 349],
+        backgroundColor: [
+          'rgba(139,92,246,0.15)',
+          'rgba(240,68,82,0.7)',
+          'rgba(245,159,0,0.7)',
+          'rgba(139,92,246,0.7)',
+          'rgba(0,179,134,0.7)'
+        ],
+        borderColor: [
+          'rgba(139,92,246,0.3)',
+          'rgba(240,68,82,1)',
+          'rgba(245,159,0,1)',
+          'rgba(139,92,246,1)',
+          'rgba(0,179,134,1)'
+        ],
+        borderWidth: 1,
+        borderRadius: 6,
+        barPercentage: 0.7
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              var pct = ((ctx.raw / 563) * 100).toFixed(1);
+              return ctx.raw + '건 (' + pct + '%)';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { font: { size: 11 } }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { size: 12, weight: 600 } }
+        }
+      }
+    }
+  });
+
+  // 2. Lead time distribution (bar chart)
+  new Chart(document.getElementById('leadtimeChart'), {
+    type: 'bar',
+    data: {
+      labels: ['당일', '2~5일', '6~7일', '8~14일', '15일+'],
+      datasets: [
+        {
+          label: '제휴',
+          data: [15, 35, 20, 18, 12],
+          backgroundColor: 'rgba(139,92,246,0.7)',
+          borderColor: 'rgba(139,92,246,1)',
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.8
+        },
+        {
+          label: '개인',
+          data: [8, 22, 25, 28, 17],
+          backgroundColor: 'rgba(245,159,0,0.7)',
+          borderColor: 'rgba(245,159,0,1)',
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.8
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, padding: 12, font: { size: 11, weight: 600 } } },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw + '%'; }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { font: { size: 11 }, callback: function(v) { return v + '%'; } }
+        }
+      }
+    }
+  });
+
+  // 3. Monthly achievement line chart
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'line',
+    data: {
+      labels: ['1월', '2월', '3월'],
+      datasets: [
+        {
+          label: 'CH 달성률',
+          data: [76, 64, 58],
+          borderColor: '#8b5cf6',
+          backgroundColor: 'rgba(139,92,246,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 6,
+          pointBackgroundColor: '#8b5cf6',
+          pointBorderWidth: 2,
+          pointBorderColor: '#fff',
+          borderWidth: 3
+        },
+        {
+          label: 'IB 달성률',
+          data: [113, 78, 66],
+          borderColor: '#3182f6',
+          backgroundColor: 'rgba(49,130,246,0.05)',
+          fill: false,
+          tension: 0.3,
+          pointRadius: 5,
+          pointBackgroundColor: '#3182f6',
+          pointBorderWidth: 2,
+          pointBorderColor: '#fff',
+          borderWidth: 2,
+          borderDash: [5, 3]
+        },
+        {
+          label: '목표 (100%)',
+          data: [100, 100, 100],
+          borderColor: 'rgba(240,68,82,0.5)',
+          borderWidth: 2,
+          borderDash: [8, 4],
+          pointRadius: 0,
+          fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, padding: 12, font: { size: 11, weight: 600 } } },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw + '%'; }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 12, weight: 600 } } },
+        y: {
+          min: 40,
+          max: 120,
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { font: { size: 11 }, callback: function(v) { return v + '%'; } }
+        }
+      }
+    }
+  });
+
+  // 4. BO별 당일완료율 bar chart
+  new Chart(document.getElementById('sameDayChart'), {
+    type: 'bar',
+    data: {
+      labels: ['장명진', '최영은', '이은지'],
+      datasets: [
+        {
+          label: '당일 완료율',
+          data: [45, 48, 23],
+          backgroundColor: [
+            'rgba(139,92,246,0.7)',
+            'rgba(139,92,246,0.7)',
+            'rgba(240,68,82,0.7)'
+          ],
+          borderColor: [
+            'rgba(139,92,246,1)',
+            'rgba(139,92,246,1)',
+            'rgba(240,68,82,1)'
+          ],
+          borderWidth: 1,
+          borderRadius: 6,
+          barPercentage: 0.6
+        },
+        {
+          label: '목표 (90%)',
+          data: [90, 90, 90],
+          backgroundColor: 'rgba(240,68,82,0.08)',
+          borderColor: 'rgba(240,68,82,0.4)',
+          borderWidth: 2,
+          borderDash: [4, 4],
+          borderRadius: 6,
+          barPercentage: 0.6,
+          type: 'bar'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, padding: 12, font: { size: 11, weight: 600 } } },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.dataset.label + ': ' + ctx.raw + '%'; }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 12, weight: 600 } } },
+        y: {
+          min: 0,
+          max: 100,
+          grid: { color: 'rgba(0,0,0,0.04)' },
+          ticks: { font: { size: 11 }, callback: function(v) { return v + '%'; } }
+        }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1545 @@
+{
+  "period": "2026-03",
+  "asOf": "2026-03-23",
+  "generatedAt": "2026-03-23T08:31:07.491Z",
+  "criteria": {
+    "conversionRate": "3월 생성 Opportunity 중 견적 있는 건 → 계약서명완료/전체 (WIP+CL 포함)",
+    "pendingAndActivity": "전체 Open 건 기준 (생성일 무관)"
+  },
+  "ibBO": {
+    "전수빈": {
+      "name": "전수빈",
+      "pipeline": {
+        "totalOpps": 101,
+        "quotedOpps": 89,
+        "signedOpps": 35,
+        "wipOpps": 45,
+        "clOpps": 9,
+        "noQuoteOpps": 12
+      },
+      "conversionRate": {
+        "quotedOpps": 89,
+        "signedQuotedOpps": 35,
+        "rate": "39.3%",
+        "note": "3월생성 Opp 중 견적있는 건 대비 계약서명완료 (WIP+CL 포함 분모)"
+      },
+      "contracts": {
+        "total": 54,
+        "signed": 49,
+        "pending": 5
+      },
+      "orderCompletionRate": {
+        "signedOpps": 49,
+        "withOrder": 49,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 592,
+      "weeklyContracts": {
+        "1": 14,
+        "2": 24,
+        "3": 16,
+        "4": 0
+      },
+      "openPipeline": {
+        "totalOpen": 93,
+        "stageBreakdown": {
+          "견적": 67,
+          "설치진행": 2,
+          "계약진행": 4,
+          "선납금": 9,
+          "출고진행": 4,
+          "방문배정": 6,
+          "방문상담": 1
+        }
+      },
+      "over7daysPending": 72,
+      "noActivity7days": {
+        "count": 23,
+        "totalOpenOpps": 93,
+        "details": [
+          {
+            "oppId": "006TJ00000ObgH0YAJ",
+            "name": "별빛스푼(수완본점)_테이블오더 (신규)",
+            "account": "별빛스푼",
+            "stage": "설치진행",
+            "createdDate": "2025-08-05",
+            "lastTaskDate": "2026-03-12",
+            "daysSinceTask": 11,
+            "totalTasks": 17
+          },
+          {
+            "oppId": "006TJ00000PNmAQYA1",
+            "name": "강릉장칼(여주가남점)_CCTV(신규)",
+            "account": "강릉장칼",
+            "stage": "견적",
+            "createdDate": "2025-08-20",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000SlCaLYAV",
+            "name": "보영만두(호매실점)_CCTV(신규)",
+            "account": "보영만두",
+            "stage": "견적",
+            "createdDate": "2025-10-22",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000TH50zYAD",
+            "name": "도돗(성수점)_CCTV(신규)",
+            "account": "도돗",
+            "stage": "견적",
+            "createdDate": "2025-10-31",
+            "lastTaskDate": "2025-12-09",
+            "daysSinceTask": 104,
+            "totalTasks": 1
+          },
+          {
+            "oppId": "006TJ00000U7AvqYAF",
+            "name": "카오시암(본점)_테이블오더 (신규)",
+            "account": "카오시암",
+            "stage": "계약진행",
+            "createdDate": "2025-11-14",
+            "lastTaskDate": "2026-03-09",
+            "daysSinceTask": 14,
+            "totalTasks": 10
+          },
+          {
+            "oppId": "006TJ00000UgdGbYAJ",
+            "name": "미스하노이(본점)_CCTV(신규)",
+            "account": "미스하노이",
+            "stage": "선납금",
+            "createdDate": "2025-11-24",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000UhtO9YAJ",
+            "name": "장어백화점(경기양주점)_CCTV(신규)",
+            "account": "장어백화점",
+            "stage": "견적",
+            "createdDate": "2025-11-24",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000Ui517YAB",
+            "name": "BHC(동대문점)_추가구매",
+            "account": "BHC",
+            "stage": "견적",
+            "createdDate": "2025-11-24",
+            "lastTaskDate": "2025-11-25",
+            "daysSinceTask": 118,
+            "totalTasks": 1
+          },
+          {
+            "oppId": "006TJ00000aqPKDYA2",
+            "name": "플레이그라운드앤(대치점)_테이블오더 (신규)",
+            "account": "플레이그라운드앤",
+            "stage": "견적",
+            "createdDate": "2025-12-30",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 9
+          },
+          {
+            "oppId": "006TJ00000gD5hdYAC",
+            "name": "디자이너푸드(인천송도점)_테이블오더 (신규)",
+            "account": "디자이너푸드",
+            "stage": "견적",
+            "createdDate": "2026-02-11",
+            "lastTaskDate": "2026-03-10",
+            "daysSinceTask": 13,
+            "totalTasks": 10
+          },
+          {
+            "oppId": "006TJ00000gQOEbYAO",
+            "name": "무봉산숯불정육식당(동탄점)_테이블오더 (신규)",
+            "account": "무봉산숯불정육식당",
+            "stage": "출고진행",
+            "createdDate": "2026-02-14",
+            "lastTaskDate": "2026-03-09",
+            "daysSinceTask": 14,
+            "totalTasks": 6
+          },
+          {
+            "oppId": "006TJ00000gZUJDYA4",
+            "name": "안식레스토랑(도곡점)_테이블오더 (신규)",
+            "account": "안식레스토랑",
+            "stage": "견적",
+            "createdDate": "2026-02-19",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 6
+          },
+          {
+            "oppId": "006TJ00000glQLRYA2",
+            "name": "확인필요(전남광주점)_테이블오더 (신규)",
+            "account": "확인필요",
+            "stage": "방문배정",
+            "createdDate": "2026-02-23",
+            "lastTaskDate": "2026-03-09",
+            "daysSinceTask": 14,
+            "totalTasks": 5
+          },
+          {
+            "oppId": "006TJ00000h0XfxYAE",
+            "name": "한끼부대(인천부평점)_테이블오더 (신규)",
+            "account": "한끼부대",
+            "stage": "방문배정",
+            "createdDate": "2026-02-26",
+            "lastTaskDate": "2026-03-06",
+            "daysSinceTask": 17,
+            "totalTasks": 6
+          },
+          {
+            "oppId": "006TJ00000jHT5KYAW",
+            "name": "정성원(명동점)_CCTV(신규)",
+            "account": "정성원",
+            "stage": "견적",
+            "createdDate": "2026-02-27",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000jjYYIYA2",
+            "name": "비비큐(청송진보점)_테이블오더 (추가설치)",
+            "account": "비비큐",
+            "stage": "견적",
+            "createdDate": "2026-03-04",
+            "lastTaskDate": "2026-03-05",
+            "daysSinceTask": 18,
+            "totalTasks": 1
+          },
+          {
+            "oppId": "006TJ00000jkE2vYAE",
+            "name": "진구곱창(강남역본점)_테이블오더 (신규)",
+            "account": "진구곱창",
+            "stage": "견적",
+            "createdDate": "2026-03-04",
+            "lastTaskDate": "2026-03-11",
+            "daysSinceTask": 12,
+            "totalTasks": 4
+          },
+          {
+            "oppId": "006TJ00000jkVzlYAE",
+            "name": "진구곱창(2호점)_테이블오더 (신규)",
+            "account": "진구곱창",
+            "stage": "방문상담",
+            "createdDate": "2026-03-04",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 4
+          },
+          {
+            "oppId": "006TJ00000jkJYpYAM",
+            "name": "비케케선셋(청주성안길점)_CCTV(신규)",
+            "account": "비케케선셋",
+            "stage": "견적",
+            "createdDate": "2026-03-04",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000jrIUjYAM",
+            "name": "치킨가격안정화프로젝트치킹(의정부점)_테이블오더 (신규)",
+            "account": "치킨가격안정화프로젝트치킹",
+            "stage": "견적",
+            "createdDate": "2026-03-06",
+            "lastTaskDate": "2026-03-11",
+            "daysSinceTask": 12,
+            "totalTasks": 5
+          }
+        ],
+        "note": "전체 Open Opp 중 마지막 Task 7일 초과 or Task 없음"
+      },
+      "over45daysPending": 19
+    },
+    "정지영": {
+      "name": "정지영",
+      "pipeline": {
+        "totalOpps": 91,
+        "quotedOpps": 79,
+        "signedOpps": 18,
+        "wipOpps": 49,
+        "clOpps": 12,
+        "noQuoteOpps": 12
+      },
+      "conversionRate": {
+        "quotedOpps": 79,
+        "signedQuotedOpps": 18,
+        "rate": "22.8%",
+        "note": "3월생성 Opp 중 견적있는 건 대비 계약서명완료 (WIP+CL 포함 분모)"
+      },
+      "contracts": {
+        "total": 37,
+        "signed": 34,
+        "pending": 3
+      },
+      "orderCompletionRate": {
+        "signedOpps": 34,
+        "withOrder": 34,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 404,
+      "weeklyContracts": {
+        "1": 10,
+        "2": 14,
+        "3": 11,
+        "4": 2
+      },
+      "openPipeline": {
+        "totalOpen": 98,
+        "stageBreakdown": {
+          "견적": 55,
+          "재견적": 16,
+          "방문배정": 12,
+          "선납금": 10,
+          "출고진행": 4,
+          "계약진행": 1
+        }
+      },
+      "over7daysPending": 73,
+      "noActivity7days": {
+        "count": 17,
+        "totalOpenOpps": 98,
+        "details": [
+          {
+            "oppId": "006TJ00000SW3dlYAD",
+            "name": "메밀식객(본점)_CCTV(신규)",
+            "account": "메밀식객",
+            "stage": "견적",
+            "createdDate": "2025-10-17",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000UQjLBYA1",
+            "name": "츠키리아(부산전포점)_CCTV(신규)",
+            "account": "츠키리아",
+            "stage": "견적",
+            "createdDate": "2025-11-19",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000b87DVYAY",
+            "name": "디자인뮤토건축(본점)_테이블오더 (신규)",
+            "account": "디자인뮤토건축",
+            "stage": "방문배정",
+            "createdDate": "2026-01-05",
+            "lastTaskDate": "2026-03-08",
+            "daysSinceTask": 15,
+            "totalTasks": 14
+          },
+          {
+            "oppId": "006TJ00000egBsrYAE",
+            "name": "동래삼광보리밥(부산동래점)_CCTV(신규)",
+            "account": "동래삼광보리밥",
+            "stage": "견적",
+            "createdDate": "2026-01-20",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000fLSBOYA4",
+            "name": "육전국밥(세종에비뉴힐점)_테이블오더 (신규)",
+            "account": "육전국밥",
+            "stage": "견적",
+            "createdDate": "2026-01-31",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 9
+          },
+          {
+            "oppId": "006TJ00000fRAQIYA4",
+            "name": "얼큰이뼈해장국황가네(용인점)_테이블오더 (신규)",
+            "account": "얼큰이뼈해장국황가네",
+            "stage": "견적",
+            "createdDate": "2026-02-02",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 10
+          },
+          {
+            "oppId": "006TJ00000gDQAzYAO",
+            "name": "가평축협한우명가(경기가평점)_테이블오더 (신규)",
+            "account": "가평축협한우명가",
+            "stage": "견적",
+            "createdDate": "2026-02-11",
+            "lastTaskDate": "2026-03-13",
+            "daysSinceTask": 10,
+            "totalTasks": 10
+          },
+          {
+            "oppId": "006TJ00000jEwALYA0",
+            "name": "짬뽕나라(안성점)_테이블오더 (신규)",
+            "account": "짬뽕나라",
+            "stage": "방문배정",
+            "createdDate": "2026-02-27",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 6
+          },
+          {
+            "oppId": "006TJ00000jQ35BYAS",
+            "name": "서오릉불고기(덕양점)_테이블오더 (신규)",
+            "account": "서오릉불고기",
+            "stage": "견적",
+            "createdDate": "2026-02-27",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 5
+          },
+          {
+            "oppId": "006TJ00000jcxoLYAQ",
+            "name": "홀리데이(충북음성점)_테이블오더 (신규)",
+            "account": "홀리데이",
+            "stage": "견적",
+            "createdDate": "2026-03-03",
+            "lastTaskDate": "2026-03-11",
+            "daysSinceTask": 12,
+            "totalTasks": 9
+          },
+          {
+            "oppId": "006TJ00000jdkibYAA",
+            "name": "진안추어탕(경기이천점)_테이블오더 (신규)",
+            "account": "진안추어탕",
+            "stage": "견적",
+            "createdDate": "2026-03-03",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 9
+          },
+          {
+            "oppId": "006TJ00000jemLlYAI",
+            "name": "울트라곱창(건대점)_테이블오더 (신규)",
+            "account": "울트라곱창",
+            "stage": "견적",
+            "createdDate": "2026-03-03",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 5
+          },
+          {
+            "oppId": "006TJ00000jgn8rYAA",
+            "name": "홍월(상암점)_테이블오더 (신규)",
+            "account": "홍월",
+            "stage": "방문배정",
+            "createdDate": "2026-03-04",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 3
+          },
+          {
+            "oppId": "006TJ00000jkhfyYAA",
+            "name": "주상낙원(동탄점)_테이블오더 (신규)",
+            "account": "주상낙원",
+            "stage": "방문배정",
+            "createdDate": "2026-03-04",
+            "lastTaskDate": "2026-03-11",
+            "daysSinceTask": 12,
+            "totalTasks": 3
+          },
+          {
+            "oppId": "006TJ00000kgH8QYAU",
+            "name": "큰기와집(잠실점)_테이블오더 (신규)",
+            "account": "큰기와집",
+            "stage": "견적",
+            "createdDate": "2026-03-11",
+            "lastTaskDate": "2026-03-13",
+            "daysSinceTask": 10,
+            "totalTasks": 4
+          },
+          {
+            "oppId": "006TJ00000m5ftJYAQ",
+            "name": "큰기와집(잠실점)_멀티오더 (신규)",
+            "account": "큰기와집",
+            "stage": "견적",
+            "createdDate": "2026-03-13",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000nAzduYAC",
+            "name": "후라이드의품격(부평구청점)_테이블오더 (추가설치)",
+            "account": "후라이드의품격",
+            "stage": "견적",
+            "createdDate": "2026-03-20",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          }
+        ],
+        "note": "전체 Open Opp 중 마지막 Task 7일 초과 or Task 없음"
+      },
+      "over45daysPending": 22
+    },
+    "박효정": {
+      "name": "박효정",
+      "pipeline": {
+        "totalOpps": 79,
+        "quotedOpps": 63,
+        "signedOpps": 10,
+        "wipOpps": 46,
+        "clOpps": 7,
+        "noQuoteOpps": 16
+      },
+      "conversionRate": {
+        "quotedOpps": 63,
+        "signedQuotedOpps": 10,
+        "rate": "15.9%",
+        "note": "3월생성 Opp 중 견적있는 건 대비 계약서명완료 (WIP+CL 포함 분모)"
+      },
+      "contracts": {
+        "total": 33,
+        "signed": 29,
+        "pending": 4
+      },
+      "orderCompletionRate": {
+        "signedOpps": 29,
+        "withOrder": 29,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 383,
+      "weeklyContracts": {
+        "1": 11,
+        "2": 8,
+        "3": 10,
+        "4": 4
+      },
+      "openPipeline": {
+        "totalOpen": 107,
+        "stageBreakdown": {
+          "견적": 66,
+          "방문배정": 16,
+          "선납금": 13,
+          "계약진행": 3,
+          "설치진행": 2,
+          "재견적": 4,
+          "출고진행": 3
+        },
+        "ageDistribution": {
+          "0-7일": 33,
+          "8-30일": 39,
+          "31-90일": 28,
+          "91-180일": 6,
+          "181-365일": 1,
+          "365일+": 0
+        }
+      },
+      "over7daysPending": 74,
+      "noActivity7days": {
+        "count": 32,
+        "totalOpenOpps": 107,
+        "details": [
+          {
+            "oppId": "006TJ00000QYQIrYAP",
+            "name": "국밥명가온마루(창원점)_CCTV(신규)",
+            "account": "국밥명가온마루",
+            "stage": "견적",
+            "createdDate": "2025-09-10",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000ScTX7YAN",
+            "name": "화성옥(남양주진건점)_테이블오더 (신규)",
+            "account": "화성옥",
+            "stage": "견적",
+            "createdDate": "2025-10-20",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 9
+          },
+          {
+            "oppId": "006TJ00000SqTdhYAF",
+            "name": "스타치(서초점)_CCTV(신규)",
+            "account": "스타치",
+            "stage": "견적",
+            "createdDate": "2025-10-23",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000UffFdYAJ",
+            "name": "화정능이닭곰탕(화정본점)_CCTV(신규)",
+            "account": "화정능이닭곰탕",
+            "stage": "견적",
+            "createdDate": "2025-11-24",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000VMGkEYAX",
+            "name": "만석식당(충남계룡점)_CCTV(신규)",
+            "account": "만석식당",
+            "stage": "견적",
+            "createdDate": "2025-12-04",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000aRX6PYAW",
+            "name": "신생반점(전북부안점)_테이블오더 (신규)",
+            "account": "신생반점",
+            "stage": "견적",
+            "createdDate": "2025-12-22",
+            "lastTaskDate": "2026-03-09",
+            "daysSinceTask": 14,
+            "totalTasks": 8
+          },
+          {
+            "oppId": "006TJ00000bHdE9YAK",
+            "name": "돈보이(하남점)_테이블오더 (신규)",
+            "account": "돈보이",
+            "stage": "방문배정",
+            "createdDate": "2026-01-07",
+            "lastTaskDate": "2026-03-07",
+            "daysSinceTask": 16,
+            "totalTasks": 5
+          },
+          {
+            "oppId": "006TJ00000bSTPyYAO",
+            "name": "영월곡(본점)_테이블오더 (신규)",
+            "account": "영월곡",
+            "stage": "견적",
+            "createdDate": "2026-01-10",
+            "lastTaskDate": "2026-03-13",
+            "daysSinceTask": 10,
+            "totalTasks": 18
+          },
+          {
+            "oppId": "006TJ00000dbW2TYAU",
+            "name": "미스터쭈삼(강원도점)_테이블오더 (신규)",
+            "account": "미스터쭈삼",
+            "stage": "방문배정",
+            "createdDate": "2026-01-18",
+            "lastTaskDate": "2026-03-11",
+            "daysSinceTask": 12,
+            "totalTasks": 4
+          },
+          {
+            "oppId": "006TJ00000fehZhYAI",
+            "name": "어반티피디(신내점)_테이블오더 (신규)",
+            "account": "어반티피디",
+            "stage": "방문배정",
+            "createdDate": "2026-02-04",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 8
+          },
+          {
+            "oppId": "006TJ00000fn3ZpYAI",
+            "name": "꼬치꼬치양꼬치(홍대점)_테이블오더 (신규)",
+            "account": "꼬치꼬치양꼬치",
+            "stage": "견적",
+            "createdDate": "2026-02-04",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 11
+          },
+          {
+            "oppId": "006TJ00000fxPvdYAE",
+            "name": "막리단길(전북익산점)_테이블오더 (신규)",
+            "account": "막리단길",
+            "stage": "방문배정",
+            "createdDate": "2026-02-06",
+            "lastTaskDate": "2026-03-06",
+            "daysSinceTask": 17,
+            "totalTasks": 8
+          },
+          {
+            "oppId": "006TJ00000gECFdYAO",
+            "name": "상호미정(송파점)_테이블오더 (신규)",
+            "account": "상호미정",
+            "stage": "견적",
+            "createdDate": "2026-02-11",
+            "lastTaskDate": "2026-03-11",
+            "daysSinceTask": 12,
+            "totalTasks": 8
+          },
+          {
+            "oppId": "006TJ00000gJLTZYA4",
+            "name": "얼룩말식당(세종나성점)_테이블오더 (신규)",
+            "account": "얼룩말식당",
+            "stage": "견적",
+            "createdDate": "2026-02-12",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 9
+          },
+          {
+            "oppId": "006TJ00000gJNITYA4",
+            "name": "더로얄인디언레스토랑(고대점)_테이블오더 (신규)",
+            "account": "더로얄인디언레스토랑",
+            "stage": "방문배정",
+            "createdDate": "2026-02-12",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 11
+          },
+          {
+            "oppId": "006TJ00000gTMY2YAO",
+            "name": "퍼줄래대박집(마포점)_테이블오더 (신규)",
+            "account": "퍼줄래대박집",
+            "stage": "방문배정",
+            "createdDate": "2026-02-16",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 9
+          },
+          {
+            "oppId": "006TJ00000gWSdlYAG",
+            "name": "한율막국수(강남점)_테이블오더 (신규)",
+            "account": "한율막국수",
+            "stage": "견적",
+            "createdDate": "2026-02-18",
+            "lastTaskDate": "2026-03-10",
+            "daysSinceTask": 13,
+            "totalTasks": 8
+          },
+          {
+            "oppId": "006TJ00000gav61YAA",
+            "name": "화락(부산사상점)_테이블오더 (신규)",
+            "account": "화락",
+            "stage": "계약진행",
+            "createdDate": "2026-02-19",
+            "lastTaskDate": "2026-03-11",
+            "daysSinceTask": 12,
+            "totalTasks": 12
+          },
+          {
+            "oppId": "006TJ00000ggtW9YAI",
+            "name": "주희정(충북충주점)_테이블오더 (신규)",
+            "account": "주희정",
+            "stage": "견적",
+            "createdDate": "2026-02-21",
+            "lastTaskDate": "2026-03-13",
+            "daysSinceTask": 10,
+            "totalTasks": 9
+          },
+          {
+            "oppId": "006TJ00000gwHebYAE",
+            "name": "야키토리이치에(전포본점)_테이블오더 (신규)",
+            "account": "야키토리이치에",
+            "stage": "선납금",
+            "createdDate": "2026-02-25",
+            "lastTaskDate": "2026-03-12",
+            "daysSinceTask": 11,
+            "totalTasks": 5
+          }
+        ],
+        "note": "전체 Open Opp 중 마지막 Task 7일 초과 or Task 없음"
+      },
+      "over45daysPending": 23
+    },
+    "조현재": {
+      "name": "조현재",
+      "pipeline": {
+        "totalOpps": 94,
+        "quotedOpps": 78,
+        "signedOpps": 16,
+        "wipOpps": 47,
+        "clOpps": 15,
+        "noQuoteOpps": 16
+      },
+      "conversionRate": {
+        "quotedOpps": 78,
+        "signedQuotedOpps": 16,
+        "rate": "20.5%",
+        "note": "3월생성 Opp 중 견적있는 건 대비 계약서명완료 (WIP+CL 포함 분모)"
+      },
+      "contracts": {
+        "total": 34,
+        "signed": 28,
+        "pending": 6
+      },
+      "orderCompletionRate": {
+        "signedOpps": 28,
+        "withOrder": 28,
+        "rate": "100.0%"
+      },
+      "monthlyTablets": 301,
+      "weeklyContracts": {
+        "1": 5,
+        "2": 14,
+        "3": 13,
+        "4": 2
+      },
+      "openPipeline": {
+        "totalOpen": 99,
+        "stageBreakdown": {
+          "계약진행": 3,
+          "방문배정": 15,
+          "재견적": 3,
+          "견적": 62,
+          "선납금": 8,
+          "출고진행": 4,
+          "설치진행": 4
+        }
+      },
+      "over7daysPending": 67,
+      "noActivity7days": {
+        "count": 22,
+        "totalOpenOpps": 99,
+        "details": [
+          {
+            "oppId": "006TJ00000PoUXcYAN",
+            "name": "60계치킨(충북오송점)_테이블오더 (신규)",
+            "account": "60계치킨",
+            "stage": "방문배정",
+            "createdDate": "2025-08-28",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 10
+          },
+          {
+            "oppId": "006TJ00000PpDpdYAF",
+            "name": "빅파이브(종로3가역점)_테이블오더 (신규)",
+            "account": "빅파이브",
+            "stage": "방문배정",
+            "createdDate": "2025-08-28",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 9
+          },
+          {
+            "oppId": "006TJ00000SFyrlYAD",
+            "name": "엄용백돼지국밥(수영본점)_테이블오더 (신규)",
+            "account": "엄용백돼지국밥",
+            "stage": "방문배정",
+            "createdDate": "2025-10-13",
+            "lastTaskDate": "2026-03-07",
+            "daysSinceTask": 16,
+            "totalTasks": 6
+          },
+          {
+            "oppId": "006TJ00000Ux2MJYAZ",
+            "name": "황제정육식당(망원시장점)_CCTV(신규)",
+            "account": "황제정육식당",
+            "stage": "견적",
+            "createdDate": "2025-11-28",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000V6nSRYAZ",
+            "name": "헤븐(구미인동점)_테이블오더 (신규)",
+            "account": "헤븐",
+            "stage": "견적",
+            "createdDate": "2025-12-01",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 12
+          },
+          {
+            "oppId": "006TJ00000XVI0rYAH",
+            "name": "구구구(한남점)_테이블오더 (신규)",
+            "account": "구구구",
+            "stage": "견적",
+            "createdDate": "2025-12-16",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 11
+          },
+          {
+            "oppId": "006TJ00000am22nYAA",
+            "name": "웬즈데이(본점)_테이블오더 (신규)",
+            "account": "웬즈데이",
+            "stage": "선납금",
+            "createdDate": "2025-12-29",
+            "lastTaskDate": "2026-03-07",
+            "daysSinceTask": 16,
+            "totalTasks": 10
+          },
+          {
+            "oppId": "006TJ00000eg60MYAQ",
+            "name": "온도온(충무로점)_CCTV(신규)",
+            "account": "온도온",
+            "stage": "견적",
+            "createdDate": "2026-01-20",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000gAw0wYAC",
+            "name": "심쿵회수산(천안두정점)_테이블오더 (신규)",
+            "account": "심쿵회수산",
+            "stage": "견적",
+            "createdDate": "2026-02-10",
+            "lastTaskDate": "2026-03-10",
+            "daysSinceTask": 13,
+            "totalTasks": 8
+          },
+          {
+            "oppId": "006TJ00000h1PjZYAU",
+            "name": "핫뼈감자탕(모란점)_테이블오더 (신규)",
+            "account": "핫뼈감자탕",
+            "stage": "출고진행",
+            "createdDate": "2026-02-26",
+            "lastTaskDate": "2026-03-12",
+            "daysSinceTask": 11,
+            "totalTasks": 5
+          },
+          {
+            "oppId": "006TJ00000jdSKJYA2",
+            "name": "스시마츠리(외대점)_테이블오더 (신규)",
+            "account": "스시마츠리",
+            "stage": "설치진행",
+            "createdDate": "2026-03-03",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 8
+          },
+          {
+            "oppId": "006TJ00000jh1IHYAY",
+            "name": "원닭(용인수지점)_테이블오더 (신규)",
+            "account": "원닭",
+            "stage": "선납금",
+            "createdDate": "2026-03-04",
+            "lastTaskDate": "2026-03-12",
+            "daysSinceTask": 11,
+            "totalTasks": 7
+          },
+          {
+            "oppId": "006TJ00000jjvwJYAQ",
+            "name": "리얼펍(인천시청점)_테이블오더 (신규)",
+            "account": "리얼펍",
+            "stage": "설치진행",
+            "createdDate": "2026-03-04",
+            "lastTaskDate": "2026-03-10",
+            "daysSinceTask": 13,
+            "totalTasks": 7
+          },
+          {
+            "oppId": "006TJ00000jrVerYAE",
+            "name": "카시아속초호라이즌(강원속초점)_테이블오더 (신규)",
+            "account": "카시아속초호라이즌",
+            "stage": "견적",
+            "createdDate": "2026-03-06",
+            "lastTaskDate": "2026-03-15",
+            "daysSinceTask": 8,
+            "totalTasks": 4
+          },
+          {
+            "oppId": "006TJ00000jw5wfYAA",
+            "name": "엔츠노래타운(거제점)_테이블오더 (추가설치)",
+            "account": "엔츠노래타운",
+            "stage": "견적",
+            "createdDate": "2026-03-07",
+            "lastTaskDate": "2026-03-09",
+            "daysSinceTask": 14,
+            "totalTasks": 1
+          },
+          {
+            "oppId": "006TJ00000k1r1NYAQ",
+            "name": "이자카야하나(춘천보안점)_테이블오더 (추가설치)",
+            "account": "이자카야하나",
+            "stage": "재견적",
+            "createdDate": "2026-03-09",
+            "lastTaskDate": "2026-03-11",
+            "daysSinceTask": 12,
+            "totalTasks": 2
+          },
+          {
+            "oppId": "006TJ00000k3qE6YAI",
+            "name": "신통치킨(야당점)_테이블오더 (신규)",
+            "account": "신통치킨",
+            "stage": "견적",
+            "createdDate": "2026-03-10",
+            "lastTaskDate": "2026-03-11",
+            "daysSinceTask": 12,
+            "totalTasks": 5
+          },
+          {
+            "oppId": "006TJ00000kgkrzYAA",
+            "name": "뇌산마을(을지로점)_테이블오더 (신규)",
+            "account": "뇌산마을",
+            "stage": "선납금",
+            "createdDate": "2026-03-11",
+            "lastTaskDate": "2026-03-13",
+            "daysSinceTask": 10,
+            "totalTasks": 6
+          },
+          {
+            "oppId": "006TJ00000kpKS3YAM",
+            "name": "신통치킨(야당점)_멀티오더 (신규)",
+            "account": "신통치킨",
+            "stage": "견적",
+            "createdDate": "2026-03-11",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          },
+          {
+            "oppId": "006TJ00000n4d4zYAA",
+            "name": "오누이밥상with한남북엇국(인천운서점)_테이블오더 (추가설치)",
+            "account": "오누이밥상with한남북엇국",
+            "stage": "견적",
+            "createdDate": "2026-03-19",
+            "lastTaskDate": null,
+            "daysSinceTask": null,
+            "totalTasks": 0
+          }
+        ],
+        "note": "전체 Open Opp 중 마지막 Task 7일 초과 or Task 없음"
+      },
+      "over45daysPending": 19
+    }
+  },
+  "chBO": {
+    "최영은": {
+      "name": "최영은",
+      "contracts": {
+        "total": 76,
+        "signed": 67,
+        "pending": 9
+      },
+      "orderCompletionRate": {
+        "signedOpps": 55,
+        "withOrder": 54,
+        "rate": "98.2%"
+      },
+      "monthlyTablets": 766,
+      "weeklyContracts": {
+        "1": 20,
+        "2": 24,
+        "3": 25,
+        "4": 7
+      },
+      "franchiseLeadTime": {
+        "total": 67,
+        "within5days": 52,
+        "rate": "77.6%"
+      },
+      "individualLeadTime": {
+        "total": 0,
+        "within7days": 0,
+        "rate": "0.0%"
+      },
+      "franchiseOver7daysPending": 4,
+      "individualOver10daysPending": 3,
+      "noActivity5days": {
+        "count": 7,
+        "totalOpenContracts": 9,
+        "details": [
+          {
+            "contract": "a0tTJ00000OYuLJYA1_a0tTJ00000OYuLJYA1_이자카야시선(안산중앙점)_2025.12.18-2028.12.17",
+            "oppId": "006TJ00000XV4FdYAL",
+            "account": "이자카야시선",
+            "createdDate": "2025-12-17",
+            "lastTaskDate": "2025-12-16",
+            "daysSinceTask": 97
+          },
+          {
+            "contract": "a0tTJ00000SRCOVYA5_a0tTJ00000SRCOVYA5_역전양평해장국(감전점)_2026.2.11-2029.2.10",
+            "oppId": "006TJ00000fpDGYYA2",
+            "account": "역전양평해장국",
+            "createdDate": "2026-02-09",
+            "lastTaskDate": "2026-02-26",
+            "daysSinceTask": 25
+          },
+          {
+            "contract": "a0tTJ00000WdVzGYAV_a0tTJ00000WdVzGYAV_페이앤스토어(본점)",
+            "oppId": null,
+            "createdDate": "2026-03-10",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000YaJLVYA3_a0tTJ00000YaJLVYA3_석암생소금구이(울산삼산점)_2026.3.26-2029.3.25",
+            "oppId": "006TJ00000l9cuEYAQ",
+            "account": "석암생소금구이",
+            "createdDate": "2026-03-12",
+            "lastTaskDate": "2026-03-12",
+            "daysSinceTask": 11
+          },
+          {
+            "contract": "a0tTJ00000dc3L8YAI_a0tTJ00000dc3L8YAI_강경상회(본점)_2026.3.25-2029.3.24",
+            "oppId": "006TJ00000jJMCcYAO",
+            "account": "강경상회",
+            "createdDate": "2026-03-17",
+            "lastTaskDate": "2026-03-17",
+            "daysSinceTask": 6
+          },
+          {
+            "contract": "a0tTJ00000e0fSQYAY_MOU 추가약정서",
+            "oppId": null,
+            "createdDate": "2026-03-23",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000e1K0rYAE_1",
+            "oppId": null,
+            "createdDate": "2026-03-23",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          }
+        ],
+        "note": "전체 Open Contract의 Opp 중 마지막 Task 5일 초과 or Task 없음"
+      },
+      "monthlyProcessed": 67
+    },
+    "장명진": {
+      "name": "장명진",
+      "contracts": {
+        "total": 73,
+        "signed": 68,
+        "pending": 5
+      },
+      "orderCompletionRate": {
+        "signedOpps": 62,
+        "withOrder": 61,
+        "rate": "98.4%"
+      },
+      "monthlyTablets": 786,
+      "weeklyContracts": {
+        "1": 14,
+        "2": 30,
+        "3": 25,
+        "4": 4
+      },
+      "franchiseLeadTime": {
+        "total": 68,
+        "within5days": 57,
+        "rate": "83.8%"
+      },
+      "individualLeadTime": {
+        "total": 0,
+        "within7days": 0,
+        "rate": "0.0%"
+      },
+      "franchiseOver7daysPending": 2,
+      "individualOver10daysPending": 2,
+      "noActivity5days": {
+        "count": 2,
+        "totalOpenContracts": 6,
+        "details": [
+          {
+            "contract": "a0tTJ00000THs9lYAD_a0tTJ00000THs9lYAD_피스(PIS)(제천점)_2026.2.26-2029.2.25",
+            "oppId": "006TJ00000gaxarYAA",
+            "account": "피스(PIS)",
+            "createdDate": "2026-02-24",
+            "lastTaskDate": "2026-03-04",
+            "daysSinceTask": 19
+          },
+          {
+            "contract": "a0tTJ00000WswsbYAB_a0tTJ00000WswsbYAB_(주)잇츠굿_평안도식당(본사)",
+            "oppId": null,
+            "createdDate": "2026-03-11",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          }
+        ],
+        "note": "전체 Open Contract의 Opp 중 마지막 Task 5일 초과 or Task 없음"
+      },
+      "monthlyProcessed": 68
+    },
+    "이은지": {
+      "name": "이은지",
+      "contracts": {
+        "total": 17,
+        "signed": 16,
+        "pending": 1
+      },
+      "orderCompletionRate": {
+        "signedOpps": 11,
+        "withOrder": 9,
+        "rate": "81.8%"
+      },
+      "monthlyTablets": 92,
+      "weeklyContracts": {
+        "1": 10,
+        "2": 7,
+        "3": 0,
+        "4": 0
+      },
+      "franchiseLeadTime": {
+        "total": 16,
+        "within5days": 9,
+        "rate": "56.3%"
+      },
+      "individualLeadTime": {
+        "total": 0,
+        "within7days": 0,
+        "rate": "0.0%"
+      },
+      "franchiseOver7daysPending": 25,
+      "individualOver10daysPending": 25,
+      "noActivity5days": {
+        "count": 25,
+        "totalOpenContracts": 25,
+        "details": [
+          {
+            "contract": "a0tTJ00000AEc1FYAT_a0tTJ00000AEc1FYAT_카엘리움(부산중구점)_2025.4.15-2028.4.14",
+            "oppId": "006TJ00000IqdNtYAJ",
+            "account": "카엘리움",
+            "createdDate": "2025-04-11",
+            "lastTaskDate": "2025-07-07",
+            "daysSinceTask": 259
+          },
+          {
+            "contract": "a0tTJ00000Bx0DlYAJ_a0tTJ00000Bx0DlYAJ_(주)우성F&S_바오탕수(본점)",
+            "oppId": null,
+            "createdDate": "2025-05-20",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000CPeucYAD_a0tTJ00000CPeucYAD_파평옥거제아주점_파평옥(본점)",
+            "oppId": null,
+            "createdDate": "2025-05-30",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000DLhX8YAL_a0tTJ00000DLhX8YAL_한와담소반(동탄점)_2025.6.20-2028.6.19",
+            "oppId": "006TJ00000LsCbBYAV",
+            "account": "한와담소반",
+            "createdDate": "2025-06-18",
+            "lastTaskDate": "2025-06-18",
+            "daysSinceTask": 278
+          },
+          {
+            "contract": "a0tTJ00000F6MoPYAV_MOU 체결 완료",
+            "oppId": null,
+            "createdDate": "2025-07-15",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000FhAebYAF_a0tTJ00000FhAebYAF_매울양양(경산점)_2025.7.30-2028.7.29",
+            "oppId": "006TJ00000NxmWPYAZ",
+            "account": "매울양양",
+            "createdDate": "2025-07-25",
+            "lastTaskDate": "2025-09-18",
+            "daysSinceTask": 186
+          },
+          {
+            "contract": "a0tTJ00000GPtL3YAL_MOU 체결 완료_추가",
+            "oppId": null,
+            "createdDate": "2025-08-06",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000GYzavYAD_a0tTJ00000GYzavYAD_곰실장(대전점)_2025.8.11-2028.8.10",
+            "oppId": "006TJ00000ObSVlYAN",
+            "account": "곰실장",
+            "createdDate": "2025-08-08",
+            "lastTaskDate": "2025-10-20",
+            "daysSinceTask": 154
+          },
+          {
+            "contract": "a0tTJ00000GmebRYAR_a0tTJ00000GmebRYAR_화요리(강남점)_2025.8.14-2028.8.13",
+            "oppId": "006TJ00000NQzFVYA1",
+            "account": "화요리",
+            "createdDate": "2025-08-12",
+            "lastTaskDate": "2025-10-20",
+            "daysSinceTask": 154
+          },
+          {
+            "contract": "a0tTJ00000H2moLYAR_a0tTJ00000H2moLYAR_옛날경성순대국(지제동삭점)_2025.8.19-2028.8.18",
+            "oppId": "006TJ00000PCcazYAD",
+            "account": "옛날경성순대국",
+            "createdDate": "2025-08-18",
+            "lastTaskDate": "2025-10-27",
+            "daysSinceTask": 147
+          },
+          {
+            "contract": "a0tTJ00000HB1v7YAD_MOU 체결 완료_추가",
+            "oppId": null,
+            "createdDate": "2025-08-20",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000HCyMnYAL_MOU 체결 완료_추가",
+            "oppId": null,
+            "createdDate": "2025-08-20",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000JOKCLYA5_a0tTJ00000JOKCLYA5_황금교동짬뽕(현대시티아울렛 가산점)_2025.9.30-2028.9.29",
+            "oppId": "006TJ00000RHjXRYA1",
+            "account": "황금교동짬뽕",
+            "createdDate": "2025-09-25",
+            "lastTaskDate": "2025-09-25",
+            "daysSinceTask": 179
+          },
+          {
+            "contract": "a0tTJ00000JfuzWYAR_a0tTJ00000JfuzWYAR_깐부치킨(동두천지행역점)_2025.10.2-2028.10.1",
+            "oppId": "006TJ00000QnEviYAF",
+            "account": "깐부치킨",
+            "createdDate": "2025-09-30",
+            "lastTaskDate": "2025-11-11",
+            "daysSinceTask": 132
+          },
+          {
+            "contract": "a0tTJ00000LNQNYYA5_a0tTJ00000LNQNYYA5_도원F&B_조은날매운갈비찜(본점)",
+            "oppId": null,
+            "createdDate": "2025-10-31",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000MXBODYA5_MOU 체결",
+            "oppId": null,
+            "createdDate": "2025-11-17",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000N4US5YAN_MOU 체결",
+            "oppId": null,
+            "createdDate": "2025-11-25",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000NHKmfYAH_a0tTJ00000NHKmfYAH_괭이부리마을(상동점)_2025.12.2-2028.12.1",
+            "oppId": "006TJ00000Uh1ArYAJ",
+            "account": "괭이부리마을",
+            "createdDate": "2025-11-28",
+            "lastTaskDate": "2025-12-30",
+            "daysSinceTask": 83
+          },
+          {
+            "contract": "a0tTJ00000No81xYAB_a0tTJ00000No81xYAB_경성깍두기(광교점)_2025.12.9-2028.12.8",
+            "oppId": "006TJ00000UZw7tYAD",
+            "account": "경성깍두기",
+            "createdDate": "2025-12-05",
+            "lastTaskDate": "2025-12-29",
+            "daysSinceTask": 84
+          },
+          {
+            "contract": "a0tTJ00000OkHpdYAF_a0tTJ00000OkHpdYAF_빅몬스터(본점)",
+            "oppId": null,
+            "createdDate": "2025-12-19",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000Otqg5YAB_006TJ00000UxyDOYAZ_일일수작(광주상무점)",
+            "oppId": "006TJ00000UxyDOYAZ",
+            "account": "일일수작",
+            "createdDate": "2025-12-22",
+            "lastTaskDate": "2025-12-22",
+            "daysSinceTask": 91
+          },
+          {
+            "contract": "a0tTJ00000SJCOjYAP_MOU 체결",
+            "oppId": null,
+            "createdDate": "2026-02-06",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000SItqsYAD_MOU 체결",
+            "oppId": null,
+            "createdDate": "2026-02-06",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000SJENJYA5_MOU 체결",
+            "oppId": null,
+            "createdDate": "2026-02-06",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000SJFEXYA5_MOU 체결",
+            "oppId": null,
+            "createdDate": "2026-02-06",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          }
+        ],
+        "note": "전체 Open Contract의 Opp 중 마지막 Task 5일 초과 or Task 없음"
+      },
+      "monthlyProcessed": 16
+    },
+    "김희수": {
+      "name": "김희수",
+      "contracts": {
+        "total": 17,
+        "signed": 15,
+        "pending": 2
+      },
+      "orderCompletionRate": {
+        "signedOpps": 12,
+        "withOrder": 11,
+        "rate": "91.7%"
+      },
+      "monthlyTablets": 102,
+      "weeklyContracts": {
+        "1": 2,
+        "2": 6,
+        "3": 9,
+        "4": 0
+      },
+      "franchiseLeadTime": {
+        "total": 15,
+        "within5days": 11,
+        "rate": "73.3%"
+      },
+      "individualLeadTime": {
+        "total": 0,
+        "within7days": 0,
+        "rate": "0.0%"
+      },
+      "franchiseOver7daysPending": 10,
+      "individualOver10daysPending": 9,
+      "noActivity5days": {
+        "count": 11,
+        "totalOpenContracts": 11,
+        "details": [
+          {
+            "contract": "a0tTJ00000Afv1UYAR_a0tTJ00000Afv1UYAR_단코투(이태원점)_2025.4.25-2028.4.24",
+            "oppId": "006TJ00000JMRWTYA5",
+            "account": "단코투",
+            "createdDate": "2025-04-23",
+            "lastTaskDate": "2025-06-26",
+            "daysSinceTask": 270
+          },
+          {
+            "contract": "a0tTJ00000AqHiFYAV_a0tTJ00000AqHiFYAV_항교막국수(원주점)_2025.4.29-2028.4.28",
+            "oppId": "006TJ00000JSlVhYAL",
+            "account": "항교막국수",
+            "createdDate": "2025-04-25",
+            "lastTaskDate": "2025-05-28",
+            "daysSinceTask": 299
+          },
+          {
+            "contract": "a0tTJ00000Awe5lYAB_a0tTJ00000Awe5lYAB_한국할랄케밥(안산점)_2025.4.29-2028.4.28",
+            "oppId": "006TJ00000JMGPlYAP",
+            "account": "한국할랄케밥",
+            "createdDate": "2025-04-28",
+            "lastTaskDate": "2025-05-13",
+            "daysSinceTask": 314
+          },
+          {
+            "contract": "a0tTJ00000EExOVYA1_a0tTJ00000EExOVYA1_역전할머니맥주(중마점)_2025.7.5-2028.7.4",
+            "oppId": "006TJ00000LoR0xYAF",
+            "account": "역전할머니맥주",
+            "createdDate": "2025-07-02",
+            "lastTaskDate": "2025-07-03",
+            "daysSinceTask": 263
+          },
+          {
+            "contract": "a0tTJ00000F61llYAB_1",
+            "oppId": null,
+            "createdDate": "2025-07-15",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000F6huTYAR_1",
+            "oppId": null,
+            "createdDate": "2025-07-15",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000F6niaYAB_a0tTJ00000F6niaYAB_베스트시스템()",
+            "oppId": null,
+            "createdDate": "2025-07-15",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000F6rQnYAJ_1",
+            "oppId": null,
+            "createdDate": "2025-07-15",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          },
+          {
+            "contract": "a0tTJ00000GQajTYAT_a0tTJ00000GQajTYAT_옛날경성순대국(면목역점)_2025.8.11-2028.8.10",
+            "oppId": "006TJ00000O7w34YAB",
+            "account": "옛날경성순대국",
+            "createdDate": "2025-08-06",
+            "lastTaskDate": "2025-09-18",
+            "daysSinceTask": 186
+          },
+          {
+            "contract": "a0tTJ00000YawLFYAZ_a0tTJ00000YawLFYAZ_안동네(종로3가점)_2026.3.16-2027.2.15",
+            "oppId": "006TJ00000m2P57YAE",
+            "account": "안동네",
+            "createdDate": "2026-03-12",
+            "lastTaskDate": "2026-03-13",
+            "daysSinceTask": 10
+          },
+          {
+            "contract": "a0tTJ00000dcUppYAE_1",
+            "oppId": null,
+            "createdDate": "2026-03-17",
+            "lastTaskDate": null,
+            "daysSinceTask": null
+          }
+        ],
+        "note": "전체 Open Contract의 Opp 중 마지막 Task 5일 초과 or Task 없음"
+      },
+      "monthlyProcessed": 15
+    }
+  },
+  "ibPipeline": {
+    "전수빈": {
+      "totalOpps": 101,
+      "quotedOpps": 89,
+      "signedOpps": 35,
+      "wipOpps": 45,
+      "clOpps": 9,
+      "noQuoteOpps": 12,
+      "conversionRate": "39.3%"
+    },
+    "정지영": {
+      "totalOpps": 91,
+      "quotedOpps": 79,
+      "signedOpps": 18,
+      "wipOpps": 49,
+      "clOpps": 12,
+      "noQuoteOpps": 12,
+      "conversionRate": "22.8%"
+    },
+    "박효정": {
+      "totalOpps": 79,
+      "quotedOpps": 63,
+      "signedOpps": 10,
+      "wipOpps": 46,
+      "clOpps": 7,
+      "noQuoteOpps": 16,
+      "conversionRate": "15.9%"
+    },
+    "조현재": {
+      "totalOpps": 94,
+      "quotedOpps": 78,
+      "signedOpps": 16,
+      "wipOpps": 47,
+      "clOpps": 15,
+      "noQuoteOpps": 16,
+      "conversionRate": "20.5%"
+    }
+  }
+}

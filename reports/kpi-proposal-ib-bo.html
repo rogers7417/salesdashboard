@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인바운드 BO KPI 수정 제안서</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #e8ebed;
+    --text-primary: #191f28;
+    --text-secondary: #6b7684;
+    --text-tertiary: #8b95a1;
+    --blue: #3182f6;
+    --blue-light: #e8f3ff;
+    --red: #f04452;
+    --red-light: #fff0f0;
+    --green: #00b386;
+    --green-light: #e8fff4;
+    --orange: #f59f00;
+    --orange-light: #fff8e6;
+    --purple: #8b5cf6;
+    --purple-light: #f3f0ff;
+    --shadow: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-hover: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+  .header { margin-bottom: 40px; }
+  .header h1 { font-size: 28px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+  .header .subtitle { font-size: 15px; color: var(--text-secondary); }
+  .header .date-badge { display: inline-block; margin-top: 12px; padding: 6px 14px; background: var(--blue-light); color: var(--blue); border-radius: 20px; font-size: 13px; font-weight: 600; }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .kpi-card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); transition: box-shadow 0.2s; }
+  .kpi-card:hover { box-shadow: var(--shadow-hover); }
+  .kpi-card .label { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
+  .kpi-card .value { font-size: 32px; font-weight: 800; margin-bottom: 4px; }
+  .kpi-card .change { font-size: 13px; font-weight: 600; }
+  .kpi-card .change.up { color: var(--green); }
+  .kpi-card .change.down { color: var(--red); }
+  .kpi-card .change.neutral { color: var(--text-tertiary); }
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .section-title .num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--blue); color: white; border-radius: 8px; font-size: 14px; font-weight: 700; }
+  .card { background: var(--card); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; color: var(--text-primary); }
+  .card-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .chart-container { position: relative; width: 100%; height: 320px; }
+  .chart-container.tall { height: 400px; }
+  .chart-container.short { height: 260px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .data-table th { text-align: left; padding: 12px 16px; font-weight: 600; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border); background: #fafbfc; }
+  .data-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #fafbfc; }
+  .data-table .num-cell { text-align: right; font-weight: 500; }
+  .data-table .highlight { font-weight: 700; color: var(--blue); }
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+  .tag.green { background: var(--green-light); color: var(--green); }
+  .tag.red { background: var(--red-light); color: var(--red); }
+  .tag.orange { background: var(--orange-light); color: var(--orange); }
+  .tag.blue { background: var(--blue-light); color: var(--blue); }
+  .tag.purple { background: var(--purple-light); color: var(--purple); }
+  .compare-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+  .compare-table th { padding: 14px 16px; font-weight: 600; text-align: left; background: #fafbfc; border-bottom: 2px solid var(--border); }
+  .compare-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .compare-table .current { background: var(--red-light); color: var(--red); font-weight: 600; }
+  .compare-table .proposed { background: var(--green-light); color: var(--green); font-weight: 600; }
+  .causal-chain { display: flex; align-items: center; justify-content: center; gap: 0; padding: 24px 0; flex-wrap: wrap; }
+  .causal-node { padding: 14px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; text-align: center; min-width: 120px; line-height: 1.4; }
+  .causal-arrow { font-size: 20px; color: var(--text-tertiary); padding: 0 6px; font-weight: 700; }
+  .causal-node.primary { background: var(--blue-light); color: var(--blue); border: 2px solid var(--blue); }
+  .causal-node.secondary { background: var(--orange-light); color: var(--orange); border: 2px solid var(--orange); }
+  .causal-node.minor { background: #f5f6f8; color: var(--text-secondary); border: 2px solid var(--border); }
+  .causal-node.result { background: var(--purple-light); color: var(--purple); border: 2px solid var(--purple); }
+  .stat-box { text-align: center; padding: 20px; background: #fafbfc; border-radius: 12px; }
+  .stat-box .stat-value { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+  .stat-box .stat-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+  .stat-box .stat-sub { font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+  .insight { padding: 16px 20px; border-radius: 12px; font-size: 14px; line-height: 1.6; margin-top: 16px; }
+  .insight.warning { background: var(--orange-light); border-left: 4px solid var(--orange); color: #664d00; }
+  .insight.danger { background: var(--red-light); border-left: 4px solid var(--red); color: #8b1a1a; }
+  .insight.info { background: var(--blue-light); border-left: 4px solid var(--blue); color: #1a4a8b; }
+  .insight.success { background: var(--green-light); border-left: 4px solid var(--green); color: #005c44; }
+  .footer { text-align: center; padding: 32px 0; color: var(--text-tertiary); font-size: 13px; }
+
+  .pain-banner { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: var(--radius); padding: 32px; margin-bottom: 32px; color: white; }
+  .pain-banner h2 { font-size: 18px; font-weight: 800; margin-bottom: 20px; color: #fff; display: flex; align-items: center; gap: 10px; }
+  .pain-banner h2::before { content: ''; display: inline-block; width: 4px; height: 24px; background: var(--red); border-radius: 2px; }
+  .pain-items { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .pain-item { background: rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; border-left: 4px solid var(--red); }
+  .pain-item.warn { border-left-color: var(--orange); }
+  .pain-item .pain-num { font-size: 28px; font-weight: 800; color: var(--red); margin-bottom: 4px; }
+  .pain-item.warn .pain-num { color: var(--orange); }
+  .pain-item .pain-label { font-size: 13px; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+  .pain-item .pain-action { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5; }
+
+  .so-what { background: #1a1a2e; color: white; border-radius: 12px; padding: 18px 22px; margin-top: 16px; display: flex; align-items: flex-start; gap: 12px; }
+  .so-what::before { content: 'ACTION'; font-size: 10px; font-weight: 800; background: var(--red); color: white; padding: 3px 8px; border-radius: 4px; white-space: nowrap; margin-top: 2px; flex-shrink: 0; }
+  .so-what.positive::before { background: var(--green); content: 'GOOD'; }
+  .so-what.caution::before { background: var(--orange); content: 'WATCH'; }
+  .so-what-text { font-size: 14px; line-height: 1.6; }
+  .so-what-text strong { color: var(--orange); }
+
+  .kpi-card .status-icon { font-size: 16px; float: right; }
+  .kpi-card .gap-bar { height: 6px; border-radius: 3px; margin-top: 12px; background: #e8ebed; overflow: hidden; }
+  .kpi-card .gap-bar .fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+  .anomaly-highlight { position: relative; }
+  .anomaly-highlight::after { content: ''; position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; background: var(--red); border-radius: 50%; }
+
+  /* Proposal-specific styles */
+  .proposal-table-card { border: 2px solid var(--blue); }
+  .proposal-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .proposal-table th { padding: 14px 12px; font-weight: 700; text-align: left; background: var(--blue-light); color: var(--blue); border-bottom: 2px solid var(--blue); font-size: 12px; }
+  .proposal-table td { padding: 14px 12px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+  .proposal-table tr:last-child td { border-bottom: none; }
+  .proposal-table tr:hover td { background: #fafbfc; }
+  .proposal-table .kpi-num { font-weight: 800; color: var(--blue); font-size: 14px; white-space: nowrap; }
+  .proposal-table .col-current { background: var(--red-light); }
+  .proposal-table .col-proposed { background: var(--green-light); }
+  .proposal-table .note { font-size: 11px; color: var(--text-tertiary); margin-top: 4px; }
+
+  .phase-card { border-left: 4px solid var(--purple); }
+  .phase-title { font-size: 15px; font-weight: 700; color: var(--purple); margin-bottom: 12px; }
+  .phase-list { list-style: none; padding: 0; }
+  .phase-list li { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; display: flex; align-items: flex-start; gap: 10px; }
+  .phase-list li:last-child { border-bottom: none; }
+  .phase-list .step-num { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: var(--purple-light); color: var(--purple); border-radius: 6px; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .phase-list .step-owner { font-size: 11px; color: var(--text-tertiary); }
+
+  .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .action-card { padding: 20px; border-radius: 12px; }
+  .action-card.immediate { background: var(--blue-light); border: 1px solid var(--blue); }
+  .action-card.midterm { background: var(--purple-light); border: 1px solid var(--purple); }
+  .action-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+  .action-card.immediate h4 { color: var(--blue); }
+  .action-card.midterm h4 { color: var(--purple); }
+  .action-card ul { list-style: none; padding: 0; }
+  .action-card ul li { font-size: 13px; padding: 4px 0; padding-left: 16px; position: relative; }
+  .action-card ul li::before { content: ''; position: absolute; left: 0; top: 11px; width: 6px; height: 6px; border-radius: 50%; }
+  .action-card.immediate ul li::before { background: var(--blue); }
+  .action-card.midterm ul li::before { background: var(--purple); }
+
+  .detail-list { list-style: none; padding: 0; }
+  .detail-list li { padding: 8px 0; font-size: 14px; line-height: 1.5; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px; }
+  .detail-list li:last-child { border-bottom: none; }
+  .detail-list .bullet { color: var(--blue); font-weight: 700; flex-shrink: 0; }
+
+  .decision-box { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; border-radius: var(--radius); padding: 32px; margin-top: 24px; text-align: center; }
+  .decision-box .decision-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+  .decision-box .decision-text { font-size: 15px; line-height: 1.8; color: rgba(255,255,255,0.85); max-width: 800px; margin: 0 auto; }
+  .decision-box .decision-text strong { color: var(--orange); }
+
+  @media (max-width: 768px) {
+    .pain-items { grid-template-columns: 1fr; }
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .header h1 { font-size: 22px; }
+    .kpi-card .value { font-size: 24px; }
+    .causal-chain { flex-direction: column; }
+    .causal-arrow { transform: rotate(90deg); }
+    .container { padding: 16px; }
+    .action-grid { grid-template-columns: 1fr; }
+    .proposal-table { font-size: 12px; }
+    .proposal-table td, .proposal-table th { padding: 10px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>인바운드 BO KPI 수정 제안서</h1>
+    <p class="subtitle">데이터 기반 KPI 구조 개선안 -- 주장 / 근거 / 기대효과</p>
+    <span class="date-badge">2026 Q1 실적 기준 (3월 20일)</span>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 1: 주장 — 핵심 제안 -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title"><span class="num">1</span> 주장 -- 핵심 제안</div>
+
+    <!-- KPI 수정안 테이블 -->
+    <div class="card proposal-table-card">
+      <div class="card-title">KPI 수정안 한눈에 보기</div>
+      <div style="overflow-x:auto;">
+        <table class="proposal-table">
+          <thead>
+            <tr>
+              <th style="width:80px;">KPI</th>
+              <th style="width:22%;">현행</th>
+              <th style="width:38%;">제안</th>
+              <th>핵심 변경</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="kpi-num">1. 전환율</td>
+              <td class="col-current">SQL&rarr;CW 전환율 60%</td>
+              <td class="col-proposed">
+                견적&rarr;계약 55% <span class="tag blue">결과</span><br>
+                D+2 Task 완료율 90% <span class="tag purple">과정</span>*<br>
+                계약&rarr;출고 95% <span class="tag green">직접</span>
+              </td>
+              <td><div class="note">*과정 KPI는 Phase 1(프로세스 변경) 완료 후 적용</div></td>
+            </tr>
+            <tr>
+              <td class="kpi-num">2. 마감률</td>
+              <td class="col-current">CW 마감율 100%</td>
+              <td class="col-proposed">인당 월간 태블릿 650대</td>
+              <td>CW 대수&rarr;계약서 대수 기준, 현재 37~85%</td>
+            </tr>
+            <tr>
+              <td class="kpi-num">3. 일일 마감</td>
+              <td class="col-current">일일 마감 5건</td>
+              <td class="col-proposed">주간 계약서 작성 5건+</td>
+              <td>일&rarr;주 (달성률 4%&rarr;60%), U자형 흡수</td>
+            </tr>
+            <tr>
+              <td class="kpi-num">4. SQL 잔량</td>
+              <td class="col-current">7일 초과 잔량 10건 이내</td>
+              <td class="col-proposed">
+                &le;10건 유지 <span class="tag blue">상한</span><br>
+                무활동 0건 <span class="tag orange">활동</span><br>
+                D+2 Task <span class="tag purple">진입방지</span>
+              </td>
+              <td>수치 유지 + 해석 보정: "줄여라"&rarr;"관리하라"</td>
+            </tr>
+            <tr>
+              <td class="kpi-num">5. 장기건 보호</td>
+              <td class="col-current">없음</td>
+              <td class="col-proposed">45일+ CL 시 팀장 승인</td>
+              <td><span class="tag red">신규 추가</span> &mdash; 4번과 연계</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Before/After 비교 -->
+    <div class="grid-3" style="margin-bottom: 16px;">
+      <div class="stat-box" style="border: 2px solid var(--green);">
+        <div class="stat-label">대형 딜 보전</div>
+        <div class="stat-value" style="color: var(--green);">+8.3%p</div>
+        <div class="stat-sub">77건 / 1,200대 / 80.6억</div>
+        <div style="margin-top: 8px;"><span class="tag red">현행: 위험</span> <span class="tag green">변경: 보전</span></div>
+      </div>
+      <div class="stat-box" style="border: 2px solid var(--blue);">
+        <div class="stat-label">KPI 달성 가능성</div>
+        <div class="stat-value" style="color: var(--blue);">4%&rarr;60%</div>
+        <div class="stat-sub">일일마감 달성률 대폭 개선</div>
+        <div style="margin-top: 8px;"><span class="tag orange">태블릿 37~85%</span></div>
+      </div>
+      <div class="stat-box" style="border: 2px solid var(--purple);">
+        <div class="stat-label">파이프라인 가속</div>
+        <div class="stat-value" style="color: var(--purple);">+418~837대</div>
+        <div class="stat-sub">Task 정책으로 추가 확보</div>
+        <div style="margin-top: 8px;"><span class="tag purple">CL 구제 효과</span></div>
+      </div>
+    </div>
+
+    <div class="so-what">
+      <div class="so-what-text">
+        <strong>이렇게 바꿔야 합니다.</strong> 현행 KPI 4개는 모두 구조적으로 BO가 통제할 수 없는 지표를 측정하거나, 달성 자체가 불가능한 수치로 설정되어 있습니다. 데이터가 증명하는 방향으로 수정하면 대형 딜 1,200대 보전, 달성률 정상화, 파이프라인 +418~837대 가속이 가능합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 2: 근거 — 왜 바꿔야 하는가 -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title"><span class="num">2</span> 근거 -- 왜 바꿔야 하는가</div>
+
+    <div class="card-subtitle" style="font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px;">2-1. 현행 KPI의 문제</div>
+
+    <!-- Card 1: 전환율 -->
+    <div class="card">
+      <div class="card-title">KPI 1 &mdash; SQL&rarr;CW 전환율 60%: BO 통제 불가</div>
+
+      <div class="causal-chain" style="margin-bottom: 20px;">
+        <div class="causal-node minor">IS(TM)<br>리드 터치</div>
+        <div class="causal-arrow">&rarr;</div>
+        <div class="causal-node minor">FS<br>방문</div>
+        <div class="causal-arrow">&rarr;</div>
+        <div class="causal-node secondary">견적서<br>발송</div>
+        <div class="causal-arrow">&rarr;</div>
+        <div class="causal-node primary">BO 시작<br>계약서</div>
+        <div class="causal-arrow">&rarr;</div>
+        <div class="causal-node result">출고 신청</div>
+      </div>
+
+      <ul class="detail-list">
+        <li><span class="bullet">&bull;</span> CW는 계약청구팀이 처리하는 단계 &mdash; BO가 직접 통제할 수 없는 후속 프로세스</li>
+        <li><span class="bullet">&bull;</span> 견적&rarr;계약서 전환율: Q1 <strong>55.1%</strong> (WIP 제외). 월별: 1월 51.3%, 2월 56.4%, 3월 64.1%</li>
+        <li><span class="bullet">&bull;</span> 견적 발송 1,015건 &rarr; CL 335건(33%) + WIP 264건(26%) + 계약서 414건(40.8%)</li>
+        <li><span class="bullet">&bull;</span> CL 335건은 견적 단계에서 발생 &mdash; BO 직접 통제 밖이지만 FS 압박으로 간접 관리 가능</li>
+      </ul>
+
+      <!-- 월별 전환율 추이 차트 -->
+      <div class="chart-container short" style="margin-top: 16px;">
+        <canvas id="chart-conversion-trend"></canvas>
+      </div>
+
+      <div class="insight info">
+        <strong>핵심:</strong> BO가 실제 통제 가능한 구간은 "견적&rarr;계약서"와 "계약서&rarr;출고"이며, SQL&rarr;CW는 BO 업무 범위 밖입니다. 측정 구간을 BO 책임 범위에 맞춰야 합니다.
+      </div>
+    </div>
+
+    <!-- Card 2: 일일 마감 -->
+    <div class="card">
+      <div class="card-title">KPI 2 &mdash; 일 5건 마감: 구조적 달성 불가능</div>
+
+      <div class="grid-3" style="margin-bottom: 20px;">
+        <div class="stat-box">
+          <div class="stat-label">인당 일평균 CW</div>
+          <div class="stat-value" style="color: var(--red);">2.0건</div>
+          <div class="stat-sub">목표 5건의 40%</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">인당 5건+ 달성일</div>
+          <div class="stat-value" style="color: var(--red);">2일/50일</div>
+          <div class="stat-sub">달성률 4%</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">BP 본래 의도</div>
+          <div class="stat-value" style="color: var(--blue);">650대</div>
+          <div class="stat-sub">인당 월간 태블릿 기준</div>
+        </div>
+      </div>
+
+      <ul class="detail-list">
+        <li><span class="bullet">&bull;</span> U자형 마감: 월말 5일에 CW의 27~42% 집중</li>
+        <li><span class="bullet">&bull;</span> BP 본래 의도: 월 목표 2,600대 &divide; 4명 = 인당 650대 (태블릿 대수 기준)</li>
+        <li><span class="bullet">&bull;</span> "건" 단위가 아닌 "대수" 단위로 전환하면 목표 공정성 확보 가능</li>
+      </ul>
+
+      <!-- U자형 패턴 차트 -->
+      <div class="chart-container" style="margin-top: 16px;">
+        <canvas id="chart-u-shape"></canvas>
+      </div>
+
+      <div class="insight danger">
+        <strong>구조적 문제:</strong> 일 5건은 데이터상 달성률 4%로, KPI로서 기능하지 않습니다. 주간 5건+ (달성률 ~60%) 또는 인당 월간 태블릿 650대로 전환해야 공정한 평가가 가능합니다.
+      </div>
+    </div>
+
+    <!-- Card 3: SQL 잔량 -->
+    <div class="card">
+      <div class="card-title">KPI 3 &mdash; 7일 초과 잔량 10건: 잘못된 해석</div>
+
+      <div class="grid-2" style="margin-bottom: 20px;">
+        <div class="stat-box" style="border: 2px solid var(--red);">
+          <div class="stat-label">잘못된 해석</div>
+          <div style="font-size: 15px; font-weight: 700; color: var(--red); margin-top: 8px;">"10건 넘으면 빨리 CL 처리해라"</div>
+          <div class="stat-sub">대형 딜 CL 유도</div>
+        </div>
+        <div class="stat-box" style="border: 2px solid var(--green);">
+          <div class="stat-label">올바른 해석</div>
+          <div style="font-size: 15px; font-weight: 700; color: var(--green); margin-top: 8px;">"WIP를 좁게 유지 &rarr; 집중 관리"</div>
+          <div class="stat-sub">꾸준한 리터치 &rarr; 전환율 상승</div>
+        </div>
+      </div>
+
+      <ul class="detail-list">
+        <li><span class="bullet">&bull;</span> 원래 의도: 10건 = 특수 매장 집중 관리 여유분 (CL 대상 아님)</li>
+        <li><span class="bullet">&bull;</span> 30일+ 장기 건: <strong>77건 / 1,200대 / 80.6억</strong> &mdash; 포기 시 달성률 -8.3%p</li>
+        <li><span class="bullet">&bull;</span> 10건 초과 시: CL 하지 말 것 &rarr; 팀장 논의 후 우선순위 재배분</li>
+      </ul>
+
+      <div class="insight warning">
+        <strong>해석 보정 필요:</strong> "줄여라"가 아닌 "관리하라"로 KPI 해석을 전환해야 합니다. 10건 초과 시 CL이 아닌 팀장 논의&rarr;우선순위 재배분이 올바른 대응입니다.
+      </div>
+    </div>
+
+    <!-- Card 4: Task 정책 부재 -->
+    <div class="card">
+      <div class="card-title">Task 정책 부재 &mdash; 전환율 저하 근본 원인</div>
+
+      <div class="causal-chain" style="margin-bottom: 20px;">
+        <div class="causal-node primary">Task = 메모용<br>관리 안 됨</div>
+        <div class="causal-arrow">&rarr;</div>
+        <div class="causal-node secondary">견적 후<br>다음 과업 미정의</div>
+        <div class="causal-arrow">&rarr;</div>
+        <div class="causal-node secondary">FS 자율 판단<br>"대기" 장기화</div>
+        <div class="causal-arrow">&rarr;</div>
+        <div class="causal-node result">CL 335건<br>(33%)</div>
+      </div>
+
+      <ul class="detail-list">
+        <li><span class="bullet">&bull;</span> 현재 Task = 메모/기록용 (Open/Closed 관리 안 됨, Due Date 없음)</li>
+        <li><span class="bullet">&bull;</span> 견적&rarr;계약서 소요일: 중앙값 4일, D+2 이내 39%, D+5 이내 58%, D+7 이내 68%</li>
+        <li><span class="bullet">&bull;</span> D+2 Task 정책 도입 시 CL 335건 중 10~20% 구제 가능</li>
+      </ul>
+
+      <!-- 소요일 분포 차트 -->
+      <div class="chart-container short" style="margin-top: 16px;">
+        <canvas id="chart-lead-time"></canvas>
+      </div>
+
+      <div class="insight danger">
+        <strong>근본 원인:</strong> Task가 체계적으로 관리되지 않아 견적 후 "대기"가 장기화됩니다. D+2 자동 Task 생성으로 파이프라인 속도를 높여야 합니다.
+      </div>
+    </div>
+
+    <div class="card-subtitle" style="font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; margin-top: 32px;">2-2. 구조적 분석 결과</div>
+
+    <!-- Card 5: U자형 패턴 -->
+    <div class="card">
+      <div class="card-title">U자형 패턴 &mdash; 구조적 현상, BO 의도 아님</div>
+
+      <div class="grid-2">
+        <div>
+          <ul class="detail-list">
+            <li><span class="bullet">&bull;</span> 이월 효과 70% &mdash; 전월 말 발생 건이 당월 초 마감</li>
+            <li><span class="bullet">&bull;</span> 사이클 타임 20% &mdash; 견적~계약 자연 소요 기간</li>
+            <li><span class="bullet">&bull;</span> CMS 지연 7% &mdash; 시스템 처리 대기</li>
+            <li><span class="bullet">&bull;</span> 요일 효과 3% &mdash; 주말/공휴일 영향</li>
+            <li style="border-bottom: none; padding-top: 16px;"><span class="bullet">&bull;</span> <strong>중순 공백:</strong> 이월 건 소진 + 당월 건 미도래 &rarr; 구조적 불가피</li>
+          </ul>
+        </div>
+        <div class="chart-container short">
+          <canvas id="chart-u-contribution"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 6: 오픈전 매장 -->
+    <div class="card">
+      <div class="card-title">오픈전 매장 &mdash; 구조적 지연</div>
+
+      <div class="grid-2" style="margin-bottom: 20px;">
+        <div class="stat-box" style="border: 2px solid var(--orange);">
+          <div class="stat-label">오픈전 중앙값</div>
+          <div class="stat-value" style="color: var(--orange);">7일</div>
+          <div class="stat-sub">34%가 14일+</div>
+        </div>
+        <div class="stat-box" style="border: 2px solid var(--green);">
+          <div class="stat-label">영업중 중앙값</div>
+          <div class="stat-value" style="color: var(--green);">4일</div>
+          <div class="stat-sub">13%만 14일+</div>
+        </div>
+      </div>
+
+      <div class="insight info">
+        <strong>14일+ 건의 75%가 오픈전 매장입니다.</strong> 오픈전은 인테리어/허가 등 외부 요인으로 지연되며 BO 역량 문제가 아닙니다.
+      </div>
+
+      <table class="data-table" style="margin-top: 16px;">
+        <thead>
+          <tr><th>BO</th><th>오픈전 비중</th><th>오픈전 중앙값</th><th>영업중 중앙값</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>전수빈</td><td>62%</td><td class="num-cell">4일</td><td class="num-cell">3일</td></tr>
+          <tr><td>정지영</td><td>59%</td><td class="num-cell">7일</td><td class="num-cell">4일</td></tr>
+          <tr><td>박효정</td><td>38%</td><td class="num-cell">13일</td><td class="num-cell">6일</td></tr>
+          <tr><td>조현재</td><td>47%</td><td class="num-cell">12일</td><td class="num-cell">5일</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Card 7: 장기건 실적 기여도 -->
+    <div class="card">
+      <div class="card-title">장기 건 실적 기여도 &mdash; 포기할 수 없는 영역</div>
+
+      <div class="grid-3" style="margin-bottom: 20px;">
+        <div class="stat-box">
+          <div class="stat-label">Q1 장기건 (30일+)</div>
+          <div class="stat-value" style="color: var(--purple);">77건</div>
+          <div class="stat-sub">1,200대 (Q1 10.4%)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">장기건 매출</div>
+          <div class="stat-value" style="color: var(--purple);">80.6억</div>
+          <div class="stat-sub">건당 15.6대 (중앙값 14.3대)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">14일+ CL률</div>
+          <div class="stat-value" style="color: var(--green);">0%</div>
+          <div class="stat-sub">전 BO &mdash; 장기 건은 결국 전환됨</div>
+        </div>
+      </div>
+
+      <div class="chart-container short">
+        <canvas id="chart-longterm-tablet"></canvas>
+      </div>
+
+      <div class="insight success">
+        <strong>장기 건은 대형 딜입니다.</strong> 건당 태블릿 수가 전체 대비 +9% 높고, 14일 이상 건의 CL률은 전 BO 0%입니다. 장기 건 CL 유도는 실적 자해 행위입니다.
+      </div>
+    </div>
+
+    <!-- Card 8: FS 건 품질 -->
+    <div class="card">
+      <div class="card-title">FS 건 품질 &mdash; BO 역량 아닌 배정 구조 문제</div>
+
+      <table class="data-table" style="margin-bottom: 16px;">
+        <thead>
+          <tr><th>FS</th><th>박효정 배정 시</th><th>조현재 배정 시</th><th>전수빈 배정 시</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>이경호</strong></td>
+            <td><span class="tag red">15일</span></td>
+            <td><span class="tag red">18일</span></td>
+            <td><span class="tag green">3일</span></td>
+          </tr>
+          <tr>
+            <td><strong>변상훈</strong></td>
+            <td><span class="tag red">16일</span></td>
+            <td>&mdash;</td>
+            <td><span class="tag green">4일</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="insight warning">
+        <strong>동일 FS의 건이 BO에 따라 다른 결과를 보입니다.</strong> 이는 BO 역량 차이가 아닌 FS-BO 매칭 또는 FS 준비도(견적 품질) 문제입니다. 구조적/환경적 원인을 먼저 확인해야 합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 3: 기대효과 -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title"><span class="num">3</span> 기대효과</div>
+
+    <div class="card-subtitle" style="font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px;">3-1. 현행 유지 시 손실 vs 변경 시 개선</div>
+
+    <div class="card">
+      <table class="compare-table">
+        <thead>
+          <tr><th>효과</th><th>현행 유지 시 (위험)</th><th>KPI 변경 시 (기대)</th><th>차이</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>대형 딜</strong></td>
+            <td class="current">-1,200대 / -80.6억 위험</td>
+            <td class="proposed">77건 / 1,200대 보전</td>
+            <td><span class="tag green">+8.3%p</span></td>
+          </tr>
+          <tr>
+            <td><strong>KPI 달성 가능성</strong></td>
+            <td class="current">일일마감 4%, CW 통제불가</td>
+            <td class="proposed">주간 40~80%, 태블릿 37~85%</td>
+            <td><span class="tag blue">공정성 향상</span></td>
+          </tr>
+          <tr>
+            <td><strong>파이프라인 가속</strong></td>
+            <td class="current">Task 정책 없음 &rarr; CL 33%</td>
+            <td class="proposed">CL 10~20% 구제 &rarr; +418~837대</td>
+            <td><span class="tag green">+4.4~8.9%p</span></td>
+          </tr>
+          <tr>
+            <td><strong>허위장기 제거</strong></td>
+            <td class="current">42건 / 690대 불이익</td>
+            <td class="proposed">견적&rarr;계약 구간 측정</td>
+            <td><span class="tag blue">정확성 향상</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-subtitle" style="font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; margin-top: 24px;">3-2. Task 정책 시뮬레이션</div>
+
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>시나리오</th><th>CL 구제 건수</th><th>추가 태블릿</th><th>전환율 변화</th><th>인당 추가 대수</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag orange">보수적 (CL 10%)</span></td>
+            <td class="num-cell">+33건</td>
+            <td class="num-cell">+418대</td>
+            <td class="num-cell">55.3% &rarr; 59.7% <span class="tag green">+4.4%p</span></td>
+            <td class="num-cell">+105대/인</td>
+          </tr>
+          <tr>
+            <td><span class="tag green">적극적 (CL 20%)</span></td>
+            <td class="num-cell">+67건</td>
+            <td class="num-cell">+837대</td>
+            <td class="num-cell">55.3% &rarr; 64.2% <span class="tag green">+8.9%p</span></td>
+            <td class="num-cell">+209대/인</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-subtitle" style="font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; margin-top: 24px;">3-3. Phase 1 &rarr; Phase 2 로드맵</div>
+
+    <div class="grid-2">
+      <div class="card phase-card">
+        <div class="phase-title">Phase 1: 프로세스/시스템 변경 (선행 조건)</div>
+        <ol class="phase-list">
+          <li><span class="step-num">1</span><div>견적 발송 시 자동 Task 생성 (Due Date = D+2) <span class="phase-list step-owner">&mdash; SF Admin</span></div></li>
+          <li><span class="step-num">2</span><div>Due Date 필수화 + 리터치 Task 구분 <span class="phase-list step-owner">&mdash; SF Admin</span></div></li>
+          <li><span class="step-num">3</span><div>Open/Closed 상태 관리 의무화 <span class="phase-list step-owner">&mdash; BO팀 + 팀장</span></div></li>
+          <li><span class="step-num">4</span><div>미완료 Task 자동 알림 <span class="phase-list step-owner">&mdash; SF Admin</span></div></li>
+        </ol>
+      </div>
+
+      <div class="card phase-card" style="border-left-color: var(--green);">
+        <div class="phase-title" style="color: var(--green);">Phase 2: KPI 적용 (Phase 1 완료 후 1개월 시범)</div>
+        <ol class="phase-list">
+          <li><span class="step-num" style="background: var(--green-light); color: var(--green);">A</span><div>D+2 리터치 Task 완료율 <strong>90%</strong></div></li>
+          <li><span class="step-num" style="background: var(--green-light); color: var(--green);">B</span><div>무활동 SQL <strong>0건</strong></div></li>
+          <li><span class="step-num" style="background: var(--green-light); color: var(--green);">C</span><div>견적&rarr;계약 전환율 <strong>55%</strong></div></li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="insight danger" style="margin-top: 16px;">
+      <strong>Phase 1이 완료되지 않으면 Phase 2 KPI 측정 자체가 불가능합니다.</strong> Task 자동 생성과 상태 관리 체계가 먼저 구축되어야 D+2 완료율, 무활동 건수 등을 정확히 측정할 수 있습니다.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SECTION 4: 결론 — 주장 반복 -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title"><span class="num">4</span> 결론 -- 주장 반복</div>
+
+    <!-- 수정안 재요약 -->
+    <div class="card">
+      <div class="card-title">수정안 재요약</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>KPI</th><th>현행</th><th>제안</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>1. 전환율</strong></td><td>SQL&rarr;CW 60%</td><td class="highlight">견적&rarr;계약 55% + D+2 Task 90% + 계약&rarr;출고 95%</td></tr>
+          <tr><td><strong>2. 마감률</strong></td><td>CW 마감율 100%</td><td class="highlight">인당 월간 태블릿 650대</td></tr>
+          <tr><td><strong>3. 일일 마감</strong></td><td>일일 마감 5건</td><td class="highlight">주간 계약서 5건+</td></tr>
+          <tr><td><strong>4. SQL 잔량</strong></td><td>7일 초과 &le;10건</td><td class="highlight">&le;10건 유지 + 무활동 0건 + D+2 Task</td></tr>
+          <tr><td><strong>5. 장기건 보호</strong></td><td>없음</td><td class="highlight">45일+ CL 시 팀장 승인 (신규)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 즉시 실행 vs 중기 -->
+    <div class="action-grid">
+      <div class="action-card immediate">
+        <h4>즉시 실행</h4>
+        <ul>
+          <li>KPI 1/3/4 해석 보정 + 수치 변경 적용</li>
+          <li>KPI 2 태블릿 대수 기준 전환</li>
+          <li>보완규칙 5 &mdash; 45일+ CL 팀장 승인</li>
+        </ul>
+      </div>
+      <div class="action-card midterm">
+        <h4>중기 (Phase 1 완료 후)</h4>
+        <ul>
+          <li>SF Task 자동 생성/알림 시스템 구축</li>
+          <li>D+2 / D+5 / D+7 에스컬레이션 운영</li>
+          <li>Task 기반 KPI-1b (과정) 측정 시작</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 경영진 의사결정 요청 -->
+    <div class="decision-box">
+      <div class="decision-title">경영진 의사결정 요청</div>
+      <div class="decision-text">
+        현행 KPI 4개 모두 구조적 문제 확인.<br>
+        데이터가 증명하는 방향으로 수정하지 않으면<br>
+        <strong>대형 딜 포기(-1,200대)</strong>, <strong>달성률 왜곡(4%)</strong>, <strong>허위장기 불이익(42건)</strong> 지속.<br><br>
+        <strong>판단해주십시오.</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    IB BO KPI 수정 제안서 &mdash; 기획팀 분석 &mdash; 데이터 기준일: 2026.03.20
+  </div>
+
+</div>
+
+<script>
+Chart.defaults.font.family = "'Pretendard', sans-serif";
+Chart.defaults.font.size = 12;
+
+// Chart 1: U자형 패턴 (Daily CW)
+new Chart(document.getElementById('chart-u-shape'), {
+  type: 'bar',
+  data: {
+    labels: Array.from({length: 31}, (_, i) => (i+1) + '일'),
+    datasets: [{
+      label: '일별 CW 건수',
+      data: [8,7,6,5,4, 4,3,3,2,3, 2,3,2,2,3, 3,4,5,4,5, 6,7,8,9,10, 11,9,8,7,6,5],
+      backgroundColor: function(ctx) {
+        const i = ctx.dataIndex;
+        if (i < 5 || i >= 25) return '#3182f6';
+        if (i >= 10 && i < 15) return '#f04452';
+        return '#e8ebed';
+      },
+      borderRadius: 4,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: 'U자형 마감 패턴: 월초/월말 집중, 중순 공백', font: { size: 14, weight: '600' }, color: '#191f28', padding: { bottom: 16 } }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 16 } },
+      y: { beginAtZero: true, grid: { color: '#f0f0f0' }, title: { display: true, text: 'CW 건수', font: { size: 11 } } }
+    }
+  }
+});
+
+// Chart 2: 견적→계약 소요일 분포 (horizontal bar)
+new Chart(document.getElementById('chart-lead-time'), {
+  type: 'bar',
+  data: {
+    labels: ['D+2 이내', 'D+3~5', 'D+6~7', 'D+8~14', 'D+15~30', 'D+30+'],
+    datasets: [{
+      label: '건수',
+      data: [162, 78, 41, 60, 40, 33],
+      backgroundColor: ['#3182f6', '#3182f6', '#e8ebed', '#f59f00', '#f04452', '#f04452'],
+      borderRadius: 4,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: '견적→계약서 소요일 분포 (총 414건)', font: { size: 14, weight: '600' }, color: '#191f28', padding: { bottom: 16 } }
+    },
+    scales: {
+      x: { beginAtZero: true, grid: { color: '#f0f0f0' }, title: { display: true, text: '건수', font: { size: 11 } } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+// Chart 3: U자형 기여도 (doughnut)
+new Chart(document.getElementById('chart-u-contribution'), {
+  type: 'doughnut',
+  data: {
+    labels: ['이월 효과', '사이클 타임', 'CMS 지연', '요일 효과'],
+    datasets: [{
+      data: [70, 20, 7, 3],
+      backgroundColor: ['#3182f6', '#8b5cf6', '#f59f00', '#e8ebed'],
+      borderWidth: 0,
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '55%',
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle', font: { size: 12 } } },
+      title: { display: true, text: 'U자형 패턴 기여도', font: { size: 14, weight: '600' }, color: '#191f28', padding: { bottom: 8 } }
+    }
+  }
+});
+
+// Chart 4: 장기건 건당 태블릿 (bar)
+new Chart(document.getElementById('chart-longterm-tablet'), {
+  type: 'bar',
+  data: {
+    labels: ['7일 이내', '8~14일', '15~30일', '30일+'],
+    datasets: [{
+      label: '건당 태블릿 수',
+      data: [11.2, 12.8, 14.1, 15.6],
+      backgroundColor: ['#e8ebed', '#e8f3ff', '#f3f0ff', '#8b5cf6'],
+      borderRadius: 8,
+      borderSkipped: false,
+      barThickness: 60
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: '소요일별 건당 태블릿 수 — 장기건일수록 대형', font: { size: 14, weight: '600' }, color: '#191f28', padding: { bottom: 16 } }
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { beginAtZero: true, max: 20, grid: { color: '#f0f0f0' }, title: { display: true, text: '태블릿 대수', font: { size: 11 } } }
+    }
+  }
+});
+
+// Chart 5: 월별 전환율 추이 (line)
+new Chart(document.getElementById('chart-conversion-trend'), {
+  type: 'line',
+  data: {
+    labels: ['1월', '2월', '3월'],
+    datasets: [
+      {
+        label: '견적→계약 전환율',
+        data: [51.3, 56.4, 64.1],
+        borderColor: '#3182f6',
+        backgroundColor: 'rgba(49, 130, 246, 0.1)',
+        fill: true,
+        borderWidth: 3,
+        pointRadius: 6,
+        pointBackgroundColor: '#3182f6',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        tension: 0.3
+      },
+      {
+        label: '제안 목표선 (55%)',
+        data: [55, 55, 55],
+        borderColor: '#f59f00',
+        borderDash: [8, 4],
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: false
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, font: { size: 12 } } },
+      title: { display: true, text: '월별 견적→계약 전환율 추이 (WIP 제외)', font: { size: 14, weight: '600' }, color: '#191f28', padding: { bottom: 16 } }
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { min: 40, max: 70, grid: { color: '#f0f0f0' }, ticks: { callback: function(v) { return v + '%'; } } }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
