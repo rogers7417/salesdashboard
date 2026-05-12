@@ -2130,6 +2130,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
         advancePaymentEnteredAt: opp.advancePaymentEnteredAt || null,
         createdDate: oppDetailMap[oppId]?.createdDate || '-',
         hasQuote: opp.hasQuote,
+        quoteCreatedDate: opp.quoteCreatedDate || null,
         hasContract: opp.hasContract || false,
         retouchCount: opp.retouchCount,
         daysSinceLastTask: opp.daysSinceLastTask,
