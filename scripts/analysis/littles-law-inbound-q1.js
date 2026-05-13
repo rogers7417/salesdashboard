@@ -18,7 +18,7 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
 
-const sf = require('../../dashboard/backend/services/salesforce');
+const sf = require('../../server/api/services/salesforce');
 
 // -------------- 공통 유틸 --------------
 

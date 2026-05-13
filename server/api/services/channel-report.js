@@ -7,8 +7,8 @@
 const path = require('path');
 
 // 기존 채널 세일즈 리포트 모듈 임포트
-const channelSalesforce = require('../../../channel-sales-report/salesforce');
-const channelStats = require('../../../channel-sales-report/stats');
+const channelSalesforce = require('../../extractors/channel-sales-report/salesforce');
+const channelStats = require('../../extractors/channel-sales-report/stats');
 
 // 캐시 (월별 키)
 let cache = { key: null, data: null, timestamp: 0 };

@@ -1,7 +1,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-const sf = require('../dashboard/backend/services/salesforce');
+const sf = require('../server/api/services/salesforce');
 
 async function lookupOpportunity(oppId) {
   console.log(`\n=== 영업기회 조회: ${oppId} ===\n`);

@@ -139,7 +139,7 @@ app.get('/api', (req, res) => {
 // KPI 데이터 자동 폴링 (30분 간격)
 // ============================================
 const KPI_EXTRACT_SCRIPT = __dirname + '/../../kpi-extract.js';
-const INSTALL_TRACKING_SCRIPT = __dirname + '/../../install-tracking-extract.js';
+const INSTALL_TRACKING_SCRIPT = __dirname + '/../extractors/install-tracking-extract.js';
 const POLL_INTERVAL_MS = 30 * 60 * 1000; // 30분
 
 let extractStatus = {
