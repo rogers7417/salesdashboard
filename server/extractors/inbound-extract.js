@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
 
 const { generateReport } = require('../api/services/inbound-report');
 const { uploadJSON } = require('../shared/s3-upload');

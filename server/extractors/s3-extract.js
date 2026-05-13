@@ -12,12 +12,13 @@
  *   node scripts/s3-extract.js --inbound-only
  */
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
 
 const { spawn } = require('child_process');
 const { uploadJSON } = require('../shared/s3-upload');
 
-const ROOT_DIR = path.join(__dirname, '..');
+const EXTRACTORS_DIR = __dirname;
+const PROJECT_ROOT = path.join(__dirname, '..', '..');
 
 function getCurrentMonth() {
   const now = new Date();
@@ -32,7 +33,7 @@ function runScript(scriptPath, args = []) {
   return new Promise((resolve, reject) => {
     const startTime = Date.now();
     const proc = spawn('node', [scriptPath, ...args], {
-      cwd: ROOT_DIR,
+      cwd: PROJECT_ROOT,
       stdio: ['ignore', 'pipe', 'pipe'],
       env: { ...process.env, PATH: `/opt/homebrew/bin:${process.env.PATH}` },
     });
@@ -63,12 +64,12 @@ function runScript(scriptPath, args = []) {
 async function runKPIExtract() {
   const month = getCurrentMonth();
   console.log(`\n📊 [1/4] KPI 추출 (${month}, --daily)...`);
-  return runScript(path.join(ROOT_DIR, 'kpi-extract.js'), [month, '--daily']);
+  return runScript(path.join(EXTRACTORS_DIR, 'kpi-extract.js'), [month, '--daily']);
 }
 
 async function runInstallTracking() {
   console.log('\n🏗️  [2/4] 설치 트래킹 추출...');
-  return runScript(path.join(ROOT_DIR, 'install-tracking-extract.js'));
+  return runScript(path.join(EXTRACTORS_DIR, 'install-tracking-extract.js'));
 }
 
 async function runChannelExtract() {
