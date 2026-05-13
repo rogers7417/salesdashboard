@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인바운드세일즈 — 방문완료 → 마감 속도 리포트</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --border: #e8ebed;
+    --text-primary: #191f28; --text-secondary: #6b7684; --text-tertiary: #8b95a1;
+    --blue: #3182f6; --blue-light: #e8f3ff;
+    --red: #f04452; --red-light: #fff0f0;
+    --green: #00b386; --green-light: #e8fff4;
+    --orange: #f59f00; --orange-light: #fff8e6;
+    --purple: #8b5cf6; --purple-light: #f3f0ff;
+    --shadow: 0 2px 8px rgba(0,0,0,0.04); --radius: 16px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text-primary); line-height: 1.5; padding: 32px; }
+  .container { max-width: 1200px; margin: 0 auto; }
+  header { margin-bottom: 32px; }
+  h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .subtitle { color: var(--text-secondary); font-size: 15px; }
+  .meta { color: var(--text-tertiary); font-size: 13px; margin-top: 8px; }
+  section { margin-bottom: 32px; }
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi-card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+  .kpi-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
+  .kpi-value { font-size: 32px; font-weight: 800; line-height: 1.1; }
+  .kpi-unit { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-left: 4px; }
+  .kpi-sub { font-size: 13px; color: var(--text-tertiary); margin-top: 8px; }
+  .kpi-blue .kpi-value { color: var(--blue); }
+  .kpi-green .kpi-value { color: var(--green); }
+  .kpi-orange .kpi-value { color: var(--orange); }
+  .kpi-purple .kpi-value { color: var(--purple); }
+  .chart-card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 16px; }
+  .chart-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .chart-desc { font-size: 13px; color: var(--text-tertiary); margin-bottom: 16px; }
+  .chart-wrap { position: relative; height: 320px; }
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 12px 8px; text-align: right; border-bottom: 1px solid var(--border); }
+  th:first-child, td:first-child { text-align: left; font-weight: 600; }
+  th { font-weight: 600; color: var(--text-secondary); background: var(--bg); font-size: 13px; }
+  .month-block { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 12px; }
+  .month-block h3 { font-size: 16px; margin-bottom: 12px; }
+  .insight-card { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); border-left: 4px solid var(--blue); margin-bottom: 12px; }
+  .insight-card.green { border-left-color: var(--green); }
+  .insight-card.orange { border-left-color: var(--orange); }
+  .insight-card.red { border-left-color: var(--red); }
+  .insight-card.purple { border-left-color: var(--purple); }
+  .insight-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .insight-body { font-size: 14px; color: var(--text-secondary); }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-right: 6px; }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-orange { background: var(--orange-light); color: var(--orange); }
+  .badge-red { background: var(--red-light); color: var(--red); }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+  .badge-purple { background: var(--purple-light); color: var(--purple); }
+  .glossary { background: #f9fafb; border-radius: 12px; padding: 16px 20px; font-size: 13px; color: var(--text-secondary); margin-top: 24px; }
+  .glossary strong { color: var(--text-primary); }
+  .conclusion { background: linear-gradient(135deg, #3182f6 0%, #8b5cf6 100%); color: white; border-radius: var(--radius); padding: 32px; margin-bottom: 24px; }
+  .conclusion h2 { color: white; }
+  .conclusion .quote { font-size: 18px; font-weight: 700; line-height: 1.5; margin-bottom: 16px; }
+  .conclusion .body { font-size: 14px; opacity: 0.92; }
+
+  /* === 가시성 향상 === */
+  .hero { background: linear-gradient(135deg, #3182f6 0%, #8b5cf6 100%); color: white; border-radius: 20px; padding: 48px 40px; margin-bottom: 32px; box-shadow: 0 10px 40px rgba(49,130,246,0.25); }
+  .hero-eyebrow { font-size: 14px; opacity: 0.85; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .hero-title { font-size: 32px; font-weight: 800; line-height: 1.3; margin-bottom: 16px; }
+  .hero-title strong { background: rgba(255,255,255,0.2); padding: 2px 12px; border-radius: 8px; }
+  .hero-body { font-size: 16px; line-height: 1.6; opacity: 0.92; max-width: 800px; }
+  .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
+  .hero-stat { background: rgba(255,255,255,0.15); border-radius: 12px; padding: 16px 20px; backdrop-filter: blur(10px); }
+  .hero-stat-label { font-size: 12px; opacity: 0.85; margin-bottom: 4px; }
+  .hero-stat-value { font-size: 24px; font-weight: 800; }
+  .hero-stat-trend { font-size: 12px; opacity: 0.85; margin-top: 4px; }
+
+  .month-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .month-card { background: white; border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); position: relative; transition: transform 0.2s, box-shadow 0.2s; }
+  .month-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .month-card.highlight-march { border: 2px solid var(--green); background: linear-gradient(180deg, #f0fff8 0%, white 50%); }
+  .month-card.highlight-april { border: 2px solid var(--orange); background: linear-gradient(180deg, #fff8e6 0%, white 50%); }
+  .month-card .mc-month { font-size: 14px; color: var(--text-secondary); font-weight: 600; }
+  .month-card .mc-status { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+  .month-card .mc-big { font-size: 36px; font-weight: 800; line-height: 1; margin: 12px 0 4px; }
+  .month-card .mc-big-sub { font-size: 13px; color: var(--text-tertiary); margin-bottom: 16px; }
+  .month-card .mc-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
+  .month-card .mc-row:last-child { border-bottom: none; }
+  .month-card .mc-row-label { color: var(--text-secondary); }
+  .month-card .mc-row-value { font-weight: 700; color: var(--text-primary); }
+
+  .change-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+  .change-up    { background: var(--green-light); color: var(--green); }
+  .change-down  { background: var(--red-light);   color: var(--red); }
+  .change-flat  { background: #eef0f2;            color: var(--text-secondary); }
+
+  .funnel-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+  .funnel-stage { flex: 1; text-align: center; }
+  .funnel-stage-name { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+  .funnel-stage-num { font-size: 22px; font-weight: 800; }
+  .funnel-arrow { font-size: 20px; color: var(--text-tertiary); padding: 0 8px; }
+
+  .heatmap-table th, .heatmap-table td { padding: 14px 12px; }
+  .heatmap-table .v-good   { background: #e8fff4; font-weight: 700; color: #00966f; }
+  .heatmap-table .v-mid    { background: #fff8e6; color: #b76b00; }
+  .heatmap-table .v-poor   { background: #fff0f0; font-weight: 700; color: #c92535; }
+  .heatmap-table .row-april { background: #fffaf3; }
+  .heatmap-table .row-april td { font-weight: 700; }
+
+  @media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .chart-grid { grid-template-columns: 1fr; } .month-row { grid-template-columns: repeat(2, 1fr); } .hero-stats { grid-template-columns: 1fr; } .hero-title { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1 style="font-size:22px;color:var(--text-secondary);font-weight:600;margin-bottom:4px">인바운드세일즈 분석 리포트</h1>
+  <p class="meta">대상: 신규 테이블오더 · 2026-01-01 ~ 2026-04-27 마감 · 생성: 2026. 4. 28. 오후 2:46:27</p>
+</header>
+
+<!-- HERO: 결론을 가장 위에 -->
+<div class="hero">
+  <div class="hero-eyebrow">📌 한 줄 결론</div>
+  <div class="hero-title">4월 둔화는 <strong>Lead 부족</strong>이 아니라<br>3월 폭증의 <strong>후행 처리 부담</strong> 때문입니다</div>
+  <div class="hero-body">인바운드의 진짜 KPI는 Lead 인입량이 아닌 <strong>방문 후 마감까지의 시간</strong>. 이 시간이 짧아질수록 다음 달 후행 처리 부담이 줄어 신규 처리 자원이 확보되는 선순환이 만들어집니다.</div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-label">3월 Lead 인입</div>
+      <div class="hero-stat-value">983건</div>
+      <div class="hero-stat-trend">전월 대비 +78% 폭증</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-label">4월 7일 이내 마감률</div>
+      <div class="hero-stat-value">22.7%</div>
+      <div class="hero-stat-trend">1월 43.2%의 약 절반 수준</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-label">4월 CW / Lead 비율</div>
+      <div class="hero-stat-value">23%</div>
+      <div class="hero-stat-trend">1월 12%의 약 2배 — 후행처리 누적</div>
+    </div>
+  </div>
+</div>
+
+<!-- 월별 한눈에 카드 -->
+<section>
+  <h2>월별 흐름 한눈에 보기</h2>
+  <div class="month-row">
+    <div class="month-card ">
+        <div class="mc-month">1월</div>
+        <div class="mc-big">8<span style="font-size:18px;color:var(--text-tertiary)">일</span></div>
+        <div class="mc-big-sub">방문 후 마감까지 (가운데 매장)</div>
+        <div class="mc-row">
+          <span class="mc-row-label">Lead 인입</span>
+          <span class="mc-row-value">672건 </span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">방문완료</span>
+          <span class="mc-row-value">339건</span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">마감 (CW)</span>
+          <span class="mc-row-value">81건</span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">7일 이내</span>
+          <span class="mc-row-value" style="color:var(--green)">43.2%</span>
+        </div>
+      </div><div class="month-card ">
+        <div class="mc-month">2월</div>
+        <div class="mc-big">12.2<span style="font-size:18px;color:var(--text-tertiary)">일</span></div>
+        <div class="mc-big-sub">방문 후 마감까지 (가운데 매장)</div>
+        <div class="mc-row">
+          <span class="mc-row-label">Lead 인입</span>
+          <span class="mc-row-value">551건 <span class="change-badge change-down">▼ -18%</span></span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">방문완료</span>
+          <span class="mc-row-value">279건</span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">마감 (CW)</span>
+          <span class="mc-row-value">99건</span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">7일 이내</span>
+          <span class="mc-row-value" style="color:var(--orange)">27.3%</span>
+        </div>
+      </div><div class="month-card highlight-march">
+        <div class="mc-month">3월<span class="mc-status" style="background:var(--green-light);color:var(--green)">폭증</span></div>
+        <div class="mc-big">10.2<span style="font-size:18px;color:var(--text-tertiary)">일</span></div>
+        <div class="mc-big-sub">방문 후 마감까지 (가운데 매장)</div>
+        <div class="mc-row">
+          <span class="mc-row-label">Lead 인입</span>
+          <span class="mc-row-value">983건 <span class="change-badge change-up">▲ +78%</span></span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">방문완료</span>
+          <span class="mc-row-value">426건</span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">마감 (CW)</span>
+          <span class="mc-row-value">187건</span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">7일 이내</span>
+          <span class="mc-row-value" style="color:var(--orange)">32.6%</span>
+        </div>
+      </div><div class="month-card highlight-april">
+        <div class="mc-month">4월 (4/1~4/27)<span class="mc-status" style="background:var(--orange-light);color:var(--orange)">둔화</span></div>
+        <div class="mc-big">13.1<span style="font-size:18px;color:var(--text-tertiary)">일</span></div>
+        <div class="mc-big-sub">방문 후 마감까지 (가운데 매장)</div>
+        <div class="mc-row">
+          <span class="mc-row-label">Lead 인입</span>
+          <span class="mc-row-value">620건 <span class="change-badge change-down">▼ -37%</span></span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">방문완료</span>
+          <span class="mc-row-value">317건</span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">마감 (CW)</span>
+          <span class="mc-row-value">141건</span>
+        </div>
+        <div class="mc-row">
+          <span class="mc-row-label">7일 이내</span>
+          <span class="mc-row-value" style="color:var(--red)">22.7%</span>
+        </div>
+      </div>
+  </div>
+</section>
+
+<section>
+  <h2>월별 추이</h2>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">방문 후 마감까지 걸린 시간 (가운데 매장)</div>
+      <div class="chart-desc">매장을 빠른 순으로 줄 세웠을 때 정중앙 매장이 걸린 일수. 낮을수록 빠름.</div>
+      <div class="chart-wrap"><canvas id="medianChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">기간 내 마감률</div>
+      <div class="chart-desc">방문 후 N일 안에 끝난 비율.</div>
+      <div class="chart-wrap"><canvas id="bucketChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>왜 4월이 느려졌을까 — 가설 검증</h2>
+
+  <div class="chart-card">
+    <div class="chart-title">월별 Lead 인입 · 방문완료 · 마감 추이</div>
+    <div class="chart-desc">3월 Lead 폭증 시점에 방문은 따라잡지 못했고(capacity 한계), 4월에는 그 후행처리 부담이 신규 처리 자원을 잠식.</div>
+    <div class="chart-wrap"><canvas id="funnelChart"></canvas></div>
+  </div>
+
+  <table class="heatmap-table" style="background:white;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px">
+    <thead><tr>
+      <th>월</th>
+      <th>Lead 인입</th>
+      <th>방문완료</th>
+      <th>마감 (CW)</th>
+      <th>CW / Lead</th>
+      <th>7일 이내 마감률</th>
+    </tr></thead>
+    <tbody>
+      <tr class="">
+          <td>1월</td>
+          <td>672건</td>
+          <td>339건</td>
+          <td>81건</td>
+          <td class="v-good">12%</td>
+          <td class="v-good">43.2%</td>
+        </tr><tr class="">
+          <td>2월</td>
+          <td>551건</td>
+          <td>279건</td>
+          <td>99건</td>
+          <td class="v-mid">18%</td>
+          <td class="v-mid">27.3%</td>
+        </tr><tr class="">
+          <td>3월</td>
+          <td>983건</td>
+          <td>426건</td>
+          <td>187건</td>
+          <td class="v-mid">19%</td>
+          <td class="v-mid">32.6%</td>
+        </tr><tr class="row-april">
+          <td>4월 (4/1~4/27)</td>
+          <td>620건</td>
+          <td>317건</td>
+          <td>141건</td>
+          <td class="v-poor">23%</td>
+          <td class="v-poor">22.7%</td>
+        </tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px;color:var(--text-tertiary);margin-bottom:16px">
+    * 색상: <span style="color:#00966f;font-weight:700">초록</span> 양호 / <span style="color:#b76b00;font-weight:700">주황</span> 주의 / <span style="color:#c92535;font-weight:700">빨강</span> 경고. CW/Lead가 높을수록 후행처리 부담↑, 7일 마감률은 높을수록 빠름.
+  </p>
+
+  <div class="insight-card orange">
+    <div class="insight-title"><span class="badge badge-orange">증거 1</span> 3월 Lead 폭증 — 인바운드 자원 한계</div>
+    <div class="insight-body">3월 Lead가 1월 대비 <strong>+46%</strong>(672 → 983건) 폭증. 같은 기간 방문완료는 <strong>+26%</strong>(339 → 426건)만 증가. <strong>처리 capacity가 인입을 따라잡지 못함</strong>.</div>
+  </div>
+
+  <div class="insight-card orange">
+    <div class="insight-title"><span class="badge badge-orange">증거 2</span> 4월 CW/Lead 비율 23% — 후행처리 누적</div>
+    <div class="insight-body">4월의 CW/Lead 비율이 <strong>23%</strong>로 1월(12%)의 약 2배. 분모(Lead)는 줄었는데 분자(CW)가 떨어지지 않음 — 즉 4월 마감의 상당수가 <strong>1~3월에 들어온 매장의 후속 처리</strong>. 4월에 새로 들어온 매장이 빨리 마감되는 게 아니라, 묵은 매장이 늦게 마감되는 구조.</div>
+  </div>
+
+  <div class="insight-card red">
+    <div class="insight-title"><span class="badge badge-red">증거 3</span> 4월 7일 이내 마감률 폭락 — 신규 빠른 사이클 부족</div>
+    <div class="insight-body">방문 후 7일 안에 마감되는 비율이 1월 <strong>43.2%</strong> → 4월 <strong>22.7%</strong> 로 절반 수준. 빠른 단번 결정 매장이 줄었고 후행 진행 매장 비중이 늘어남.</div>
+  </div>
+
+  <div class="conclusion">
+    <h2>결론</h2>
+    <div class="quote">"4월의 인바운드 둔화는 Lead 부족이 아니라 3월 폭증의 후행 처리. 인바운드의 진짜 KPI는 Lead 인입량이 아니라 방문 후 CW까지의 시간 단축이다."</div>
+    <div class="body">Lead 인입은 채널팀의 영역이고, 인바운드는 들어온 Lead를 얼마나 빨리 마감으로 끌고 가느냐가 본질. 방문→CW 시간이 짧아지면 다음 달 후행처리 부담이 줄고 신규 처리 자원이 확보되는 선순환이 만들어진다.</div>
+  </div>
+</section>
+
+<section>
+  <h2>월별 상세 (매장상태별)</h2>
+  
+    <div class="month-block">
+      <h3>1월 (마감 81건)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>매장상태</th>
+            <th>건수</th>
+            <th>가운데 매장</th>
+            <th>가장 오래 걸린 매장</th>
+            <th>7일 이내</th>
+            <th>14일 이내</th>
+            <th>30일 이내</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="">
+              <td>오픈전</td>
+              <td>31건</td>
+              <td><strong>7일</strong></td>
+              <td>18.1일</td>
+              <td>48.4%</td>
+              <td>90.3%</td>
+              <td>100%</td>
+            </tr><tr style="">
+              <td>운영중</td>
+              <td>50건</td>
+              <td><strong>8일</strong></td>
+              <td>26.5일</td>
+              <td>40%</td>
+              <td>80%</td>
+              <td>100%</td>
+            </tr><tr style="font-weight:700;background:#f9fafb;">
+              <td>전체</td>
+              <td>81건</td>
+              <td><strong>8일</strong></td>
+              <td>26.5일</td>
+              <td>43.2%</td>
+              <td>84%</td>
+              <td>100%</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <div class="month-block">
+      <h3>2월 (마감 99건)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>매장상태</th>
+            <th>건수</th>
+            <th>가운데 매장</th>
+            <th>가장 오래 걸린 매장</th>
+            <th>7일 이내</th>
+            <th>14일 이내</th>
+            <th>30일 이내</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="">
+              <td>오픈전</td>
+              <td>37건</td>
+              <td><strong>17.7일</strong></td>
+              <td>39.1일</td>
+              <td>8.1%</td>
+              <td>32.4%</td>
+              <td>86.5%</td>
+            </tr><tr style="">
+              <td>운영중</td>
+              <td>62건</td>
+              <td><strong>8.4일</strong></td>
+              <td>52.8일</td>
+              <td>38.7%</td>
+              <td>67.7%</td>
+              <td>85.5%</td>
+            </tr><tr style="font-weight:700;background:#f9fafb;">
+              <td>전체</td>
+              <td>99건</td>
+              <td><strong>12.2일</strong></td>
+              <td>52.8일</td>
+              <td>27.3%</td>
+              <td>54.5%</td>
+              <td>85.9%</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <div class="month-block">
+      <h3>3월 (마감 187건)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>매장상태</th>
+            <th>건수</th>
+            <th>가운데 매장</th>
+            <th>가장 오래 걸린 매장</th>
+            <th>7일 이내</th>
+            <th>14일 이내</th>
+            <th>30일 이내</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="">
+              <td>오픈전</td>
+              <td>86건</td>
+              <td><strong>14.5일</strong></td>
+              <td>65.8일</td>
+              <td>24.4%</td>
+              <td>48.8%</td>
+              <td>77.9%</td>
+            </tr><tr style="">
+              <td>운영중</td>
+              <td>101건</td>
+              <td><strong>7.8일</strong></td>
+              <td>49일</td>
+              <td>39.6%</td>
+              <td>75.2%</td>
+              <td>90.1%</td>
+            </tr><tr style="font-weight:700;background:#f9fafb;">
+              <td>전체</td>
+              <td>187건</td>
+              <td><strong>10.2일</strong></td>
+              <td>65.8일</td>
+              <td>32.6%</td>
+              <td>63.1%</td>
+              <td>84.5%</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <div class="month-block">
+      <h3>4월 (4/1~4/27) (마감 141건)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>매장상태</th>
+            <th>건수</th>
+            <th>가운데 매장</th>
+            <th>가장 오래 걸린 매장</th>
+            <th>7일 이내</th>
+            <th>14일 이내</th>
+            <th>30일 이내</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="">
+              <td>오픈전</td>
+              <td>64건</td>
+              <td><strong>18.9일</strong></td>
+              <td>86.1일</td>
+              <td>10.9%</td>
+              <td>34.4%</td>
+              <td>79.7%</td>
+            </tr><tr style="">
+              <td>운영중</td>
+              <td>77건</td>
+              <td><strong>10일</strong></td>
+              <td>213.1일</td>
+              <td>32.5%</td>
+              <td>64.9%</td>
+              <td>88.3%</td>
+            </tr><tr style="font-weight:700;background:#f9fafb;">
+              <td>전체</td>
+              <td>141건</td>
+              <td><strong>13.1일</strong></td>
+              <td>213.1일</td>
+              <td>22.7%</td>
+              <td>51.1%</td>
+              <td>84.4%</td>
+            </tr>
+        </tbody>
+      </table>
+    </div>
+  
+</section>
+
+<section>
+  <h2>한눈에 보는 인사이트</h2>
+
+  <div class="insight-card green">
+    <div class="insight-title"><span class="badge badge-green">1월</span> 가장 빨랐던 달</div>
+    <div class="insight-body">방문 후 매장 절반이 <strong>8일</strong> 안에 마감. 30일 안에 끝난 비율은 100%.</div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-title"><span class="badge badge-blue">매장상태별</span> 운영중 매장이 항상 더 빠름</div>
+    <div class="insight-body">모든 달에서 <strong>운영중 매장</strong>이 오픈전 매장보다 빠르게 마감됩니다. 오픈전 매장은 매장 오픈 일정과 영업 일정을 맞추는 데 추가 시간이 필요합니다.</div>
+  </div>
+
+  <div class="insight-card purple">
+    <div class="insight-title"><span class="badge badge-purple">병목 단계</span> 방문 후 가장 오래 걸리는 곳</div>
+    <div class="insight-body">stage 분해 결과 <strong>견적 → 선납금 → 재견적</strong> 루프가 전체 시간의 70%+ 차지. 한 매장 평균 <strong>2.3회 재견적</strong> 발생. 견적 1차 통과율 향상이 인바운드 leadtime 단축의 가장 큰 레버.</div>
+  </div>
+</section>
+
+<div class="glossary">
+  <strong>용어 설명</strong><br>
+  · <strong>방문완료</strong>: 영업 담당자가 매장을 방문하고 상담을 끝낸 시점<br>
+  · <strong>마감 (CW)</strong>: 영업기회가 계약 체결로 종결된 시점<br>
+  · <strong>가운데 매장</strong>: 빠른 순으로 줄 세웠을 때 정중앙 매장. 평균보다 안정적인 대표값<br>
+  · <strong>CW / Lead 비율</strong>: 같은 달 마감 ÷ 같은 달 인입. 100%면 인입한 만큼 그 달에 마감, 100% 이상이면 이전 달 인입을 끌어와서 마감 (후행처리)<br>
+  · <strong>오픈전 / 운영중</strong>: 매장이 아직 오픈 전인지(오픈전), 이미 영업 중인지(운영중)<br>
+  · <strong>분석 제외</strong>: 방문완료 기록 없는 8건 + 4월 28일 이후 9건(데이터 미완성) 제외
+</div>
+
+</div>
+
+<script>
+  Chart.defaults.font.family = "'Pretendard', -apple-system, sans-serif";
+  Chart.defaults.color = '#6b7684';
+  const monthLabels = ["1월","2월","3월","4월 (4/1~4/27)"];
+
+  new Chart(document.getElementById('medianChart'), {
+    type: 'line',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: '오픈전', data: [7,17.7,14.5,18.9], borderColor: '#f59f00', tension: 0.3, borderWidth: 3 },
+        { label: '운영중', data: [8,8.4,7.8,10], borderColor: '#00b386', tension: 0.3, borderWidth: 3 },
+        { label: '전체',   data: [8,12.2,10.2,13.1], borderColor: '#3182f6', tension: 0.3, borderWidth: 3, borderDash: [5, 5] },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y + '일' } } },
+      scales: { y: { beginAtZero: true, title: { display: true, text: '걸린 일수' } } },
+    },
+  });
+
+  new Chart(document.getElementById('bucketChart'), {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: '7일 이내',  data: [43.2,27.3,32.6,22.7],  backgroundColor: '#00b386' },
+        { label: '14일 이내', data: [84,54.5,63.1,51.1], backgroundColor: '#3182f6' },
+        { label: '30일 이내', data: [100,85.9,84.5,84.4], backgroundColor: '#8b5cf6' },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } } },
+      scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: '비율 (%)' } } },
+    },
+  });
+
+  new Chart(document.getElementById('funnelChart'), {
+    type: 'bar',
+    data: {
+      labels: monthLabels,
+      datasets: [
+        { label: 'Lead 인입',   data: [672,551,983,620],  backgroundColor: '#3182f6' },
+        { label: '방문완료',     data: [339,279,426,317], backgroundColor: '#00b386' },
+        { label: '마감 (CW)',  data: [81,99,187,141],    backgroundColor: '#f59f00' },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y.toLocaleString() + '건' } } },
+      scales: { y: { beginAtZero: true, title: { display: true, text: '건수' } } },
+    },
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026년 1~4월 분기 마감 — 지표별 추이 차트</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --border: #e8ebed;
+    --text-primary: #191f28;
+    --text-secondary: #6b7684;
+    --text-tertiary: #8b95a1;
+    --blue: #3182f6;
+    --blue-light: #e8f3ff;
+    --red: #f04452;
+    --red-light: #fff0f0;
+    --green: #00b386;
+    --green-light: #e8fff4;
+    --orange: #f59f00;
+    --orange-light: #fff8e6;
+    --purple: #8b5cf6;
+    --purple-light: #f3f0ff;
+    --grid: rgba(0,0,0,0.05);
+    --shadow: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-hover: 0 4px 16px rgba(0,0,0,0.08);
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+  .header { margin-bottom: 32px; }
+  .header h1 { font-size: 28px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+  .header .subtitle { font-size: 15px; color: var(--text-secondary); }
+  .header .date-badge { display: inline-block; margin-top: 12px; padding: 6px 14px; background: var(--blue-light); color: var(--blue); border-radius: 20px; font-size: 13px; font-weight: 600; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+  .kpi-card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); transition: box-shadow 0.2s; }
+  .kpi-card:hover { box-shadow: var(--shadow-hover); }
+  .kpi-card .label { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px; }
+  .kpi-card .value { font-size: 32px; font-weight: 800; margin-bottom: 4px; line-height: 1.1; }
+  .kpi-card .change { font-size: 13px; font-weight: 600; }
+  .kpi-card .status-icon { font-size: 16px; float: right; }
+  .kpi-card .gap-bar { height: 6px; border-radius: 3px; margin-top: 12px; background: #e8ebed; overflow: hidden; }
+  .kpi-card .gap-bar .fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+
+  .section { margin-bottom: 40px; }
+  .section-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; }
+  .section-title .num { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--blue); color: white; border-radius: 8px; font-size: 14px; font-weight: 700; }
+  .section-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 16px; margin-left: 42px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .chart-card { background: var(--card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 16px; }
+  .chart-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: var(--text-primary); }
+  .chart-card .insight { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
+  .chart-card .insight strong { color: var(--text-primary); font-weight: 700; }
+  .chart-wrap { position: relative; width: 100%; height: 300px; }
+  .chart-wrap.tall { height: 360px; }
+
+  .footer { text-align: center; padding: 32px 0 16px; color: var(--text-tertiary); font-size: 13px; line-height: 1.7; }
+  .footer strong { color: var(--text-secondary); }
+
+  /* part color accents */
+  .section.part-is .num { background: var(--blue); }
+  .section.part-fs .num { background: var(--purple); }
+  .section.part-ibbo .num { background: var(--green); }
+  .section.part-ae .num { background: var(--orange); }
+  .section.part-am .num { background: var(--red); }
+  .section.part-tm .num { background: #14b8a6; }
+  .section.part-chbo .num { background: #6366f1; }
+
+  @media (max-width: 768px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .header h1 { font-size: 22px; }
+    .kpi-card .value { font-size: 24px; }
+    .container { padding: 16px; }
+    .section-desc { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>2026년 1~4월 분기 마감 — 지표별 추이 차트</h1>
+    <p class="subtitle">Torder 세일즈본부 · 7개 파트별 지표 추이 시각화</p>
+    <span class="date-badge">2026-04-29 · 1~4월 / 4월은 4/27까지</span>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-row">
+    <div class="kpi-card" style="border-top: 4px solid var(--green);">
+      <div class="status-icon">&#x2705;</div>
+      <div class="label">IBS 태블릿 (4월)</div>
+      <div class="value" style="color: var(--green);">2,993대</div>
+      <div class="change" style="color: var(--green);">목표 2,600대 · 달성률 115%</div>
+      <div class="gap-bar"><div class="fill" style="width:100%; background: var(--green);"></div></div>
+    </div>
+    <div class="kpi-card" style="border-top: 4px solid var(--orange);">
+      <div class="status-icon">&#x26A0;&#xFE0F;</div>
+      <div class="label">IS SQL 전환율 (4월)</div>
+      <div class="value" style="color: var(--orange);">89.6%</div>
+      <div class="change" style="color: var(--orange);">목표 90% · -0.4%p 미달</div>
+      <div class="gap-bar"><div class="fill" style="width:99.5%; background: var(--orange);"></div></div>
+    </div>
+    <div class="kpi-card" style="border-top: 4px solid var(--red);">
+      <div class="status-icon">&#x1F534;</div>
+      <div class="label">AM Lead 일평균 (4월)</div>
+      <div class="value" style="color: var(--red);">14.8건</div>
+      <div class="change" style="color: var(--red);">목표 20~25 · -5건 부족</div>
+      <div class="gap-bar"><div class="fill" style="width:65%; background: var(--red);"></div></div>
+    </div>
+    <div class="kpi-card" style="border-top: 4px solid var(--red);">
+      <div class="status-icon">&#x1F534;</div>
+      <div class="label">MOU 안착률 (4월)</div>
+      <div class="value" style="color: var(--red);">29.8%</div>
+      <div class="change" style="color: var(--red);">목표 80% · -50.2%p 미달</div>
+      <div class="gap-bar"><div class="fill" style="width:37%; background: var(--red);"></div></div>
+    </div>
+  </div>
+
+  <!-- 1. IS -->
+  <div class="section part-is">
+    <div class="section-title"><span class="num">1</span>IS — 인사이드세일즈</div>
+    <div class="section-desc">Lead 인입 · MQL/SQL 전환 · FRT 준수 · 방문→CW 속도</div>
+
+    <div class="grid-2">
+      <div class="chart-card">
+        <h3>인입 · 전환 단계 추이</h3>
+        <div class="insight"><strong>3월 폭증 후 4월 -36% 감소</strong> — Lead 997건에서 633건. 신규 인입 보강 필요.</div>
+        <div class="chart-wrap"><canvas id="is_funnel"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>MQL → SQL 전환율 vs 목표(90%)</h3>
+        <div class="insight"><strong>4월 89.6%로 목표 0.4%p 미달</strong> — 1·2월 89% 수준 회귀. 3월 91.1%가 일시적 피크.</div>
+        <div class="chart-wrap"><canvas id="is_sqlrate"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>FRT 준수율 시간대별</h3>
+        <div class="insight"><strong>업무시간 92.9%로 4월 최고</strong> — 다만 주말 18.6%, 업무외 6.5%로 저시간대 응답 여전히 취약.</div>
+        <div class="chart-wrap"><canvas id="is_frt"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>방문 → CW 중앙값 (일)</h3>
+        <div class="insight"><strong>13.1일로 1월(8.0일) 대비 +5.1일 지연</strong> — 처리 적체 누적. 1월 8일 기준선 대비 가속 필요.</div>
+        <div class="chart-wrap"><canvas id="is_visit_cw"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>7일 이내 마감률</h3>
+        <div class="insight"><strong>22.7%로 분기 최저</strong> — 1월 43.2% 대비 절반 수준. 후행처리 부담 누적의 핵심 신호.</div>
+        <div class="chart-wrap"><canvas id="is_7day"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. FS -->
+  <div class="section part-fs">
+    <div class="section-title"><span class="num">2</span>FS — 필드세일즈</div>
+    <div class="section-desc">계약서 댓수 · 신규/이월 CW · 방치 건수 · 담당자별 누적</div>
+
+    <div class="grid-2">
+      <div class="chart-card">
+        <h3>계약서 댓수</h3>
+        <div class="insight"><strong>4월 4,510대로 분기 최고</strong> — 단, 이월 비중 80%로 신규 인입은 둔화.</div>
+        <div class="chart-wrap"><canvas id="fs_contract"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>당월 신규 CW vs 단계변경일 총 CW</h3>
+        <div class="insight"><strong>4월 신규 CW 53건 — 분기 최저</strong>. 총 CW 260건 중 신규 비중 20%로 이월 의존 심화.</div>
+        <div class="chart-wrap"><canvas id="fs_cw"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>이월 비중 추이 (%)</h3>
+        <div class="insight"><strong>4월 80.4% — 신규 영업이 아닌 처리 중심 월</strong>. 2월 82.9%에 이은 두 번째 고점.</div>
+        <div class="chart-wrap"><canvas id="fs_carry"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>방치 건수 (골든타임 8일+ vs 14일+)</h3>
+        <div class="insight"><strong>3월 14일+ 방치 87건 정점</strong> — 4월 51건으로 정리 진행 중이나 여전히 분기 평균 상회.</div>
+        <div class="chart-wrap"><canvas id="fs_idle"></canvas></div>
+      </div>
+      <div class="chart-card" style="grid-column: 1 / -1;">
+        <h3>담당자별 분기 누적 댓수</h3>
+        <div class="insight">한용우 2,418대로 분기 1위. <strong>4월 팽창은 이월 결과의 후행 처리</strong>임을 감안한 평가 필요.</div>
+        <div class="chart-wrap tall"><canvas id="fs_owners"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. IB BO -->
+  <div class="section part-ibbo">
+    <div class="section-title"><span class="num">3</span>IB BO — 인바운드 백오피스</div>
+    <div class="section-desc">계약서 댓수 · SQL 잔량 · 이월 비중 · 담당자별 일평균 마감</div>
+
+    <div class="grid-2">
+      <div class="chart-card">
+        <h3>계약서 댓수</h3>
+        <div class="insight"><strong>3월 2,685대 정점, 4월 2,513대</strong>로 안정적 처리. 분기 누적 9,017대.</div>
+        <div class="chart-wrap"><canvas id="ibbo_contract"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>SQL 잔량 (진행중 vs 7일 초과)</h3>
+        <div class="insight"><strong>3월부터 7일 초과 급증 (186건)</strong> — 4월 162건으로 소폭 감소했으나 여전히 위험 수위.</div>
+        <div class="chart-wrap"><canvas id="ibbo_sqlrest"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>이월 비중 (%)</h3>
+        <div class="insight"><strong>4월 73.1%로 재상승</strong> — 2월 77.1%, 3월 67.0%에서 다시 후행 처리 부담 확대.</div>
+        <div class="chart-wrap"><canvas id="ibbo_carry"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>담당자별 일평균 마감</h3>
+        <div class="insight"><strong>전반적 하락 추세</strong> — 전수빈 10.5→7.1, 박효정 10.3→6.9. 정지영(1~3월)은 이탈로 4월 미집계, 강수영 4월 합류.</div>
+        <div class="chart-wrap"><canvas id="ibbo_owners"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. AE -->
+  <div class="section part-ae">
+    <div class="section-title"><span class="num">4</span>AE — Account Executive</div>
+    <div class="section-desc">MOU 체결 · 목표 달성률 · 미팅 일평균 · 네고 진입</div>
+
+    <div class="grid-2">
+      <div class="chart-card">
+        <h3>MOU 체결 (파트너사 + 프랜차이즈)</h3>
+        <div class="insight"><strong>4월 누적 25건 — 분기 최고</strong>. 프랜차이즈 12건이 핵심 동력.</div>
+        <div class="chart-wrap"><canvas id="ae_mou"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>MOU 목표 대비 달성률 (%)</h3>
+        <div class="insight"><strong>4월 625% — 분기 누적 초과 달성</strong>. 100% 목표선 대비 6배 상회.</div>
+        <div class="chart-wrap"><canvas id="ae_attain"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>미팅 일평균 (건)</h3>
+        <div class="insight"><strong>4월 8.5건 — 분기 최고치</strong>. 1월 1.5건 대비 5.7배 증가, 활동성 회복.</div>
+        <div class="chart-wrap"><canvas id="ae_meeting"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>네고 진입 건수</h3>
+        <div class="insight"><strong>2월 12건 정점 후 8건 유지</strong>. 미팅 폭증 대비 네고 전환은 지연 효과 예상.</div>
+        <div class="chart-wrap"><canvas id="ae_nego"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. AM -->
+  <div class="section part-am">
+    <div class="section-title"><span class="num">5</span>AM — Account Management</div>
+    <div class="section-desc">Lead 창출 · 일평균 · MOU 안착률 · 활성 파트너 · 담당자별 누적</div>
+
+    <div class="grid-2">
+      <div class="chart-card">
+        <h3>Lead 창출 총량 vs 일평균</h3>
+        <div class="insight"><strong>총량 284건, 일평균 14.8건</strong> — 3월 대비 -16건. 일평균은 미세 증가했으나 목표 미달 지속.</div>
+        <div class="chart-wrap"><canvas id="am_lead_combo"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Lead 일평균 vs 목표 범위 (20~25)</h3>
+        <div class="insight"><strong>14.8건 — 목표 하한 20건 대비 -5건 부족</strong>. 1월 10.9건부터 점진 개선 중이나 갭 여전.</div>
+        <div class="chart-wrap"><canvas id="am_target"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>MOU → 안착률 추이 vs 목표(80%)</h3>
+        <div class="insight"><strong>4월 29.8% — 분기 최저, 목표 -50.2%p 미달</strong>. 안착 단계 구조적 점검 필요.</div>
+        <div class="chart-wrap"><canvas id="am_settle"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>활성 파트너 추이</h3>
+        <div class="insight"><strong>4월 287개로 1월 대비 -65개 (-18%)</strong>. 3월 274개 저점 후 미세 회복.</div>
+        <div class="chart-wrap"><canvas id="am_partner"></canvas></div>
+      </div>
+      <div class="chart-card" style="grid-column: 1 / -1;">
+        <h3>담당자별 분기 누적 Lead</h3>
+        <div class="insight"><strong>오유정 444건 — 2위 박해규(214) 대비 2배</strong>. 한 명에게 의존도가 높은 구조. 분산 필요.</div>
+        <div class="chart-wrap tall"><canvas id="am_owners"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. TM -->
+  <div class="section part-tm">
+    <div class="section-title"><span class="num">6</span>TM — Telemarketing</div>
+    <div class="section-desc">FRT 미준수 · MQL 미전환 · SQL 전환율 · 잔량 · 담당자별 7일 초과</div>
+
+    <div class="grid-2">
+      <div class="chart-card">
+        <h3>FRT 20분 미준수 건수</h3>
+        <div class="insight"><strong>4월 34건 — 분기 최저</strong>. 1~3월 평균 68건의 절반 수준으로 개선.</div>
+        <div class="chart-wrap"><canvas id="tm_frt"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>MQL 미전환 건수</h3>
+        <div class="insight"><strong>4월 7건 — 1월 31건 대비 -77%</strong>. 미전환 정리 작업 효과 가시화.</div>
+        <div class="chart-wrap"><canvas id="tm_mql_miss"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>MQL → SQL 전환율 (%)</h3>
+        <div class="insight"><strong>4월 97.6% — 분기 최고</strong>. 84% 저점에서 +13.5%p 개선.</div>
+        <div class="chart-wrap"><canvas id="tm_sqlrate"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>SQL 잔량 (진행중 vs 7일 초과)</h3>
+        <div class="insight"><strong>4월 진행중 123건 / 7일 초과 59건</strong> — 1·2월 대비 잔량 급증, 적체 심화.</div>
+        <div class="chart-wrap"><canvas id="tm_sqlrest"></canvas></div>
+      </div>
+      <div class="chart-card" style="grid-column: 1 / -1;">
+        <h3>담당자별 7일 초과 추이</h3>
+        <div class="insight"><strong>송슬기 52건, 이은지 39건, 정주희 29건</strong> — 전원 4월 정점. 잔량 적체가 개인 차원이 아닌 구조적.</div>
+        <div class="chart-wrap"><canvas id="tm_owners"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. CH BO -->
+  <div class="section part-chbo">
+    <div class="section-title"><span class="num">7</span>CH BO — 채널 백오피스</div>
+    <div class="section-desc">신규/이월 CW · 이월 비중 · 미배정 CL · 당일 완료율</div>
+
+    <div class="grid-2">
+      <div class="chart-card">
+        <h3>당월 신규 CW vs 이월 CW</h3>
+        <div class="insight"><strong>4월 신규 55, 이월 128</strong> — 이월 의존 구조 지속. 1월 신규 43 → 3월 72로 회복했다 4월 재둔화.</div>
+        <div class="chart-wrap"><canvas id="chbo_cw"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>이월 비중 (%)</h3>
+        <div class="insight"><strong>4월 69.9%로 재상승</strong>. 3월 63.5% 저점 후 다시 이월 부담 확대.</div>
+        <div class="chart-wrap"><canvas id="chbo_carry"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>미배정 CL 건수</h3>
+        <div class="insight"><strong>2월 242건 정점 → 4월 131건</strong>. 절반 수준으로 회복했으나 여전히 1월 대비 2배.</div>
+        <div class="chart-wrap"><canvas id="chbo_unassign"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>당일 완료율 추이 (%)</h3>
+        <div class="insight"><strong>4월 47.8% — 분기 최고</strong>. 1월 0%에서 점진 개선, 처리 즉시성 확보 가시화.</div>
+        <div class="chart-wrap"><canvas id="chbo_sameday"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    데이터 기준: <strong>kpi-extract-2026-{01,02,03,04}.json</strong> + <strong>april-team-split-tablets-2026.json</strong><br>
+    본 차트는 부록 A. 월별 통합 KPI 표를 시각화한 것임. 자세한 내용은 <strong>분기 마감 심화 분석 리포트</strong> 참고.
+  </div>
+
+</div>
+
+<script>
+// ===== Chart.js Global Defaults =====
+Chart.defaults.font.family = "'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = '#6b7684';
+Chart.defaults.plugins.legend.position = 'bottom';
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.padding = 14;
+Chart.defaults.plugins.legend.labels.boxWidth = 8;
+Chart.defaults.plugins.legend.labels.font = { size: 12, weight: '500' };
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(25, 31, 40, 0.95)';
+Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: '700' };
+Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+
+const MONTHS = ['1월', '2월', '3월', '4월'];
+const COLOR = {
+  blue:   '#3182f6',
+  red:    '#f04452',
+  green:  '#00b386',
+  orange: '#f59f00',
+  purple: '#8b5cf6',
+  teal:   '#14b8a6',
+  indigo: '#6366f1',
+  gray:   '#8b95a1',
+};
+const GRID = 'rgba(0,0,0,0.05)';
+
+const baseLineOpts = (yLabel) => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  interaction: { mode: 'index', intersect: false },
+  scales: {
+    x: { grid: { display: false }, ticks: { font: { size: 12 } } },
+    y: {
+      beginAtZero: true,
+      grid: { color: GRID, drawBorder: false },
+      ticks: { font: { size: 11 } },
+      title: yLabel ? { display: true, text: yLabel, font: { size: 11, weight: '600' }, color: '#8b95a1' } : { display: false }
+    }
+  }
+});
+
+const baseBarOpts = (yLabel, stacked = false) => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    x: { grid: { display: false }, ticks: { font: { size: 12 } }, stacked },
+    y: {
+      beginAtZero: true,
+      grid: { color: GRID, drawBorder: false },
+      ticks: { font: { size: 11 } },
+      stacked,
+      title: yLabel ? { display: true, text: yLabel, font: { size: 11, weight: '600' }, color: '#8b95a1' } : { display: false }
+    }
+  }
+});
+
+// ===== 1. IS =====
+new Chart(document.getElementById('is_funnel'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Lead', data: [787, 560, 997, 633], borderColor: COLOR.blue, backgroundColor: COLOR.blue, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+      { label: 'MQL', data: [434, 369, 516, 434], borderColor: COLOR.purple, backgroundColor: COLOR.purple, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+      { label: 'SQL', data: [387, 328, 470, 389], borderColor: COLOR.green, backgroundColor: COLOR.green, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+      { label: '방문완료', data: [362, 291, 446, 370], borderColor: COLOR.orange, backgroundColor: COLOR.orange, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+    ]
+  },
+  options: baseLineOpts('건수')
+});
+
+new Chart(document.getElementById('is_sqlrate'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'MQL→SQL 전환율(%)', data: [89.2, 88.9, 91.1, 89.6], borderColor: COLOR.blue, backgroundColor: 'rgba(49,130,246,0.1)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 },
+      { label: '목표 90%', data: [90, 90, 90, 90], borderColor: COLOR.red, borderDash: [6, 4], pointRadius: 0, borderWidth: 2, fill: false }
+    ]
+  },
+  options: { ...baseLineOpts('%'), scales: { x: { grid: { display: false } }, y: { min: 85, max: 95, grid: { color: GRID }, ticks: { callback: v => v + '%' } } } }
+});
+
+new Chart(document.getElementById('is_frt'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '업무시간', data: [80.3, 76.7, 77.9, 92.9], borderColor: COLOR.green, backgroundColor: COLOR.green, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+      { label: '업무외',   data: [9.7, 3.2, 3.8, 6.5],     borderColor: COLOR.red, backgroundColor: COLOR.red, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+      { label: '주말',     data: [38.1, 33.6, 23.4, 18.6], borderColor: COLOR.orange, backgroundColor: COLOR.orange, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+    ]
+  },
+  options: { ...baseLineOpts('%'), scales: { x: { grid: { display: false } }, y: { beginAtZero: true, max: 100, grid: { color: GRID }, ticks: { callback: v => v + '%' } } } }
+});
+
+new Chart(document.getElementById('is_visit_cw'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '방문→CW 중앙값(일)', data: [8.0, 12.2, 10.2, 13.1], borderColor: COLOR.purple, backgroundColor: 'rgba(139,92,246,0.1)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 },
+      { label: '1월 기준 8일', data: [8, 8, 8, 8], borderColor: COLOR.green, borderDash: [6, 4], pointRadius: 0, borderWidth: 2, fill: false }
+    ]
+  },
+  options: baseLineOpts('일')
+});
+
+new Chart(document.getElementById('is_7day'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '7일 이내 마감률(%)', data: [43.2, 27.3, 32.6, 22.7], borderColor: COLOR.red, backgroundColor: 'rgba(240,68,82,0.1)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 }
+    ]
+  },
+  options: { ...baseLineOpts('%'), scales: { x: { grid: { display: false } }, y: { beginAtZero: true, max: 50, grid: { color: GRID }, ticks: { callback: v => v + '%' } } } }
+});
+
+// ===== 2. FS =====
+new Chart(document.getElementById('fs_contract'), {
+  type: 'bar',
+  data: { labels: MONTHS, datasets: [{ label: '계약서 댓수', data: [3540, 2955, 4430, 4510], backgroundColor: COLOR.purple, borderRadius: 6 }] },
+  options: baseBarOpts('대')
+});
+
+new Chart(document.getElementById('fs_cw'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '당월 신규 CW', data: [132, 112, 91, 53], backgroundColor: COLOR.blue, borderRadius: 6 },
+      { label: '단계변경일 총 CW', data: [273, 222, 329, 260], backgroundColor: COLOR.gray, borderRadius: 6 },
+    ]
+  },
+  options: baseBarOpts('건')
+});
+
+new Chart(document.getElementById('fs_carry'), {
+  type: 'line',
+  data: { labels: MONTHS, datasets: [{ label: '이월 비중(%)', data: [72.2, 82.9, 76.0, 80.4], borderColor: COLOR.orange, backgroundColor: 'rgba(245,159,0,0.12)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 }] },
+  options: { ...baseLineOpts('%'), scales: { x: { grid: { display: false } }, y: { min: 60, max: 90, grid: { color: GRID }, ticks: { callback: v => v + '%' } } } }
+});
+
+new Chart(document.getElementById('fs_idle'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '골든타임 8일+', data: [6, 21, 39, 21], backgroundColor: COLOR.orange, borderRadius: 6 },
+      { label: '14일+ 방치',   data: [17, 37, 87, 51], backgroundColor: COLOR.red, borderRadius: 6 },
+    ]
+  },
+  options: baseBarOpts('건')
+});
+
+new Chart(document.getElementById('fs_owners'), {
+  type: 'bar',
+  data: {
+    labels: ['한용우', '이경호', '최옥환', '최준일', '변상훈', '김영호', '고용진(4월만)'],
+    datasets: [{
+      label: '분기 누적 댓수',
+      data: [2418, 2283, 2114, 2061, 2057, 1549, 172],
+      backgroundColor: ['#8b5cf6', '#8b5cf6', '#8b5cf6', '#8b5cf6', '#8b5cf6', '#8b5cf6', '#8b95a1'],
+      borderRadius: 6
+    }]
+  },
+  options: { ...baseBarOpts('대'), indexAxis: 'y', plugins: { legend: { display: false } } }
+});
+
+// ===== 3. IB BO =====
+new Chart(document.getElementById('ibbo_contract'), {
+  type: 'bar',
+  data: { labels: MONTHS, datasets: [{ label: '계약서 댓수', data: [2182, 1637, 2685, 2513], backgroundColor: COLOR.green, borderRadius: 6 }] },
+  options: baseBarOpts('대')
+});
+
+new Chart(document.getElementById('ibbo_sqlrest'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '진행중',    data: [23, 48, 259, 241], backgroundColor: COLOR.blue, borderRadius: 6 },
+      { label: '7일 초과', data: [23, 48, 186, 162], backgroundColor: COLOR.red, borderRadius: 6 },
+    ]
+  },
+  options: baseBarOpts('건')
+});
+
+new Chart(document.getElementById('ibbo_carry'), {
+  type: 'line',
+  data: { labels: MONTHS, datasets: [{ label: '이월 비중(%)', data: [63.7, 77.1, 67.0, 73.1], borderColor: COLOR.orange, backgroundColor: 'rgba(245,159,0,0.12)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 }] },
+  options: { ...baseLineOpts('%'), scales: { x: { grid: { display: false } }, y: { min: 50, max: 90, grid: { color: GRID }, ticks: { callback: v => v + '%' } } } }
+});
+
+new Chart(document.getElementById('ibbo_owners'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '전수빈', data: [10.5, 9.0, 9.2, 7.1], borderColor: COLOR.blue, backgroundColor: COLOR.blue, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+      { label: '박효정', data: [10.3, 9.1, 7.4, 6.9], borderColor: COLOR.purple, backgroundColor: COLOR.purple, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+      { label: '조현재', data: [8.7, 7.5, 7.4, 5.6],  borderColor: COLOR.green, backgroundColor: COLOR.green, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+      { label: '강수영(4월 합류)', data: [null, null, null, 2.6], borderColor: COLOR.orange, backgroundColor: COLOR.orange, tension: 0.3, borderWidth: 2.5, pointRadius: 4, spanGaps: false },
+      { label: '정지영(1~3월)',     data: [9.0, 8.2, 7.0, null], borderColor: COLOR.gray, backgroundColor: COLOR.gray, tension: 0.3, borderWidth: 2.5, pointRadius: 4, borderDash: [4,4], spanGaps: false },
+    ]
+  },
+  options: baseLineOpts('일평균')
+});
+
+// ===== 4. AE =====
+new Chart(document.getElementById('ae_mou'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '파트너사', data: [8, 11, 14, 13], backgroundColor: COLOR.orange, borderRadius: 6 },
+      { label: '프랜차이즈', data: [3, 9, 8, 12], backgroundColor: COLOR.purple, borderRadius: 6 },
+    ]
+  },
+  options: baseBarOpts('건', true)
+});
+
+new Chart(document.getElementById('ae_attain'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '달성률(%)', data: [275, 500, 550, 625], borderColor: COLOR.orange, backgroundColor: 'rgba(245,159,0,0.12)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 },
+      { label: '목표 100%', data: [100, 100, 100, 100], borderColor: COLOR.red, borderDash: [6, 4], pointRadius: 0, borderWidth: 2, fill: false }
+    ]
+  },
+  options: { ...baseLineOpts('%'), scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: GRID }, ticks: { callback: v => v + '%' } } } }
+});
+
+new Chart(document.getElementById('ae_meeting'), {
+  type: 'line',
+  data: { labels: MONTHS, datasets: [{ label: '미팅 일평균(건)', data: [1.5, 4.3, 2.8, 8.5], borderColor: COLOR.orange, backgroundColor: 'rgba(245,159,0,0.12)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 }] },
+  options: baseLineOpts('건')
+});
+
+new Chart(document.getElementById('ae_nego'), {
+  type: 'bar',
+  data: { labels: MONTHS, datasets: [{ label: '네고 진입', data: [7, 12, 8, 8], backgroundColor: COLOR.orange, borderRadius: 6 }] },
+  options: baseBarOpts('건')
+});
+
+// ===== 5. AM =====
+new Chart(document.getElementById('am_lead_combo'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { type: 'bar',  label: 'Lead 총량', data: [228, 231, 300, 284], backgroundColor: COLOR.red, borderRadius: 6, yAxisID: 'y' },
+      { type: 'line', label: 'Lead 일평균', data: [10.9, 12.8, 14.2, 14.8], borderColor: COLOR.blue, backgroundColor: COLOR.blue, tension: 0.3, borderWidth: 2.5, pointRadius: 5, yAxisID: 'y1' },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      x: { grid: { display: false } },
+      y:  { beginAtZero: true, position: 'left',  grid: { color: GRID }, title: { display: true, text: '총량(건)', font: { size: 11, weight: '600' }, color: '#8b95a1' } },
+      y1: { beginAtZero: true, position: 'right', grid: { display: false }, title: { display: true, text: '일평균(건)', font: { size: 11, weight: '600' }, color: '#8b95a1' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('am_target'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'Lead 일평균', data: [10.9, 12.8, 14.2, 14.8], borderColor: COLOR.red, backgroundColor: 'rgba(240,68,82,0.1)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 },
+      { label: '목표 상한 25', data: [25, 25, 25, 25], borderColor: COLOR.green, borderDash: [6, 4], pointRadius: 0, borderWidth: 1.5, fill: false },
+      { label: '목표 하한 20', data: [20, 20, 20, 20], borderColor: COLOR.orange, borderDash: [6, 4], pointRadius: 0, borderWidth: 1.5, fill: false },
+    ]
+  },
+  options: { ...baseLineOpts('건'), scales: { x: { grid: { display: false } }, y: { beginAtZero: true, max: 30, grid: { color: GRID } } } }
+});
+
+new Chart(document.getElementById('am_settle'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: 'MOU 안착률(%)', data: [40.7, 35.3, 34.1, 29.8], borderColor: COLOR.red, backgroundColor: 'rgba(240,68,82,0.1)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 },
+      { label: '목표 80%', data: [80, 80, 80, 80], borderColor: COLOR.green, borderDash: [6, 4], pointRadius: 0, borderWidth: 2, fill: false },
+    ]
+  },
+  options: { ...baseLineOpts('%'), scales: { x: { grid: { display: false } }, y: { beginAtZero: true, max: 100, grid: { color: GRID }, ticks: { callback: v => v + '%' } } } }
+});
+
+new Chart(document.getElementById('am_partner'), {
+  type: 'bar',
+  data: { labels: MONTHS, datasets: [{ label: '활성 파트너', data: [352, 319, 274, 287], backgroundColor: COLOR.red, borderRadius: 6 }] },
+  options: baseBarOpts('개')
+});
+
+new Chart(document.getElementById('am_owners'), {
+  type: 'bar',
+  data: {
+    labels: ['오유정', '박해규', '구준모', '정용현', '명세준', '문은기'],
+    datasets: [{
+      label: '분기 누적 Lead',
+      data: [444, 214, 115, 97, 73, 69],
+      backgroundColor: [COLOR.red, COLOR.gray, COLOR.gray, COLOR.gray, COLOR.gray, COLOR.gray],
+      borderRadius: 6
+    }]
+  },
+  options: { ...baseBarOpts('건'), indexAxis: 'y', plugins: { legend: { display: false } } }
+});
+
+// ===== 6. TM =====
+new Chart(document.getElementById('tm_frt'), {
+  type: 'bar',
+  data: { labels: MONTHS, datasets: [{ label: 'FRT 20분 미준수', data: [70, 63, 71, 34], backgroundColor: COLOR.teal, borderRadius: 6 }] },
+  options: baseBarOpts('건')
+});
+
+new Chart(document.getElementById('tm_mql_miss'), {
+  type: 'bar',
+  data: { labels: MONTHS, datasets: [{ label: 'MQL 미전환', data: [31, 28, 46, 7], backgroundColor: COLOR.teal, borderRadius: 6 }] },
+  options: baseBarOpts('건')
+});
+
+new Chart(document.getElementById('tm_sqlrate'), {
+  type: 'line',
+  data: { labels: MONTHS, datasets: [{ label: 'MQL→SQL 전환율(%)', data: [86.2, 87.8, 84.1, 97.6], borderColor: COLOR.teal, backgroundColor: 'rgba(20,184,166,0.12)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 }] },
+  options: { ...baseLineOpts('%'), scales: { x: { grid: { display: false } }, y: { min: 80, max: 100, grid: { color: GRID }, ticks: { callback: v => v + '%' } } } }
+});
+
+new Chart(document.getElementById('tm_sqlrest'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '진행중',   data: [9, 17, 97, 123], backgroundColor: COLOR.teal, borderRadius: 6 },
+      { label: '7일 초과', data: [9, 17, 52, 59],  backgroundColor: COLOR.red,  borderRadius: 6 },
+    ]
+  },
+  options: baseBarOpts('건')
+});
+
+new Chart(document.getElementById('tm_owners'), {
+  type: 'line',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '송슬기', data: [2, 12, 40, 52], borderColor: COLOR.red,    backgroundColor: COLOR.red,    tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+      { label: '이은지', data: [5, 4, 31, 39],  borderColor: COLOR.orange, backgroundColor: COLOR.orange, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+      { label: '정주희', data: [1, 0, 24, 29],  borderColor: COLOR.purple, backgroundColor: COLOR.purple, tension: 0.3, borderWidth: 2.5, pointRadius: 4 },
+    ]
+  },
+  options: baseLineOpts('건')
+});
+
+// ===== 7. CH BO =====
+new Chart(document.getElementById('chbo_cw'), {
+  type: 'bar',
+  data: {
+    labels: MONTHS,
+    datasets: [
+      { label: '당월 신규 CW', data: [43, 39, 72, 55],  backgroundColor: COLOR.indigo, borderRadius: 6 },
+      { label: '이월 CW',      data: [88, 112, 125, 128], backgroundColor: COLOR.gray,   borderRadius: 6 },
+    ]
+  },
+  options: baseBarOpts('건', true)
+});
+
+new Chart(document.getElementById('chbo_carry'), {
+  type: 'line',
+  data: { labels: MONTHS, datasets: [{ label: '이월 비중(%)', data: [67.2, 74.2, 63.5, 69.9], borderColor: COLOR.indigo, backgroundColor: 'rgba(99,102,241,0.12)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 }] },
+  options: { ...baseLineOpts('%'), scales: { x: { grid: { display: false } }, y: { min: 50, max: 90, grid: { color: GRID }, ticks: { callback: v => v + '%' } } } }
+});
+
+new Chart(document.getElementById('chbo_unassign'), {
+  type: 'bar',
+  data: { labels: MONTHS, datasets: [{ label: '미배정 CL', data: [62, 242, 166, 131], backgroundColor: COLOR.red, borderRadius: 6 }] },
+  options: baseBarOpts('건')
+});
+
+new Chart(document.getElementById('chbo_sameday'), {
+  type: 'line',
+  data: { labels: MONTHS, datasets: [{ label: '당일 완료율(%)', data: [0, 25, 30.2, 47.8], borderColor: COLOR.green, backgroundColor: 'rgba(0,179,134,0.12)', tension: 0.3, fill: true, borderWidth: 2.5, pointRadius: 5 }] },
+  options: { ...baseLineOpts('%'), scales: { x: { grid: { display: false } }, y: { beginAtZero: true, max: 60, grid: { color: GRID }, ticks: { callback: v => v + '%' } } } }
+});
+</script>
+
+</body>
+</html>
