@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026년 4월 (29일까지) 월간 KPI 보고서</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+  :root{--bg:#f5f6f8;--card:#fff;--border:#e8ebed;--text-primary:#191f28;--text-secondary:#6b7684;--text-tertiary:#8b95a1;--blue:#3182f6;--blue-light:#e8f3ff;--red:#f04452;--red-light:#fff0f0;--green:#00b386;--green-light:#e8fff4;--orange:#f59f00;--orange-light:#fff8e6;--purple:#8b5cf6;--purple-light:#f3f0ff;--shadow:0 2px 8px rgba(0,0,0,.04);--radius:16px}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard',sans-serif;background:var(--bg);color:var(--text-primary);padding:32px;line-height:1.5}
+  .container{max-width:1280px;margin:0 auto}
+  header{margin-bottom:32px}
+  h1{font-size:28px;font-weight:800;margin-bottom:6px}
+  .meta{color:var(--text-tertiary);font-size:13px}
+  .toc{display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap}
+  .toc a{padding:10px 18px;background:#fff;border-radius:10px;text-decoration:none;box-shadow:var(--shadow);border:1px solid var(--border);color:var(--text-primary);font-weight:700;font-size:13px}
+  section{margin-bottom:32px}
+  h2{font-size:22px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+  h2 .dot{width:10px;height:10px;border-radius:50%}
+  h3{font-size:16px;font-weight:700;margin-bottom:12px}
+
+  .subteam{background:#fff;border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:16px}
+  .st-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+  .st-bar{width:6px;height:24px;border-radius:3px}
+  .st-name{font-size:18px;font-weight:800}
+  .st-meta{margin-left:auto;font-size:12px;color:var(--text-tertiary)}
+
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+  .tile{background:var(--bg);border-radius:12px;padding:14px}
+  .tile .lbl{font-size:11px;color:var(--text-secondary);margin-bottom:4px;font-weight:600}
+  .tile .val{font-size:22px;font-weight:800;line-height:1.1}
+  .tile .sub{font-size:11px;color:var(--text-tertiary);margin-top:4px}
+  .tile.target-met{background:var(--green-light);border-left:3px solid var(--green)}
+  .tile.target-low{background:var(--red-light);border-left:3px solid var(--red)}
+
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+  th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--border)}
+  th:first-child,td:first-child{text-align:left;font-weight:600}
+  th{color:var(--text-secondary);background:var(--bg);font-weight:600;font-size:11px}
+  tbody tr:hover{background:#fafbfc}
+
+  .grade{display:inline-block;padding:1px 7px;border-radius:6px;font-size:11px;font-weight:800}
+  .grade-S{background:#fff0f0;color:#c92535}
+  .grade-A{background:#e8fff4;color:#00966f}
+  .grade-B{background:#e8f3ff;color:var(--blue)}
+  .grade-C{background:#fff8e6;color:#b76b00}
+  .grade-D{background:#f3f0ff;color:var(--purple)}
+
+  .bar-bg{position:relative;height:8px;background:#eef0f2;border-radius:4px;overflow:hidden;margin-top:6px}
+  .bar-fill{height:100%;background:var(--blue);border-radius:4px}
+  .bar-fill.green{background:var(--green)}
+  .bar-fill.orange{background:var(--orange)}
+  .bar-fill.red{background:var(--red)}
+
+  /* 핵심 KPI 헤로 */
+  .hero-kpi{display:flex;align-items:center;gap:20px;background:linear-gradient(135deg,#fafbfc 0%,#fff 100%);border:1px solid var(--border);border-left:6px solid var(--blue);border-radius:12px;padding:18px 22px;margin-bottom:14px}
+  .hero-kpi.met{border-left-color:var(--green);background:linear-gradient(135deg,#f0fff8 0%,#fff 100%)}
+  .hero-kpi.poor{border-left-color:var(--red);background:linear-gradient(135deg,#fff5f5 0%,#fff 100%)}
+  .hero-kpi-tag{font-size:11px;font-weight:700;background:var(--blue-light);color:var(--blue);padding:3px 10px;border-radius:6px;margin-bottom:6px;display:inline-block}
+  .hero-kpi.met .hero-kpi-tag{background:var(--green-light);color:var(--green)}
+  .hero-kpi.poor .hero-kpi-tag{background:var(--red-light);color:var(--red)}
+  .hero-kpi-name{font-size:13px;color:var(--text-secondary);font-weight:600}
+  .hero-kpi-val{font-size:48px;font-weight:800;line-height:1;margin:4px 0}
+  .hero-kpi.met .hero-kpi-val{color:var(--green)}
+  .hero-kpi.poor .hero-kpi-val{color:var(--red)}
+  .hero-kpi-target{font-size:12px;color:var(--text-tertiary);margin-top:2px}
+  .hero-kpi-bar{flex:1;display:flex;flex-direction:column;gap:6px;min-width:180px}
+  .hero-bar-track{height:10px;background:#eef0f2;border-radius:5px;overflow:hidden}
+  .hero-bar-fill{height:100%;background:var(--blue);border-radius:5px;transition:width .4s}
+  .hero-kpi.met .hero-bar-fill{background:var(--green)}
+  .hero-kpi.poor .hero-bar-fill{background:var(--red)}
+  .hero-bar-info{font-size:11px;color:var(--text-tertiary);display:flex;justify-content:space-between}
+
+  /* 트렌드 표 */
+  .trend-table{font-size:14px}
+  .trend-table th{padding:12px;font-weight:700;color:var(--text-primary);background:#f5f6f8;font-size:13px}
+  .trend-table td{padding:12px}
+  .trend-table tbody tr:hover{background:#fafbfc}
+  .trend-tag{display:inline-block;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;white-space:nowrap}
+  .tag-up-strong{background:#e8fff4;color:#00966f}
+  .tag-up{background:#f0fff8;color:#00b386}
+  .tag-flat{background:#eef0f2;color:var(--text-secondary)}
+  .tag-down{background:#fff5f5;color:#e35454}
+  .tag-down-strong{background:#fff0f0;color:#c92535}
+
+  /* 파트별 리뷰 카드 */
+  .review-card{background:#fafbfc;border:1px solid var(--border);border-left:5px solid var(--blue);border-radius:12px;padding:18px 22px;margin-bottom:14px}
+  .review-card.review-strong-up{border-left-color:#00966f;background:linear-gradient(135deg,#f0fff8 0%,#fafbfc 100%)}
+  .review-card.review-up{border-left-color:#00b386}
+  .review-card.review-flat{border-left-color:var(--text-tertiary)}
+  .review-card.review-down{border-left-color:#e35454}
+  .review-card.review-strong-down{border-left-color:#c92535;background:linear-gradient(135deg,#fff5f5 0%,#fafbfc 100%)}
+  .review-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .review-bar{display:inline-block;width:6px;height:20px;border-radius:3px}
+  .review-title{font-size:15px;font-weight:800;flex:1}
+  .review-tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:#fff;border:1px solid var(--border);color:var(--text-secondary)}
+  .review-headline{font-size:15px;font-weight:700;line-height:1.5;margin-bottom:8px;color:var(--text-primary)}
+  .review-body{font-size:13.5px;line-height:1.7;color:var(--text-secondary);margin-bottom:10px}
+  .review-action{font-size:13px;color:var(--text-primary);background:#fff;border-left:3px solid var(--blue);padding:8px 12px;border-radius:4px;line-height:1.6}
+  .review-action strong{color:var(--blue)}
+  .review-improve{font-size:13px;color:var(--text-primary);background:#f0fff8;border-left:3px solid #00b386;padding:10px 14px;border-radius:4px;line-height:1.7;margin-bottom:10px}
+  .review-improve strong{color:#00966f;display:inline-block;margin-bottom:4px}
+
+  /* 헤더 대시보드 strip */
+  .dashboard{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:24px}
+  .dash-tile{background:#fff;border:1px solid var(--border);border-top:4px solid var(--blue);border-radius:10px;padding:14px;text-align:center;box-shadow:var(--shadow);position:relative}
+  .dash-tile.met{border-top-color:var(--green)}
+  .dash-tile.poor{border-top-color:var(--red)}
+  .dash-tile-name{font-size:11px;color:var(--text-secondary);font-weight:600;margin-bottom:6px}
+  .dash-tile-val{font-size:22px;font-weight:800;line-height:1}
+  .dash-tile-delta{font-size:11px;font-weight:700;margin-top:4px}
+  .dash-tile-delta.up{color:var(--green)}
+  .dash-tile-delta.down{color:var(--red)}
+  .dash-tile-delta.flat{color:var(--text-tertiary)}
+  @media (max-width:1024px){.dashboard{grid-template-columns:repeat(4,1fr)}}
+  @media (max-width:640px){.dashboard{grid-template-columns:repeat(2,1fr)}}
+
+  .funnel{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:center;margin:10px 0}
+  .funnel-stage{text-align:center;background:var(--bg);border-radius:10px;padding:10px}
+  .funnel-stage .nm{font-size:11px;color:var(--text-secondary);margin-bottom:4px}
+  .funnel-stage .v{font-size:18px;font-weight:800}
+  .funnel-stage .conv{font-size:10px;color:var(--text-tertiary);margin-top:2px}
+
+  @media (max-width:768px){.kpi-row{grid-template-columns:repeat(2,1fr)}.funnel{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>2026년 4월 (29일까지) 월간 KPI 보고서</h1>
+  <p style="color:var(--text-secondary);font-size:14px;margin-bottom:8px">운영 중인 KPI 시스템 (S3+CloudFront) 데이터 기반</p>
+  <p class="meta">기간: 2026-04-01 ~ 2026-04-29 · 데이터 추출: 2026. 4. 30. 오후 11:31:13</p>
+</header>
+
+<div class="dashboard"><div class="dash-tile poor" style="border-top-color:var(--red)">
+      <div class="dash-tile-name">인사이드 SQL 전환율</div>
+      <div class="dash-tile-val">89.4%</div>
+      <div class="dash-tile-delta down">▼ -1.7% · 목표 90%</div>
+    </div><div class="dash-tile " style="border-top-color:#f59f00">
+      <div class="dash-tile-name">필드 CW 전환율</div>
+      <div class="dash-tile-val">42%</div>
+      <div class="dash-tile-delta down">▼ -4%</div>
+    </div><div class="dash-tile " style="border-top-color:#8b5cf6">
+      <div class="dash-tile-name">인바운드 BO CW 전환율</div>
+      <div class="dash-tile-val">45%</div>
+      <div class="dash-tile-delta up">▲ +9%</div>
+    </div><div class="dash-tile poor" style="border-top-color:var(--red)">
+      <div class="dash-tile-name">채널 TM SQL 백로그 (7일+)</div>
+      <div class="dash-tile-val">68건</div>
+      <div class="dash-tile-delta down">▲ +16건 · 목표 10건</div>
+    </div><div class="dash-tile met" style="border-top-color:var(--green)">
+      <div class="dash-tile-name">채널 AE 신규 MOU</div>
+      <div class="dash-tile-val">25건</div>
+      <div class="dash-tile-delta up">▲ +3건 · 목표 4건</div>
+    </div><div class="dash-tile met" style="border-top-color:var(--green)">
+      <div class="dash-tile-name">채널 AM 활성 파트너</div>
+      <div class="dash-tile-val">298개</div>
+      <div class="dash-tile-delta up">▲ +24개 · 목표 70개</div>
+    </div><div class="dash-tile " style="border-top-color:#a855f7">
+      <div class="dash-tile-name">채널 BO CW 전환율</div>
+      <div class="dash-tile-val">58%</div>
+      <div class="dash-tile-delta up">▲ +6%</div>
+    </div></div>
+
+<div class="toc">
+  <a href="#trend" style="color:#06b6d4">📈 4개월 트렌드</a>
+  <a href="#inbound" style="color:#3182f6">📥 인바운드</a>
+  <a href="#channel" style="color:#8b5cf6">📤 채널</a>
+  <a href="#scores" style="color:#f59f00">⭐ 스코어카드</a>
+</div>
+
+
+<section id="trend">
+  <h2><span class="dot" style="background:#06b6d4"></span>1~4월 핵심 KPI 트렌드</h2>
+
+  <div class="subteam">
+    <div class="st-head">
+      <div class="st-bar" style="background:#06b6d4"></div>
+      <div class="st-name">월별 핵심 KPI</div>
+      <div class="st-meta">최댓값은 초록색 강조 · 1월→4월 전체 변화 표시</div>
+    </div>
+    <table class="trend-table">
+      <thead>
+        <tr>
+          <th>지표</th>
+          <th>01월</th><th>02월</th><th>03월</th><th>04월</th>
+          <th>1월→4월</th>
+          <th>패턴</th>
+        </tr>
+      </thead>
+      <tbody><tr>
+      <td><span style="display:inline-block;width:6px;height:24px;background:#00b386;border-radius:3px;vertical-align:middle;margin-right:8px"></span>인사이드 — SQL 전환율</td>
+      <td style="">89.2%</td><td style="">88.9%</td><td style="background:#e8fff4;font-weight:800;color:#00966f">91.1%</td><td style="">89.4%</td>
+      <td><strong>+0.2%</strong></td>
+      <td><span class="trend-tag tag-flat">안정</span></td>
+    </tr>
+    <tr class="causal-row">
+      <td colspan="7" style="padding:6px 12px 12px 26px;background:#fafbfc;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text-secondary);line-height:1.6">
+        <span style="color:var(--blue);font-weight:700">↳ 인과 해석:</span> FRT 준수율 +8 개선이 SQL 전환율 안정의 기반으로 작용 중
+      </td>
+    </tr><tr>
+      <td><span style="display:inline-block;width:6px;height:24px;background:#f59f00;border-radius:3px;vertical-align:middle;margin-right:8px"></span>필드 — CW 전환율 (마감 중)</td>
+      <td style="">38%</td><td style="">42%</td><td style="background:#e8fff4;font-weight:800;color:#00966f">46%</td><td style="">42%</td>
+      <td><strong>+4%</strong></td>
+      <td><span class="trend-tag tag-up">개선 추세</span></td>
+    </tr>
+    <tr class="causal-row">
+      <td colspan="7" style="padding:6px 12px 12px 26px;background:#fafbfc;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text-secondary);line-height:1.6">
+        <span style="color:var(--blue);font-weight:700">↳ 인과 해석:</span> 전환율 개선 흐름 속에서 14일+ 정체 매장(59건) 관리도 함께 점검 필요
+      </td>
+    </tr><tr>
+      <td><span style="display:inline-block;width:6px;height:24px;background:#8b5cf6;border-radius:3px;vertical-align:middle;margin-right:8px"></span>인바운드 BO — CW 전환율</td>
+      <td style="">24%</td><td style="">29%</td><td style="">36%</td><td style="background:#e8fff4;font-weight:800;color:#00966f">45%</td>
+      <td><strong>+21%</strong></td>
+      <td><span class="trend-tag tag-up-strong">꾸준히 개선</span></td>
+    </tr>
+    <tr class="causal-row">
+      <td colspan="7" style="padding:6px 12px 12px 26px;background:#fafbfc;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text-secondary);line-height:1.6">
+        <span style="color:var(--blue);font-weight:700">↳ 인과 해석:</span> 처리 효율 가속에 따라 정체 매장 누적(86건) 동반 — 다음 달 stage별 분해 분석 권장
+      </td>
+    </tr><tr>
+      <td><span style="display:inline-block;width:6px;height:24px;background:#0ea5e9;border-radius:3px;vertical-align:middle;margin-right:8px"></span>채널 TM — SQL 백로그 (7일 초과 미처리)</td>
+      <td style="background:#e8fff4;font-weight:800;color:#00966f">9건</td><td style="">17건</td><td style="">52건</td><td style="">68건</td>
+      <td><strong>+59건</strong></td>
+      <td><span class="trend-tag tag-down-strong">꾸준히 악화</span></td>
+    </tr>
+    <tr class="causal-row">
+      <td colspan="7" style="padding:6px 12px 12px 26px;background:#fafbfc;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text-secondary);line-height:1.6">
+        <span style="color:var(--blue);font-weight:700">↳ 인과 해석:</span> Open SQL 중 오픈전 매장 비중이 22% → 54%로 누적 +32%p 증가 — 오픈일 미확정 매장의 입금 의사결정 지연이 백로그 가속의 직접 원인
+      </td>
+    </tr><tr>
+      <td><span style="display:inline-block;width:6px;height:24px;background:#8b5cf6;border-radius:3px;vertical-align:middle;margin-right:8px"></span>채널 AE — 신규 MOU</td>
+      <td style="">11건</td><td style="">20건</td><td style="">22건</td><td style="background:#e8fff4;font-weight:800;color:#00966f">25건</td>
+      <td><strong>+14건</strong></td>
+      <td><span class="trend-tag tag-up-strong">꾸준히 개선</span></td>
+    </tr>
+    <tr class="causal-row">
+      <td colspan="7" style="padding:6px 12px 12px 26px;background:#fafbfc;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text-secondary);line-height:1.6">
+        <span style="color:var(--blue);font-weight:700">↳ 인과 해석:</span> 미팅 활동 +11, 협상 진입 +4 모두 동반 증가 — 발굴 모멘텀의 직접 원인
+      </td>
+    </tr><tr>
+      <td><span style="display:inline-block;width:6px;height:24px;background:#06b6d4;border-radius:3px;vertical-align:middle;margin-right:8px"></span>채널 AM — 활성 파트너</td>
+      <td style="background:#e8fff4;font-weight:800;color:#00966f">352개</td><td style="">319개</td><td style="">274개</td><td style="">298개</td>
+      <td><strong>-54개</strong></td>
+      <td><span class="trend-tag tag-down">악화 추세</span></td>
+    </tr>
+    <tr class="causal-row">
+      <td colspan="7" style="padding:6px 12px 12px 26px;background:#fafbfc;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text-secondary);line-height:1.6">
+        <span style="color:var(--blue);font-weight:700">↳ 인과 해석:</span> 일평균 Lead +4 증가에도 온보딩률 -8 추세 — 활성화 단계 보강이 다음 과제
+      </td>
+    </tr><tr>
+      <td><span style="display:inline-block;width:6px;height:24px;background:#a855f7;border-radius:3px;vertical-align:middle;margin-right:8px"></span>채널 BO — CW 전환율</td>
+      <td style="background:#e8fff4;font-weight:800;color:#00966f">67%</td><td style="">38%</td><td style="">52%</td><td style="">58%</td>
+      <td><strong>-9%</strong></td>
+      <td><span class="trend-tag tag-down">악화 추세</span></td>
+    </tr>
+    <tr class="causal-row">
+      <td colspan="7" style="padding:6px 12px 12px 26px;background:#fafbfc;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text-secondary);line-height:1.6">
+        <span style="color:var(--blue);font-weight:700">↳ 인과 해석:</span> 회복 흐름 속에서 정체 매장(57건) 관리가 회복 속도의 핵심 변수
+      </td>
+    </tr></tbody>
+    </table>
+  </div>
+
+  <div class="subteam">
+    <div class="st-head">
+      <div class="st-bar" style="background:#06b6d4"></div>
+      <div class="st-name">파트별 리뷰</div>
+      <div class="st-meta">각 sub-team의 1~4월 변화 해석 · 이번달 개선 포인트 · 다음 액션</div>
+    </div>
+    
+    <div class="review-card review-up">
+      <div class="review-head">
+        <span class="review-bar" style="background:#00b386"></span>
+        <div class="review-title">인사이드 — SQL 전환율</div>
+        <div class="review-tag">🟡 목표 근접</div>
+      </div>
+      <div class="review-headline">4월 SQL 전환율 89.4%로 목표 90%에 0.6%p 부족</div>
+      <div class="review-body">인사이드 세일즈의 핵심 지표인 SQL 전환율은 1월 89.2%에서 4월 89.4%로, 03월이 정점(91.1%)이었으며 분기 동안 90% 안팎의 안정적인 수준을 유지했습니다. 4월 한 달 동안 704건의 Lead가 인입되어 MQL 481건, 최종 SQL 430건으로 이어졌으며, MQL 단계까지는 도달했으나 SQL 자격 검증을 통과하지 못한 잔여가 51건 발생했습니다.<br><br>
+세부 운영 지표를 보면, 인사이드 자체 FRT 준수율(20분 이내)은 1월 53%에서 4월 61%로 +8%p 변동했으며, 평균 응답 시간은 4월 기준 247분으로 측정되었습니다. SQL 전환율은 안정적이지만 응답 속도 분포는 여전히 개선 여지가 남아있는 상황입니다.</div>
+      <div class="review-improve"><strong>✅ 이번달 개선 포인트</strong><br>· <strong>인사이드 FRT 준수율(20분)</strong>: 47% → 61% (+14%)<br>· <strong>인사이드 평균 FRT</strong>: 347분 → 247분 (-100분)</div>
+      <div class="review-action"><strong>다음 단계 →</strong> SQL 미전환 MQL 51건의 사유 분포(가격·타이밍·오인입)를 분석하여 응대 표준화에 반영하고, 인사이드 FRT 분포가 길어지는 구간이 SQL 전환율 변동과 어떻게 연동되는지 추적할 필요가 있습니다.</div>
+    </div>
+    <div class="review-card review-up">
+      <div class="review-head">
+        <span class="review-bar" style="background:#f59f00"></span>
+        <div class="review-title">필드 — CW 전환율 (마감 중)</div>
+        <div class="review-tag">🟢 개선</div>
+      </div>
+      <div class="review-headline">필드 CW 전환율은 1월 38%에서 4월 42%로 4%p 개선</div>
+      <div class="review-body">필드 세일즈의 CW 전환율은 1월 38%에서 시작해 03월 46%로 정점을 찍은 후 4월 42%로 개선되었습니다. 4월 마감의 상당 부분이 이월 매장 처리분이라는 점, 그리고 일부 매장의 일정 취소가 영향을 미친 것으로 보입니다. 4월 기준 마감 사유를 보면 방문 후 취소 1건, 설치 일정 확정 후 취소 1건 등이 주요 패턴입니다.<br><br>
+세부 운영 지표 측면에서 stale 방문(정체 매장) 총 건수는 1월 17건에서 4월 105건으로 변동했으며, 그 중 14일 이상 정체 매장은 1월 17건에서 4월 59건으로 +42건 변화했습니다. 골든타임을 8일 이상 초과한 매장도 4월 기준 28건 누적되어 있어, 정체 매장 관리가 다음 달 CW 전환율에 영향을 줄 수 있는 상황입니다.</div>
+      <div class="review-improve"><strong>✅ 이번달 개선 포인트</strong><br>· <strong>stale 방문 총</strong>: 151건 → 105건 (-46건)<br>· <strong>14일 초과 정체</strong>: 87건 → 59건 (-28건)<br>· <strong>골든타임 위반(8일+)</strong>: 39건 → 28건 (-11건)</div>
+      <div class="review-action"><strong>다음 단계 →</strong> 14일 이상 정체 59건 매장에 대해 강제 push 또는 담당 재배정을 검토해야 하며, CL 사유 상위 패턴을 매월 모니터링하여 패배 원인의 변화를 추적할 필요가 있습니다.</div>
+    </div>
+    <div class="review-card review-strong-up">
+      <div class="review-head">
+        <span class="review-bar" style="background:#8b5cf6"></span>
+        <div class="review-title">인바운드 BO — CW 전환율</div>
+        <div class="review-tag">🟢🟢 꾸준히 개선</div>
+      </div>
+      <div class="review-headline">인바운드 백오피스 CW 전환율은 1월 24%에서 4월 45%로 21%p 개선되어 분기 동안 88% 증가</div>
+      <div class="review-body">인바운드 백오피스의 CW 전환율은 1월 24%에서 4월 45%까지 매월 연속 상승하여, 견적·계약·출고·설치로 이어지는 처리 단계의 효율이 분기 동안 꾸준히 개선되었음을 보여줍니다. 4월 마감 사유 분포에서는 주요 사유 미기록 등이 상위에 나타났습니다.<br><br>
+다만 진행 중 매장의 정체 상황은 함께 봐야 합니다. 4월 기준 진행 매장의 노화도는 3일 이내 62건, 4~7일 28건, 7일 초과 61건, 14일 초과가 86건으로, 14일 이상 정체된 매장이 가장 큰 비중을 차지하고 있습니다. 14일 초과 정체 매장은 1월 1건에서 4월 86건으로 +85건 변화했으며, SQL 백로그는 1월 0건에서 4월 0건으로 증가하여 다음 달 처리 부담으로 작용할 가능성이 있습니다.</div>
+      <div class="review-improve"><strong>✅ 이번달 개선 포인트</strong><br>· <strong>14일 초과 정체 매장</strong>: 107건 → 86건 (-21건)</div>
+      <div class="review-action"><strong>다음 단계 →</strong> 14일 초과 86건 매장의 stage별 분포를 확인하여 견적 정체인지 계약 정체인지 식별하고, 백로그 누적 추세가 지속되면 CW 전환율 개선 효과가 한계에 부딪힐 수 있으므로 견적 1차 통과율 보강을 우선 검토할 필요가 있습니다.</div>
+    </div>
+    <div class="review-card review-strong-up">
+      <div class="review-head">
+        <span class="review-bar" style="background:#0ea5e9"></span>
+        <div class="review-title">채널 TM — SQL 백로그 (7일 초과 미처리)</div>
+        <div class="review-tag">🔴 누적 과부하</div>
+      </div>
+      <div class="review-headline">채널 TM의 SQL 백로그(7일 초과 미처리)는 4월 68건로 목표 10건 대비 58건 초과</div>
+      <div class="review-body">채널 TM의 핵심 지표인 SQL 백로그(견적 발송 후 입금일자가 7일 이상 미입력된 매장 수)는 1월 9건에서 4월 68건로 +59건 누적 증가하여 목표(10건) 대비 58건 초과 상태입니다. 견적 처리 속도가 입금일자 입력의 병목으로 작용하고 있습니다.<br><br>
+누적의 핵심 원인은 <strong>오픈전 매장 비중의 지속적 증가</strong>로 분석됩니다. Open SQL 매장 중 오픈전 비중이 1월 22%에서 4월 54%로 약 2.5배 늘어났으며, 4월 기준 7일 초과 정체 매장 68건 중 <strong>36건(53%)이 오픈전 매장</strong>입니다. 특히 "오픈전 2개월+" 장기 정체가 7건 존재해, 매장 오픈 일정이 미확정·연기되며 입금 의사결정이 동결되는 패턴이 보입니다. FRT 준수율(69%→89%) 등 응대 속도 지표는 안정 영역인 만큼, 첫 응답이 아니라 견적 발송 후 입금 단계가 진짜 정체 구간입니다.</div>
+      <div class="review-improve"><strong>✅ 이번달 개선 포인트</strong><br>· <strong>FRT 준수율(20분)</strong>: 77% → 89% (+12%)<br>· <strong>평균 FRT</strong>: 93분 → 63분 (-30분)<br>· <strong>미전환 MQL 누적</strong>: 46건 → 7건 (-39건)</div>
+      <div class="review-action"><strong>다음 단계 →</strong> 오픈전 매장 전용 SLA(예: 오픈일 N주 전 입금 안내, 오픈일 미정 시 N주 후 push)를 정의하고, "오픈전 2개월+" 7건은 1:1 사유 점검을 통해 폐기/유지 의사결정이 필요합니다. 운영중 매장의 7일+ 정체 37건은 별도 push 프로세스로 분리 관리.</div>
+    </div>
+    <div class="review-card review-strong-up">
+      <div class="review-head">
+        <span class="review-bar" style="background:#8b5cf6"></span>
+        <div class="review-title">채널 AE — 신규 MOU</div>
+        <div class="review-tag">🟢🟢 꾸준히 개선</div>
+      </div>
+      <div class="review-headline">채널 AE의 신규 MOU는 1월 11건에서 4월 25건로 분기 동안 2.3배 증가</div>
+      <div class="review-body">채널 AE의 핵심 지표인 신규 MOU 체결 수는 1월 11건에서 4월 25건로 분기 동안 매월 평균 5건 페이스로 증가했으며, 4월 목표(4건) 대비 6배를 초과 달성했습니다. AE 1명이 운영하는 조직임을 감안하면 발굴 모멘텀이 분기 동안 강하게 형성되었음을 의미합니다. 4월 신규 MOU의 구성을 보면 파트너 13건, FC HQ 12건, 브랜드 0건으로 카테고리 간 균형이 잡혀 있습니다.<br><br>
+세부 운영 지표를 함께 보면, 영업 활동량을 나타내는 미팅 수는 1월 12건에서 4월 23건으로 +11건 변화했고, 후속 단계인 협상 진입은 1월 7건에서 4월 11건으로 변동했습니다. 미서명 계약은 1월 4건에서 4월 5건으로 누적되고 있어, MOU 발굴이 늘어난 만큼 다음 단계로의 전환·서명 처리가 함께 따라가는지가 다음 분석 포인트입니다.</div>
+      <div class="review-improve"><strong>✅ 이번달 개선 포인트</strong><br>· <strong>신규 MOU</strong>: 22건 → 25건 (+3건)<br>· <strong>협상 진입</strong>: 8건 → 11건 (+3건)</div>
+      <div class="review-action"><strong>다음 단계 →</strong> 발굴량 자체는 충분히 확보되었으므로, 협상 진입과 미서명 계약 비율을 모니터링하여 후속 전환 단계의 병목을 식별하고, 미서명 계약 중 overdue 케이스의 중단 사유를 분석할 필요가 있습니다.</div>
+    </div>
+    <div class="review-card review-down">
+      <div class="review-head">
+        <span class="review-bar" style="background:#06b6d4"></span>
+        <div class="review-title">채널 AM — 활성 파트너</div>
+        <div class="review-tag">🟡 하락 후 회복</div>
+      </div>
+      <div class="review-headline">채널 AM 활성 파트너는 01월 352개 정점 이후 4월 298개로 54개 감소 (4월 소폭 반등)</div>
+      <div class="review-body">채널 AM의 핵심 지표인 활성 파트너 수는 01월 352개 정점 이후 4월 298개로 분기 동안 54개 감소했습니다. 4월에는 소폭 반등하여 24개 회복했지만 1월 수준에는 미달했습니다. 4월 활성 파트너의 구성은 파트너 153개, 브랜드 145개로 합계 298개이며, 절대 수치는 목표(70개)를 4배 이상 초과하고 있습니다.<br><br>
+다만 세부 운영 지표를 보면 우려스러운 신호가 함께 나타납니다. 일평균 Lead 확보는 1월 10.9건에서 4월 14.9건으로 4.0건 증가했지만 여전히 목표(20~25)에 미달하고 있고, 미팅 수는 1월 7건에서 4월 130건으로 +123건 변동했습니다. 가장 주목할 점은 온보딩률로, 1월 40.7%에서 4월 32.7%로 -8.0%p 하락했으며 목표(80%) 대비 47.3%p 미달 상태입니다. AE의 신규 MOU 발굴(분기 -54건 증가)이 활성 단계로 충분히 이어지지 못하고 있다는 구조적 신호로 해석됩니다.</div>
+      <div class="review-improve"><strong>✅ 이번달 개선 포인트</strong><br>· <strong>활성 파트너</strong>: 274개 → 298개 (+24개)<br>· <strong>일평균 Lead 확보</strong>: 14.2건 → 14.9건 (+0.7건)<br>· <strong>미팅 수</strong>: 22건 → 130건 (+108건)</div>
+      <div class="review-action"><strong>다음 단계 →</strong> 신규 MOU 25건이 다음 달 활성 파트너로 실제 추가되는지 추적이 필요하며, 온보딩률을 끌어올리지 못하면 AE의 발굴 효과가 활성 단계로 이어지지 않으므로 온보딩 단계별 정체 지점을 분해 분석할 필요가 있습니다.</div>
+    </div>
+    <div class="review-card review-down">
+      <div class="review-head">
+        <span class="review-bar" style="background:#a855f7"></span>
+        <div class="review-title">채널 BO — CW 전환율</div>
+        <div class="review-tag">🟡 변동 후 회복</div>
+      </div>
+      <div class="review-headline">채널 백오피스 CW 전환율은 01월 67% 정점 이후 02월 38% 저점을 거쳐 4월 58%로 회복 중</div>
+      <div class="review-body">채널 백오피스의 CW 전환율은 1월 67%로 분기 초 정점을 기록한 후 02월 38% 저점까지 떨어졌다가 4월 58%로 회복 추세에 들어섰습니다. 4월 마감 매장 중 이월 처리 비중이 약 66%를 차지하여 후행 처리가 우세한 패턴은 인바운드 백오피스와 유사하지만, 동일한 분기 동안 인바운드 백오피스가 24%에서 45%로 매월 +5~7%p 페이스로 꾸준히 개선된 것과 비교하면 채널 백오피스의 회복 속도는 다소 느린 편입니다. 채널 BO 특유의 처리 단계(MOU 체결 후 가맹점 등록 행정 등)가 병목일 가능성을 시사합니다.<br><br>
+세부 지표 측면에서, 14일 이상 정체된 진행 매장은 1월 0건에서 4월 57건으로 +57건 변동했고, SQL 백로그는 1월 0건에서 4월 0건으로 증가했습니다. 4월에는 57건이 14일 이상 정체된 상태로, 회복 속도를 더 끌어올리려면 정체 매장의 stage 분해 식별이 우선 과제입니다.</div>
+      <div class="review-improve"><strong>✅ 이번달 개선 포인트</strong><br>특별한 단월 개선 포인트는 없으며, 추세 유지 또는 점검이 필요한 구간입니다.</div>
+      <div class="review-action"><strong>다음 단계 →</strong> 인바운드 백오피스의 매월 +5~7%p 개선 패턴을 채널 백오피스에 이식할 수 있는지 검토하고, 14일 초과 57건의 stage별 분포를 분석하여 채널 BO 고유의 병목(MOU 후 행정 처리 등) 단계를 식별할 필요가 있습니다.</div>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  if (!window.Chart) return;
+  Chart.defaults.font.family = "'Pretendard', sans-serif";
+  Chart.defaults.color = '#6b7684';
+  const labels = ["01월","02월","03월","04월"];
+  
+  new Chart(document.getElementById('tr-rates'), {
+    type: 'line',
+    data: { labels, datasets: [{"label":"인사이드 SQL 전환율","color":"#00b386","data":[89.2,88.9,91.1,89.4]},{"label":"필드 CW 전환율","color":"#f59f00","data":[38,42,46,42]},{"label":"인바운드 BO CW 전환율","color":"#8b5cf6","data":[24,29,36,45]},{"label":"채널 BO CW 전환율","color":"#a855f7","data":[67,38,52,58]},{"label":"채널 TM FRT 준수율","color":"#0ea5e9","data":[69,74,77,89]}].map(d => ({
+      label: d.label, data: d.data, borderColor: d.color, backgroundColor: d.color,
+      tension: 0.3, borderWidth: 3, pointRadius: 4, pointHoverRadius: 6, fill: false
+    })) },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } }
+      },
+      scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: '%' } } }
+    }
+  });
+  
+
+  new Chart(document.getElementById('tr-counts'), {
+    type: 'line',
+    data: { labels, datasets: [{"label":"채널 AE 신규 MOU","color":"#8b5cf6","data":[11,20,22,25]},{"label":"채널 AM 활성 파트너","color":"#06b6d4","data":[352,319,274,298]}].map(d => ({
+      label: d.label, data: d.data, borderColor: d.color, backgroundColor: d.color,
+      tension: 0.3, borderWidth: 3, pointRadius: 4, pointHoverRadius: 6, fill: false
+    })) },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: { callbacks: { label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y + '건/개' } }
+      },
+      scales: { y: { beginAtZero: true, title: { display: true, text: '건/개' } } }
+    }
+  });
+  
+})();
+</script>
+
+<section id="inbound">
+  <h2><span class="dot" style="background:#3182f6"></span>인바운드</h2>
+  
+  <div class="subteam">
+    <div class="st-head">
+      <div class="st-bar" style="background:var(--green)"></div>
+      <div class="st-name">인사이드 세일즈</div>
+      <div class="st-meta">3명 — Lead 응대·MQL/SQL 자격검증</div>
+    </div>
+    
+    <div class="hero-kpi poor">
+      <div style="min-width:200px">
+        <div class="hero-kpi-tag">1차 핵심 KPI</div>
+        <div class="hero-kpi-name">SQL 전환율 (Lead → SQL)</div>
+        <div class="hero-kpi-val">89.4<span style="font-size:22px;font-weight:600;color:var(--text-secondary)">%</span></div>
+        <div class="hero-kpi-target">목표 90% · 달성률 99%</div>
+      </div>
+      <div class="hero-kpi-bar">
+        <div class="hero-bar-track"><div class="hero-bar-fill" style="width:99%"></div></div>
+        <div class="hero-bar-info"><span>0</span><span>목표 90%</span></div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">Lead 704 → MQL 481 → SQL 430</div>
+      </div>
+    </div>
+    <h3 style="font-size:13px;margin:16px 0 8px;color:var(--text-secondary)">단계별 깔때기</h3>
+    <div class="funnel">
+      <div class="funnel-stage"><div class="nm">Lead</div><div class="v">704</div></div>
+      <div class="funnel-stage"><div class="nm">MQL</div><div class="v">481</div><div class="conv">68%</div></div>
+      <div class="funnel-stage"><div class="nm">SQL</div><div class="v">430</div><div class="conv">89%</div></div>
+      <div class="funnel-stage"><div class="nm">방문</div><div class="v">408</div></div>
+      <div class="funnel-stage"><div class="nm">CW</div><div class="v">78</div></div>
+    </div>
+    <div class="kpi-row" style="margin-top:14px">
+      <div class="tile target-low"><div class="lbl">FRT 준수율 (20분 이내)</div><div class="val">61%</div><div class="sub">400/653건</div></div>
+      <div class="tile"><div class="lbl">FRT 초과 (20분+)</div><div class="val">253건</div></div>
+      <div class="tile"><div class="lbl">방문 전환</div><div class="val">408건</div></div>
+      <div class="tile"><div class="lbl">CW</div><div class="val">78건</div></div>
+    </div>
+  </div>
+  
+  <div class="subteam">
+    <div class="st-head">
+      <div class="st-bar" style="background:var(--orange)"></div>
+      <div class="st-name">필드 세일즈</div>
+      <div class="st-meta">8명 — 매장 방문·상담</div>
+    </div>
+    
+    <div class="hero-kpi ">
+      <div style="min-width:200px">
+        <div class="hero-kpi-tag">1차 핵심 KPI</div>
+        <div class="hero-kpi-name">CW 전환율 (이월 포함, 마감 매장 중 Win 비율)</div>
+        <div class="hero-kpi-val">42<span style="font-size:22px;font-weight:600;color:var(--text-secondary)">%</span></div>
+        
+      </div>
+      <div class="hero-kpi-bar">
+        
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">마감 170건 (CW 72 / CL 98) · CW 내역: 이번달 72 + 이월 0</div>
+      </div>
+    </div>
+    <div class="kpi-row" style="margin-top:14px">
+      <div class="tile"><div class="lbl">활동 대상 (전체)</div><div class="val">397건</div><div class="sub">이번달 397 + 이월 0</div></div>
+      <div class="tile"><div class="lbl">CW (이월 포함)</div><div class="val">72건</div><div class="sub">이번달 72 + 이월 0</div></div>
+      <div class="tile"><div class="lbl">담당 중 CW 비율</div><div class="val">18%</div><div class="sub">72/397 · 진행 중 227</div></div>
+      <div class="tile"><div class="lbl">stale 방문</div><div class="val">-건</div><div class="sub">정체 매장</div></div>
+    </div>
+  </div>
+  
+  <div class="subteam">
+    <div class="st-head">
+      <div class="st-bar" style="background:var(--purple)"></div>
+      <div class="st-name">백오피스 (인바운드)</div>
+      <div class="st-meta">4명 — 견적·계약·출고·설치</div>
+    </div>
+    
+    <div class="hero-kpi ">
+      <div style="min-width:200px">
+        <div class="hero-kpi-tag">1차 핵심 KPI</div>
+        <div class="hero-kpi-name">CW 전환율 (이월 포함, 마감 매장 중 Win 비율)</div>
+        <div class="hero-kpi-val">45<span style="font-size:22px;font-weight:600;color:var(--text-secondary)">%</span></div>
+        
+      </div>
+      <div class="hero-kpi-bar">
+        
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">마감 460건 (CW 205 / CL 255) · CW 내역: 이번달 64 + 이월 141</div>
+      </div>
+    </div>
+    <div class="kpi-row" style="margin-top:14px">
+      <div class="tile"><div class="lbl">활동 대상 (전체)</div><div class="val">408건</div><div class="sub">이번달 408 + 이월 0</div></div>
+      <div class="tile"><div class="lbl">CW (이월 포함)</div><div class="val">205건</div><div class="sub">이번달 64 + 이월 141</div></div>
+      <div class="tile"><div class="lbl">담당 중 CW 비율</div><div class="val">50%</div><div class="sub">205/408 · 진행 중 237</div></div>
+      <div class="tile"><div class="lbl">SQL 백로그</div><div class="val">-건</div></div>
+    </div>
+  </div>
+  
+  <div class="subteam">
+    <div class="st-head">
+      <div class="st-bar" style="background:#0ea5e9"></div>
+      <div class="st-name">채널 TM (텔레마케팅)</div>
+      <div class="st-meta">3명 — Lead 1차 응대 + 견적 처리</div>
+    </div>
+    
+    <div class="hero-kpi poor">
+      <div style="min-width:200px">
+        <div class="hero-kpi-tag">1차 핵심 KPI</div>
+        <div class="hero-kpi-name">SQL 백로그 (견적 후 입금일자 7일+ 미입력)</div>
+        <div class="hero-kpi-val">68<span style="font-size:22px;font-weight:600;color:var(--text-secondary)">건</span></div>
+        <div class="hero-kpi-target">목표 10건 · 달성률 15%</div>
+      </div>
+      <div class="hero-kpi-bar">
+        <div class="hero-bar-track"><div class="hero-bar-fill" style="width:15%"></div></div>
+        <div class="hero-bar-info"><span>0</span><span>목표 10건</span></div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">Open SQL 112건 중 68건 7일+ 정체 · 목표 10건 이내</div>
+      </div>
+    </div>
+    <div class="kpi-row" style="margin-top:14px">
+      <div class="tile target-met"><div class="lbl">FRT 준수율 (20분)</div><div class="val">89%</div><div class="sub">278/313건</div></div>
+      <div class="tile"><div class="lbl">평균 FRT</div><div class="val">63분</div></div>
+      <div class="tile"><div class="lbl">미전환 MQL</div><div class="val">7건</div></div>
+      <div class="tile"><div class="lbl">견적 발송</div><div class="val">294건</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="channel">
+  <h2><span class="dot" style="background:#8b5cf6"></span>채널</h2>
+  
+  <div class="subteam">
+    <div class="st-head">
+      <div class="st-bar" style="background:var(--purple)"></div>
+      <div class="st-name">채널 AE (Account Executive)</div>
+      <div class="st-meta">1명 · 영업일 21일 — MOU 체결·협상 진입</div>
+    </div>
+    
+    <div class="hero-kpi met">
+      <div style="min-width:200px">
+        <div class="hero-kpi-tag">1차 핵심 KPI</div>
+        <div class="hero-kpi-name">신규 MOU 체결 수</div>
+        <div class="hero-kpi-val">25<span style="font-size:22px;font-weight:600;color:var(--text-secondary)">건</span></div>
+        <div class="hero-kpi-target">목표 4건 · 달성률 200%</div>
+      </div>
+      <div class="hero-kpi-bar">
+        <div class="hero-bar-track"><div class="hero-bar-fill" style="width:100%"></div></div>
+        <div class="hero-bar-info"><span>0</span><span>목표 4건</span></div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">파트너 13 · FC HQ 12 · 브랜드 0</div>
+      </div>
+    </div>
+    <div class="kpi-row" style="margin-top:14px">
+      <div class="tile target-met"><div class="lbl">협상 진입 (이번달)</div><div class="val">11건</div><div class="sub">목표 10건 · 누적 117</div></div>
+      <div class="tile"><div class="lbl">미서명 계약</div><div class="val">5건</div><div class="sub">overdue 1건 (7일 기준)</div></div>
+      <div class="tile"><div class="lbl">미팅 (이번달)</div><div class="val">23건</div><div class="sub">일평균 1.1건</div></div>
+      <div class="tile"><div class="lbl">미팅 목표/일</div><div class="val">2</div></div>
+    </div>
+  </div>
+  
+  <div class="subteam">
+    <div class="st-head">
+      <div class="st-bar" style="background:#06b6d4"></div>
+      <div class="st-name">채널 AM (Account Manager)</div>
+      <div class="st-meta">4명 · 영업일 21일 — Lead 확보·미팅·온보딩</div>
+    </div>
+    
+    <div class="hero-kpi met">
+      <div style="min-width:200px">
+        <div class="hero-kpi-tag">1차 핵심 KPI</div>
+        <div class="hero-kpi-name">활성 파트너 수</div>
+        <div class="hero-kpi-val">298<span style="font-size:22px;font-weight:600;color:var(--text-secondary)">개</span></div>
+        <div class="hero-kpi-target">목표 70개 · 달성률 200%</div>
+      </div>
+      <div class="hero-kpi-bar">
+        <div class="hero-bar-track"><div class="hero-bar-fill" style="width:100%"></div></div>
+        <div class="hero-bar-info"><span>0</span><span>목표 70개</span></div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">파트너 153 · 브랜드 145</div>
+      </div>
+    </div>
+    <div class="kpi-row" style="margin-top:14px">
+      <div class="tile"><div class="lbl">채널 Lead (이번달)</div><div class="val">314건</div><div class="sub">파트너 213 / 프랜차이즈 101</div></div>
+      <div class="tile"><div class="lbl">일평균 Lead</div><div class="val">14.9건</div><div class="sub">목표 20~25</div></div>
+      <div class="tile target-low"><div class="lbl">온보딩률</div><div class="val">32.7%</div><div class="sub">16/49 · 목표 80%</div></div>
+      <div class="tile"><div class="lbl">미팅 (이번달)</div><div class="val">130건</div><div class="sub">일평균 6.2건</div></div>
+    </div>
+  </div>
+  
+  <div class="subteam">
+    <div class="st-head">
+      <div class="st-bar" style="background:#a855f7"></div>
+      <div class="st-name">백오피스 (채널)</div>
+      <div class="st-meta">3명 — 채널 견적·계약</div>
+    </div>
+    
+    <div class="hero-kpi ">
+      <div style="min-width:200px">
+        <div class="hero-kpi-tag">1차 핵심 KPI</div>
+        <div class="hero-kpi-name">CW 전환율 (이월 포함, 마감 매장 중 Win 비율)</div>
+        <div class="hero-kpi-val">58<span style="font-size:22px;font-weight:600;color:var(--text-secondary)">%</span></div>
+        
+      </div>
+      <div class="hero-kpi-bar">
+        
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">마감 356건 (CW 208 / CL 148) · CW 내역: 이번달 70 + 이월 138</div>
+      </div>
+    </div>
+    <div class="kpi-row" style="margin-top:14px">
+      <div class="tile"><div class="lbl">활동 대상 (전체)</div><div class="val">406건</div><div class="sub">이번달 0 + 이월 0</div></div>
+      <div class="tile"><div class="lbl">CW (이월 포함)</div><div class="val">208건</div><div class="sub">이번달 70 + 이월 138</div></div>
+      <div class="tile"><div class="lbl">담당 중 CW 비율</div><div class="val">51%</div><div class="sub">208/406 · 진행 중 183</div></div>
+      <div class="tile"><div class="lbl">SQL 백로그</div><div class="val">-건</div></div>
+    </div>
+  </div>
+  
+  <div class="subteam">
+    <div class="st-head">
+      <div class="st-bar" style="background:var(--orange)"></div>
+      <div class="st-name">MOU 발굴 현황 (채널 1차 KPI 보조)</div>
+    </div>
+    <div class="kpi-row">
+      <div class="tile"><div class="lbl">파트너 (이번달)</div><div class="val">13건</div><div class="sub">최근 3개월 49</div></div>
+      <div class="tile"><div class="lbl">프랜차이즈본사 (이번달)</div><div class="val">12건</div><div class="sub">최근 3개월 31</div></div>
+      <div class="tile"><div class="lbl">파트너 온보딩</div><div class="val">-건</div><div class="sub">/ 49</div></div>
+      <div class="tile"><div class="lbl">FC HQ 온보딩</div><div class="val">-건</div><div class="sub">/ 31</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="scores">
+  <h2><span class="dot" style="background:#f59f00"></span>스코어카드 — 사람별 등급</h2>
+  
+    <div class="subteam">
+      <div class="st-head">
+        <div class="st-bar" style="background:#f59f00"></div>
+        <div class="st-name">팀별 등급 분포</div>
+        <div class="st-meta">사람별 점수가 자동 평가된 등급(S~D) 분포 — 사람 이름 비공개</div>
+      </div>
+      <table>
+        <thead><tr><th>팀</th><th>인원</th><th>평균 점수</th><th>S</th><th>A</th><th>B</th><th>C</th><th>D</th></tr></thead>
+        <tbody><tr>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#00b386;margin-right:6px"></span>인사이드</td>
+      <td><strong>11명</strong></td>
+      <td>62점</td>
+      <td><span class="grade grade-S">S</span> 1명</td><td><span class="grade grade-A">A</span> 1명</td><td><span class="grade grade-B">B</span> 3명</td><td><span class="grade grade-C">C</span> 5명</td><td><span class="grade grade-D">D</span> 1명</td>
+    </tr><tr>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f59f00;margin-right:6px"></span>필드</td>
+      <td><strong>13명</strong></td>
+      <td>0점</td>
+      <td><span class="grade grade-S">S</span> 0명</td><td><span class="grade grade-A">A</span> 0명</td><td><span class="grade grade-B">B</span> 0명</td><td><span class="grade grade-C">C</span> 0명</td><td><span class="grade grade-D">D</span> 0명</td>
+    </tr><tr>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#8b5cf6;margin-right:6px"></span>인바운드 BO</td>
+      <td><strong>5명</strong></td>
+      <td>41점</td>
+      <td><span class="grade grade-S">S</span> 0명</td><td><span class="grade grade-A">A</span> 0명</td><td><span class="grade grade-B">B</span> 0명</td><td><span class="grade grade-C">C</span> 1명</td><td><span class="grade grade-D">D</span> 4명</td>
+    </tr><tr>
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#a855f7;margin-right:6px"></span>채널 BO</td>
+      <td><strong>5명</strong></td>
+      <td>50점</td>
+      <td><span class="grade grade-S">S</span> 0명</td><td><span class="grade grade-A">A</span> 0명</td><td><span class="grade grade-B">B</span> 1명</td><td><span class="grade grade-C">C</span> 2명</td><td><span class="grade grade-D">D</span> 2명</td>
+    </tr></tbody>
+      </table>
+    </div>
+</section>
+
+<div style="padding:16px 20px;background:#f9fafb;border-radius:12px;font-size:12px;color:var(--text-secondary);margin-top:24px">
+  <strong>데이터 출처:</strong> S3+CloudFront (kpi-extract.js, scripts/channel-extract.js 산출물)<br>
+  <strong>매월 자동 갱신:</strong> <code>node scripts/analysis/render-monthly-kpi.js YYYY-MM</code><br>
+  <strong>주의:</strong> CW 태블릿/매출은 모든 sub-team의 후행 지표 — 1차 평가는 sub-team 핵심 KPI 사용
+</div>
+
+</div></body></html>

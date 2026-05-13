@@ -1,6 +1,6 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
-const sf = require('../dashboard/backend/services/salesforce');
+const sf = require('../server/api/services/salesforce');
 const fs = require('fs');
 
 const IB_BO_NAMES = ['전수빈', '정지영', '박효정', '조현재'];

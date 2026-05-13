@@ -1,203 +1,240 @@
 # Salesforce Data Tools
 
-Salesforce Closed-Lost Grid 데이터를 일별, 주별, 월별로 추출하는 독립 실행형 도구입니다.
+세일즈 KPI 데이터 추출·집계·시각화 도구. **S3 정적 배포 + 비동기 추출** 아키텍처.
 
-## 🚀 빠른 시작
+## 아키텍처
 
-### 1. 의존성 설치
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      Salesforce CRM                          │
+└──────────────────┬──────────────────────────────────────────┘
+                   │ SOQL (OAuth password grant)
+                   ↓
+┌─────────────────────────────────────────────────────────────┐
+│  server/extractors/  (Node.js, PM2 cron 30분마다)            │
+│  ├── kpi-extract.js               인사이드 + 채널 sub-team   │
+│  ├── channel-extract.js           채널 KPI v2 (BD/AM/MOU)    │
+│  ├── inbound-extract.js           인바운드 보조              │
+│  ├── install-tracking-extract.js  설치 트래킹                │
+│  └── s3-extract.js                통합 엔트리                │
+└──────────────────┬──────────────────────────────────────────┘
+                   │ JSON 업로드
+                   ↓
+┌─────────────────────────────────────────────────────────────┐
+│  AWS S3 (정적 호스팅) + CloudFront (CDN)                     │
+│  ├── /dashboard/kpi/monthly/{YYYY-MM}.json                   │
+│  ├── /dashboard/channel/kpi-v2/{YYYY-MM}.json                │
+│  ├── /dashboard/kpi/daily/{YYYY-MM-DD}.json                  │
+│  ├── /dashboard/kpi/weekly/{start}_{end}.json                │
+│  └── /dashboard/...  (정적 Next.js 빌드 결과 + JSON 데이터)  │
+└────────────┬──────────────┬─────────────────────────────────┘
+             │              │
+        JSON │              │ 정적 페이지
+        fetch │              │
+             ↓              ↓
+┌─────────────────────────────────────────────────────────────┐
+│  web/  (Next.js static export → S3 배포)                     │
+│  - 브라우저가 CloudFront에서 정적 페이지 + JSON 직접 fetch   │
+│  - API 서버를 거치지 않음                                    │
+└─────────────────────────────────────────────────────────────┘
+                   ↑
+                   │ (선택) 즉시 추출 트리거
+                   │
+┌─────────────────────────────────────────────────────────────┐
+│  server/api/  (Express, PM2 sf-dashboard-api)                │
+│  - POST /api/kpi/refresh         : 추출 즉시 실행            │
+│  - POST /api/install-tracking/refresh : 설치 트래킹 갱신     │
+│  - 그 외 보조 라우트 (관리·디버그 용도)                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**핵심 특징**
+- **클라이언트는 S3+CloudFront에서 정적 JSON을 직접 fetch** — API 서버에 부하 없음
+- **추출은 30분 cron 백그라운드 처리** — 사용자 요청과 분리
+- **server/api는 보조** — 즉시 갱신, 관리 기능 등 일부 동적 요구만 처리
+
+---
+
+## 디렉토리 구조
+
+```
+salesforce-data-tools/
+├── server/                  # 서버사이드 통합
+│   ├── extractors/          # Salesforce → S3 추출 스크립트
+│   ├── api/                 # Express API 서버 (보조)
+│   │   ├── server.js
+│   │   ├── routes/          # /api/kpi, /api/inbound, /api/channel, ...
+│   │   └── services/        # salesforce.js, kpi-report.js 등
+│   └── shared/              # 공통 라이브러리
+│       ├── s3-upload.js
+│       ├── kpi-aggregation.js
+│       └── closedLostGrid.js
+│
+├── web/                     # Next.js (output: 'export', S3 정적 배포)
+│   ├── src/, public/
+│   ├── package.json
+│   └── next.config.ts
+│
+├── scripts/                 # ad-hoc 분석·실험
+│   ├── analysis/            # 매월 재실행 (render-monthly-kpi.js 등)
+│   ├── archive/             # 1회성 분석 보존
+│   ├── experiments/         # 실험 코드
+│   ├── debug/, auto-task/
+│   └── deploy-frontend.sh   # 프론트 S3 배포 스크립트
+│
+├── reports/                 # 산출물 (HTML/MD)
+├── data/                    # 로컬 raw 데이터 (gitignore)
+├── docs/                    # 문서
+├── ecosystem.config.js      # PM2 설정 (sf-s3-extract + sf-dashboard-api)
+├── package.json
+├── .env, .env.example, .gitignore
+└── README.md, QUICKSTART.md
+```
+
+---
+
+## 데이터 흐름
+
+### 1. 정상 흐름 (대부분의 사용자 요청)
+```
+사용자 브라우저
+  → CloudFront (정적 페이지 + JSON)
+  → S3 (CDN edge)
+```
+**API 서버 호출 없음.** PM2 cron이 30분마다 갱신한 JSON을 그대로 fetch.
+
+### 2. 즉시 갱신이 필요한 경우
+```
+사용자 브라우저
+  → server/api (POST /api/kpi/refresh)
+  → server/extractors (spawn 추출 프로세스)
+  → S3 업로드
+  → 응답 후 클라이언트가 S3 재fetch
+```
+
+### 3. 매월 KPI 리포트 생성 (분석가용)
+```
+node scripts/analysis/render-monthly-kpi.js 2026-04
+  → CloudFront에서 JSON 직접 fetch
+  → reports/2026-04-kpi-monthly-report.html 생성
+```
+
+---
+
+## 설치 및 실행
+
+### 1. 의존성
 
 ```bash
+# 루트 (추출 스크립트, API 서버)
 npm install
+
+# 프론트엔드
+cd web && npm install
 ```
 
-### 2. 환경 변수 설정
+### 2. 환경 변수 (`.env`)
 
-`.env` 파일을 생성하고 Salesforce 인증 정보를 입력합니다:
-
-```bash
-cp .env.example .env
-```
-
-`.env` 파일 내용:
 ```env
-SF_CLIENT_ID=your_client_id
-SF_CLIENT_SECRET=your_client_secret
-SF_USERNAME=your_username
-SF_PASSWORD=your_password
+# Salesforce
+SF_CLIENT_ID=...
+SF_CLIENT_SECRET=...
+SF_USERNAME=...
+SF_PASSWORD=...
 SF_LOGIN_URL=https://login.salesforce.com
-API_BASE_URL=http://localhost:3003
-OUTPUT_DIR=./data
+
+# AWS S3
+AWS_REGION=...
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+S3_BUCKET_NAME=...
+
+# API 서버 (선택)
+API_PORT=4003
 ```
 
-### 3. 실행
+### 3. 로컬 실행
+
+**추출 (수동 1회):**
+```bash
+node server/extractors/kpi-extract.js          # 인사이드 + 채널 sub-team
+node server/extractors/channel-extract.js      # 채널 KPI v2
+node server/extractors/s3-extract.js           # 통합 (PM2 진입점)
+```
+
+**API 서버:**
+```bash
+node server/api/server.js
+# 또는
+pm2 start ecosystem.config.js --only sf-dashboard-api
+```
+
+**프론트엔드 개발 서버:**
+```bash
+cd web && npm run dev
+```
+
+**프론트엔드 빌드 + S3 배포:**
+```bash
+cd web && npm run build         # web/out/ 정적 빌드
+bash scripts/deploy-frontend.sh # S3 업로드
+```
+
+---
+
+## 운영 (PM2)
+
+`ecosystem.config.js`에 두 앱 통합.
 
 ```bash
-# 일별 데이터 추출 (오늘)
-npm run fetch:daily
-
-# 일별 데이터 추출 (특정 날짜)
-npm run fetch:daily 2026-01-15
-
-# 주별 데이터 추출
-npm run fetch:weekly 2026-01-15
-
-# 월별 데이터 추출
-npm run fetch:monthly 2026-01-15
-
-# 모든 타입 추출 (일별 + 주별 + 월별)
-npm run fetch:all 2026-01-15
+pm2 start ecosystem.config.js          # 전체 시작
+pm2 restart sf-s3-extract              # 추출 즉시 실행 (30분 cron 외 수동)
+pm2 restart sf-dashboard-api           # API 서버 재시작
+pm2 logs sf-s3-extract                 # 추출 로그
+pm2 logs sf-dashboard-api              # API 로그
+pm2 save                               # 부팅 시 자동 시작 등록
 ```
 
-## 📖 사용법
+| 앱 | 스크립트 | 주기 |
+|---|---|---|
+| `sf-s3-extract` | `server/extractors/s3-extract.js` | 30분 cron, 완료 후 종료 |
+| `sf-dashboard-api` | `server/api/server.js` | 상주, 자동 재시작 |
 
-### NPM 스크립트
+---
 
-```bash
-npm run fetch:daily [날짜]    # 일별 데이터
-npm run fetch:weekly [날짜]   # 주별 데이터 (월요일~일요일)
-npm run fetch:monthly [날짜]  # 월별 데이터
-npm run fetch:all [날짜]      # 모든 타입
-```
+## 분석 스크립트 (`scripts/analysis/`)
 
-### Node.js 직접 실행
+매월 재실행하는 KPI 리포트 생성기.
 
-```bash
-node index.js daily 2026-01-15
-node index.js weekly 2026-01-15
-node index.js monthly 2026-01-15
-node index.js all 2026-01-15
-```
+| 스크립트 | 산출물 | 입력 |
+|---|---|---|
+| `render-monthly-kpi.js` | 월간 HTML 리포트 (sub-team별 핵심 KPI·트렌드·인과 해석) | S3 JSON (CloudFront fetch) |
+| `render-quarterly-md.js` | 분기 PPT용 Markdown | S3 JSON (1~4월 4개월) |
+| `visit-to-cw-report.js` | 방문→CW leadtime 분석 HTML | Salesforce 직접 SOQL |
+| `frt-report.js`, `inactive-partners*.js`, `pipeline-congestion-*.js` | 각종 분석 | 직접 SOQL |
 
-## 📁 출력 구조
+**1회성 분석은 `scripts/archive/`에 보존.**
 
-추출된 데이터는 `data/` 디렉토리에 저장됩니다:
+---
 
-```
-data/
-├── daily_2026-01-15.json
-├── weekly_2026-01-13_to_2026-01-19.json
-└── monthly_2026-01.json
-```
+## 문제 해결
 
-## 🔧 설정
+### "토큰 발급 실패"
+- `.env` 인증 정보 확인
+- Connected App IP 제한 확인
+- 비밀번호 특수문자는 URL 인코딩 필요
 
-### 환경 변수
+### 추출은 됐는데 클라이언트가 옛 데이터
+- CloudFront 캐시 — invalidation 또는 TTL 만료 대기
 
-| 변수 | 설명 | 기본값 |
-|------|------|--------|
-| `SF_CLIENT_ID` | Salesforce Connected App Client ID | 필수 |
-| `SF_CLIENT_SECRET` | Salesforce Connected App Client Secret | 필수 |
-| `SF_USERNAME` | Salesforce 사용자명 | 필수 |
-| `SF_PASSWORD` | Salesforce 비밀번호 | 필수 |
-| `SF_LOGIN_URL` | Salesforce 로그인 URL | `https://login.salesforce.com` |
-| `API_BASE_URL` | API 서버 URL | `http://localhost:3003` |
-| `OUTPUT_DIR` | 출력 디렉토리 | `./data` |
+### `kpi-extract.js` 결과에 사람 이름이 영문 ID
+- `IsActive=true` SOQL 필터 때문에 퇴사자/신규자 매핑 누락. byOwner 처리 시 누락된 userId 별도 SOQL 매핑 필요.
 
-## 📊 데이터 구조
+### Node v23 + login.salesforce.com ECONNRESET
+- `scripts/archive/axios-fetch-shim.js` 참고 (fetch adapter 적용)
 
-```json
-{
-  "dateUtc": "2026-01-02~2026-01-31",
-  "startIso": "2026-01-02T00:00:00Z",
-  "endIso": "2026-02-01T00:00:00Z",
-  "startDate": "2026-01-02",
-  "endDate": "2026-01-31",
-  "summary": {
-    "closedLostCount": 918,
-    "accountCount": 901,
-    "lossCategories": [
-      {
-        "label": "단순 변심",
-        "count": 360
-      }
-    ]
-  },
-  "rows": [
-    {
-      "opportunity": {
-        "id": "006TJ00000b09POYAY",
-        "name": "...",
-        "createdDate": "2026-01-02T02:10:11.000+0000",
-        "department": "광고세일즈1팀"
-      },
-      "loss": {
-        "reason": "광고주 내부 검토",
-        "r1": "시기 미정"
-      },
-      "latestCase": null,
-      "recentCases": [],
-      "recentTasks": []
-    }
-  ]
-}
-```
+---
 
-## 🔐 인증 방식
+## 라이선스
 
-이 도구는 Salesforce Username-Password OAuth Flow를 사용합니다:
-
-1. `.env`의 인증 정보로 Salesforce OAuth 토큰 발급
-2. 발급받은 토큰으로 API 서버 호출
-3. 토큰은 세션 동안 캐시되어 재사용
-
-## 🛠️ 기술 스택
-
-- **Node.js**: 런타임
-- **axios**: HTTP 클라이언트
-- **dotenv**: 환경 변수 관리
-
-## 📝 예제
-
-### 2026년 1월 전체 데이터 추출
-
-```bash
-npm run fetch:monthly 2026-01-15
-```
-
-출력:
-```
-📊 타입: MONTHLY
-📅 기준일: 2026-01-15
-📁 출력 경로: ./data
-
-📅 MONTHLY 데이터 추출: 2026-01-01 ~ 2026-01-31
-✅ 저장 완료: monthly_2026-01.json
-   📊 건수: 918건
-   💾 크기: 5832.45 KB
-
-✨ 모든 데이터 추출 완료!
-📁 저장 위치: /Users/torder/workspace/salesforce-data-tools/data
-```
-
-### 특정 주의 데이터 추출
-
-```bash
-npm run fetch:weekly 2026-01-15
-```
-
-2026-01-15가 포함된 주(월요일~일요일)의 데이터를 추출합니다.
-
-## ⚠️ 문제 해결
-
-### "환경 변수가 설정되지 않았습니다" 오류
-
-`.env` 파일이 올바르게 설정되었는지 확인하세요.
-
-### "토큰 발급 실패" 오류
-
-1. Salesforce 인증 정보가 정확한지 확인
-2. Connected App 설정 확인
-3. IP 제한 설정 확인
-
-### "API 인증 실패" 오류
-
-1. API 서버(`http://localhost:3003`)가 실행 중인지 확인
-2. API 서버에 먼저 로그인이 필요할 수 있습니다
-
-## 📄 라이선스
-
-ISC
-
-## 👥 작성자
-
-Torder Team
+ISC · Torder Team

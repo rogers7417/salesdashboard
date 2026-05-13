@@ -15,7 +15,7 @@ const DATA_DIR = path.join(__dirname, '../../../data');
 const {
   aggregateWeeklyData,
   annotateCurrentStatus: _annotateCurrentStatus,
-} = require('../../../lib/kpi-aggregation');
+} = require('../../../server/shared/kpi-aggregation');
 
 // DATA_DIR을 바인딩한 래퍼
 async function annotateCurrentStatus(data, requestedPeriod) {
