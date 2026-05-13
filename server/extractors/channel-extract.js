@@ -1,9 +1,9 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-const { collectChannelData } = require('../channel-sales-report/salesforce');
-const { calculateStats } = require('../channel-sales-report/stats');
-const { uploadJSON } = require('../lib/s3-upload');
+const { collectChannelData } = require('./channel-sales-report/salesforce');
+const { calculateStats } = require('./channel-sales-report/stats');
+const { uploadJSON } = require('../shared/s3-upload');
 
 function getCurrentMonth() {
   const now = new Date();

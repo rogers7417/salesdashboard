@@ -1,8 +1,8 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-const { generateReport } = require('../dashboard/backend/services/inbound-report');
-const { uploadJSON } = require('../lib/s3-upload');
+const { generateReport } = require('../api/services/inbound-report');
+const { uploadJSON } = require('../shared/s3-upload');
 
 const MODES = ['daily', 'weekly', 'monthly', 'monthly-current'];
 

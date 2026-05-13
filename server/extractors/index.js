@@ -20,7 +20,7 @@ require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
-const { fetchClosedLostGrid } = require('./lib/closedLostGrid');
+const { fetchClosedLostGrid } = require('../shared/closedLostGrid');
 
 // 설정
 const OUTPUT_DIR = process.env.OUTPUT_DIR || './data';

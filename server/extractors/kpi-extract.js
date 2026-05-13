@@ -3959,8 +3959,8 @@ async function main() {
   // S3 업로드 + 주간 사전계산 + 메타데이터
   // ============================================
   if (!localMode && (s3Mode || process.env.S3_BUCKET_NAME)) {
-    const { uploadJSON } = require('./lib/s3-upload');
-    const { aggregateWeeklyData, annotateCurrentStatus, generateWeeks } = require('./lib/kpi-aggregation');
+    const { uploadJSON } = require('../shared/s3-upload');
+    const { aggregateWeeklyData, annotateCurrentStatus, generateWeeks } = require('../shared/kpi-aggregation');
 
     console.log('\n☁️  S3 업로드 시작...');
 

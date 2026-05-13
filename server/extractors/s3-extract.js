@@ -15,7 +15,7 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const { spawn } = require('child_process');
-const { uploadJSON } = require('../lib/s3-upload');
+const { uploadJSON } = require('../shared/s3-upload');
 
 const ROOT_DIR = path.join(__dirname, '..');
 
