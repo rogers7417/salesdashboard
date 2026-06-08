@@ -7,8 +7,28 @@ const S3_DATA_URL = process.env.NEXT_PUBLIC_S3_DATA_URL || '';
 const KAKAO_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY || '';
 const SF_BASE = 'https://torder.lightning.force.com/lightning/r/Opportunity';
 
-// 데이터 로드 — S3 정적 또는 로컬 API
-async function loadTracking(): Promise<{ records: any[] }> {
+// 부서 → 파일 슬러그
+const DEPT_SLUG: Record<string, string> = {
+  '아웃바운드세일즈': 'outbound',
+  '인바운드세일즈': 'inbound',
+  '채널매니지먼트': 'channel',
+  '리텐션': 'retention',
+  '마케팅': 'marketing',
+  '채널세일즈': 'channel-sales',
+  'SE': 'se',
+};
+
+// 데이터 로드:
+//  - S3 + 부서 지정 → 그 팀 파일만 (가벼움)
+//  - S3 + 부서 미지정 → tracking 전체 (호환용)
+//  - 로컬 dev → /api/visits/all (전체)
+async function loadTracking(dept?: string): Promise<{ records: any[] }> {
+  if (S3_DATA_URL && dept && DEPT_SLUG[dept]) {
+    const url = `${S3_DATA_URL}/visits/team-${DEPT_SLUG[dept]}.json`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`${dept} 팀 파일 로드 실패 (${res.status})`);
+    return res.json();
+  }
   const url = S3_DATA_URL
     ? `${S3_DATA_URL}/visits/tracking.json`
     : `${API}/api/visits/all`;
@@ -201,14 +221,16 @@ export default function VisitRoutePage() {
     })();
   }, []);
 
-  // 데이터 로드 (S3 또는 로컬 API — 단일 JSON)
+  // 부서 변경 시 — 그 팀 파일 fetch + 기존 선택 초기화
   useEffect(() => {
-    loadTracking()
+    setOwnerFilter('');
+    setSelected(null);
+    setNearby([]);
+    setAllRecords([]); // stale 데이터 잠시 비우기
+    loadTracking(deptFilter)
       .then(d => setAllRecords(d.records || []))
       .catch(e => setErr(e.message));
-  }, []);
-
-  useEffect(() => { setOwnerFilter(''); setSelected(null); setNearby([]); }, [deptFilter]);
+  }, [deptFilter]);
 
   // 풀 → Pin 매핑 (필터 없음, 전체 풀)
   const pins = useMemo<Pin[]>(() => allRecords.filter(inPool).map(toPin), [allRecords]);

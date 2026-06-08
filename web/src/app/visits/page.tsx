@@ -11,13 +11,16 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003';
 const S3_DATA_URL = process.env.NEXT_PUBLIC_S3_DATA_URL || '';
 const SF_BASE = 'https://torder.lightning.force.com/lightning/r/Opportunity';
 
-async function loadTracking(): Promise<any> {
-  const url = S3_DATA_URL
-    ? `${S3_DATA_URL}/visits/tracking.json`
-    : `${API}/api/visits/all`;
-  const res = await fetch(url, { cache: 'no-store' });
+async function loadSummary(): Promise<any> {
+  // S3 정적 모드: 가벼운 summary.json (~130KB). 로컬 dev: 전체 tracking 후 클라이언트 계산
+  if (S3_DATA_URL) {
+    const res = await fetch(`${S3_DATA_URL}/visits/summary.json`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`summary 로드 실패 (${res.status})`);
+    return { mode: 'summary', summary: await res.json() };
+  }
+  const res = await fetch(`${API}/api/visits/all`, { cache: 'no-store' });
   if (!res.ok) throw new Error(`tracking 로드 실패 (${res.status})`);
-  return res.json();
+  return { mode: 'tracking', tracking: await res.json() };
 }
 
 // raw records → summary + stuck (이전 API /summary, /stuck 응답과 동일 형태)
@@ -137,10 +140,25 @@ export default function VisitsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const data = await loadTracking();
-        const { summary, stuck } = computeFromRecords(data);
-        setSummary(summary);
-        setStuck(stuck);
+        const loaded = await loadSummary();
+        if (loaded.mode === 'summary') {
+          // S3 — summary는 이미 페이지 A 응답 형태로 빌드돼 있음
+          const s = loaded.summary;
+          setSummary({
+            generatedAt: s.generatedAt,
+            period: s.period,
+            total: s.total,
+            byStage: s.byStage,
+            byOwner: s.byOwner,
+            trend: s.trend,
+          });
+          setStuck(s.stuck || []);
+        } else {
+          // 로컬 dev — 전체 tracking에서 클라이언트 계산
+          const { summary, stuck } = computeFromRecords(loaded.tracking);
+          setSummary(summary);
+          setStuck(stuck);
+        }
       } catch (e: unknown) {
         setErr((e as Error).message);
       } finally {

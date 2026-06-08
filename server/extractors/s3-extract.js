@@ -104,11 +104,21 @@ async function runVisitTracking() {
   await runScript(path.join(PROJECT_ROOT, 'scripts/analysis/geocode-visit-opps.js'));
   // 2) Visit__c + Task 통합 데이터셋
   await runScript(path.join(PROJECT_ROOT, 'scripts/analysis/build-visit-tracking-dataset.js'));
-  // 3) S3 업로드 (visits/tracking.json)
+  // 3) S3 업로드
   const trackingPath = path.join(PROJECT_ROOT, 'data/visit-tracking.json');
   if (!fs.existsSync(trackingPath)) throw new Error('visit-tracking.json 미생성');
-  const content = JSON.parse(fs.readFileSync(trackingPath, 'utf8'));
-  await uploadJSON('visits/tracking.json', content);
+  // legacy 통합 파일 (호환용)
+  await uploadJSON('visits/tracking.json', JSON.parse(fs.readFileSync(trackingPath, 'utf8')));
+  // 팀별 + summary 파일
+  const splitDir = path.join(PROJECT_ROOT, 'data/visits');
+  if (fs.existsSync(splitDir)) {
+    const files = fs.readdirSync(splitDir).filter(f => f.endsWith('.json'));
+    for (const f of files) {
+      const content = JSON.parse(fs.readFileSync(path.join(splitDir, f), 'utf8'));
+      await uploadJSON(`visits/${f}`, content);
+      console.log(`   ☁️  visits/${f} 업로드`);
+    }
+  }
   return { success: true, duration: `${((Date.now() - t0) / 1000).toFixed(1)}s` };
 }
 

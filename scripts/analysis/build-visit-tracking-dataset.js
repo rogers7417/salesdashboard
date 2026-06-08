@@ -325,16 +325,126 @@ const cleanStr = s => {
 
   console.log(`   ${records.length}건`);
 
-  console.log('7) 저장');
+  console.log('7) 저장 (legacy 통합 파일)');
   const out = {
     generatedAt: new Date().toISOString(),
-    periodStart: '2026-05-01',
+    periodStart: '2026-03-01',
     periodEnd: today,
     totalOpps: records.length,
     records,
   };
   fs.writeFileSync(OUT_PATH, JSON.stringify(out, null, 1), 'utf8');
-  console.log(`   → ${OUT_PATH}`);
+  console.log(`   → ${OUT_PATH} (${(fs.statSync(OUT_PATH).size / 1024 / 1024).toFixed(1)} MB)`);
+
+  // ── 새 구조: 팀별 + summary 분리 ──
+  console.log('8) 팀별/summary 분리');
+  const DEPT_SLUG = {
+    '아웃바운드세일즈': 'outbound',
+    '인바운드세일즈': 'inbound',
+    '채널매니지먼트': 'channel',
+    '리텐션': 'retention',
+    '마케팅': 'marketing',
+    '채널세일즈': 'channel-sales',
+  };
+  const isClosed = r => r.stage === 'Closed Won' || r.stage === 'Closed Lost';
+  const openRecords = records.filter(r => !isClosed(r));
+
+  const splitDir = path.join(__dirname, '../../data/visits');
+  if (!fs.existsSync(splitDir)) fs.mkdirSync(splitDir, { recursive: true });
+
+  // 팀별 파일 (진행중만, 전체 detail)
+  const byDept = {};
+  for (const r of openRecords) {
+    const dept = r.lastVisitorDept || r.dept || '미지정';
+    if (!byDept[dept]) byDept[dept] = [];
+    byDept[dept].push(r);
+  }
+  for (const [dept, recs] of Object.entries(byDept)) {
+    const slug = DEPT_SLUG[dept] || dept.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+    const teamPath = path.join(splitDir, `team-${slug}.json`);
+    const teamOut = {
+      generatedAt: out.generatedAt,
+      periodStart: out.periodStart,
+      periodEnd: out.periodEnd,
+      dept,
+      slug,
+      total: recs.length,
+      records: recs,
+    };
+    fs.writeFileSync(teamPath, JSON.stringify(teamOut, null, 1), 'utf8');
+    console.log(`   → team-${slug}.json (${recs.length}건 / ${(fs.statSync(teamPath).size / 1024 / 1024).toFixed(2)} MB) — ${dept}`);
+  }
+
+  // summary 파일 (전사 통계 + 정체 리스트만)
+  const stageCount = {};
+  const deptCount = {};
+  const ownerStat = {};
+  const dailyTrend = {};
+  let totalCw = 0, totalCl = 0, totalOpen = 0, totalStuck = 0;
+
+  for (const r of records) {
+    stageCount[r.stage] = (stageCount[r.stage] || 0) + 1;
+    const dept = r.lastVisitorDept || r.dept || '미지정';
+    if (!deptCount[dept]) deptCount[dept] = { dept, open: 0, stuck: 0, cw: 0, cl: 0 };
+    const dc = deptCount[dept];
+    const owner = r.lastVisitor || r.owner || '(미지정)';
+    if (!ownerStat[owner]) ownerStat[owner] = { owner, dept, visits: 0, cw: 0, cl: 0, open: 0, stuck: 0 };
+    const os = ownerStat[owner];
+    os.visits++;
+    if (r.stage === 'Closed Won') { totalCw++; dc.cw++; os.cw++; }
+    else if (r.stage === 'Closed Lost') { totalCl++; dc.cl++; os.cl++; }
+    else { totalOpen++; dc.open++; os.open++; }
+    if (r.isStuck) { totalStuck++; dc.stuck++; os.stuck++; }
+    if (r.firstVisit) {
+      if (!dailyTrend[r.firstVisit]) dailyTrend[r.firstVisit] = { date: r.firstVisit, visits: 0, cw: 0 };
+      dailyTrend[r.firstVisit].visits++;
+      if (r.stage === 'Closed Won') dailyTrend[r.firstVisit].cw++;
+    }
+  }
+
+  const ownerList = Object.values(ownerStat).map(o => ({
+    ...o,
+    closed: o.cw + o.cl,
+    cwRate: (o.cw + o.cl) > 0 ? Math.round(o.cw / (o.cw + o.cl) * 1000) / 10 : 0,
+  })).sort((a, b) => b.visits - a.visits);
+
+  const SF_BASE = 'https://torder.lightning.force.com/lightning/r/Opportunity';
+  const stuckList = records.filter(r => r.isStuck).map(r => ({
+    oppId: r.oppId,
+    name: r.name,
+    visitor: r.lastVisitor || r.owner,
+    visitorDept: r.lastVisitorDept || r.dept,
+    stage: r.stage,
+    sido: r.sido,
+    sigugun: r.sigugun,
+    firstVisit: r.firstVisit,
+    lastTaskDate: r.lastTaskDate,
+    daysSinceLastTask: r.daysSinceLastTask,
+    lastTaskSubject: r.lastTaskSubject,
+    hasOpenTask: r.hasOpenTask,
+    lightningUrl: `${SF_BASE}/${r.oppId}/view`,
+  })).sort((a, b) => b.daysSinceLastTask - a.daysSinceLastTask);
+
+  const summary = {
+    generatedAt: out.generatedAt,
+    period: { start: out.periodStart, end: out.periodEnd },
+    total: {
+      opps: records.length,
+      cw: totalCw,
+      cl: totalCl,
+      open: totalOpen,
+      stuck: totalStuck,
+      cwRate: (totalCw + totalCl) > 0 ? Math.round(totalCw / (totalCw + totalCl) * 1000) / 10 : 0,
+    },
+    byStage: Object.entries(stageCount).map(([stage, count]) => ({ stage, count })).sort((a, b) => b.count - a.count),
+    byDept: Object.values(deptCount).sort((a, b) => b.open - a.open),
+    byOwner: ownerList,
+    trend: Object.values(dailyTrend).sort((a, b) => a.date.localeCompare(b.date)),
+    stuck: stuckList,
+  };
+  const sumPath = path.join(splitDir, 'summary.json');
+  fs.writeFileSync(sumPath, JSON.stringify(summary, null, 1), 'utf8');
+  console.log(`   → summary.json (${(fs.statSync(sumPath).size / 1024).toFixed(0)} KB / 정체 ${stuckList.length}건)`);
 
   // 요약
   const stuck = records.filter(r => r.isStuck);
