@@ -8,6 +8,87 @@ import {
 } from 'recharts';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4003';
+const S3_DATA_URL = process.env.NEXT_PUBLIC_S3_DATA_URL || '';
+const SF_BASE = 'https://torder.lightning.force.com/lightning/r/Opportunity';
+
+async function loadTracking(): Promise<any> {
+  const url = S3_DATA_URL
+    ? `${S3_DATA_URL}/visits/tracking.json`
+    : `${API}/api/visits/all`;
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`tracking 로드 실패 (${res.status})`);
+  return res.json();
+}
+
+// raw records → summary + stuck (이전 API /summary, /stuck 응답과 동일 형태)
+function computeFromRecords(data: any): { summary: Summary; stuck: StuckItem[] } {
+  const recs = (data.records || []) as any[];
+  const byStage: Record<string, number> = {};
+  const byOwnerMap: Record<string, { owner: string; visits: number; cw: number; cl: number; stuck: number; open: number; quoteStuckOpps: string[] }> = {};
+  const byDate: Record<string, { date: string; visits: number; cw: number }> = {};
+  let totalCw = 0, totalCl = 0, totalStuck = 0, totalOpen = 0;
+
+  for (const r of recs) {
+    byStage[r.stage] = (byStage[r.stage] || 0) + 1;
+    const owner = r.lastVisitor || r.owner || '(미지정)';
+    if (!byOwnerMap[owner]) byOwnerMap[owner] = { owner, visits: 0, cw: 0, cl: 0, stuck: 0, open: 0, quoteStuckOpps: [] };
+    const o = byOwnerMap[owner];
+    o.visits++;
+    if (r.stage === 'Closed Won') { o.cw++; totalCw++; }
+    else if (r.stage === 'Closed Lost') { o.cl++; totalCl++; }
+    else { o.open++; totalOpen++; }
+    if (r.isStuck) { o.stuck++; totalStuck++; }
+    if (r.firstVisit) {
+      if (!byDate[r.firstVisit]) byDate[r.firstVisit] = { date: r.firstVisit, visits: 0, cw: 0 };
+      byDate[r.firstVisit].visits++;
+      if (r.stage === 'Closed Won') byDate[r.firstVisit].cw++;
+    }
+  }
+
+  const byOwner = Object.values(byOwnerMap).map(o => ({
+    ...o,
+    closed: o.cw + o.cl,
+    cwRate: (o.cw + o.cl) > 0 ? Math.round(o.cw / (o.cw + o.cl) * 1000) / 10 : 0,
+  })).sort((a, b) => b.visits - a.visits);
+
+  const trend = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
+
+  const summary: Summary = {
+    generatedAt: data.generatedAt || '',
+    period: { start: data.periodStart || '', end: data.periodEnd || '' },
+    total: {
+      opps: recs.length,
+      cw: totalCw,
+      cl: totalCl,
+      open: totalOpen,
+      stuck: totalStuck,
+      cwRate: (totalCw + totalCl) > 0 ? Math.round(totalCw / (totalCw + totalCl) * 1000) / 10 : 0,
+    },
+    byStage: Object.entries(byStage).map(([stage, count]) => ({ stage, count })).sort((a, b) => b.count - a.count),
+    byOwner,
+    trend,
+  };
+
+  const stuck: StuckItem[] = recs
+    .filter(r => r.isStuck)
+    .map(r => ({
+      oppId: r.oppId,
+      name: r.name,
+      owner: r.lastVisitor || r.owner || '(미지정)',
+      stage: r.stage,
+      sido: r.sido,
+      sigugun: r.sigugun,
+      firstVisit: r.firstVisit,
+      lastTaskDate: r.lastTaskDate,
+      daysSinceLastTask: r.daysSinceLastTask,
+      lastTaskSubject: r.lastTaskSubject,
+      hasOpenTask: r.hasOpenTask,
+      lightningUrl: `${SF_BASE}/${r.oppId}/view`,
+    }))
+    .sort((a, b) => b.daysSinceLastTask - a.daysSinceLastTask);
+
+  return { summary, stuck };
+}
 
 type Summary = {
   generatedAt: string;
@@ -56,12 +137,10 @@ export default function VisitsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const [s, st] = await Promise.all([
-          fetch(`${API}/api/visits/summary`).then(r => r.json()),
-          fetch(`${API}/api/visits/stuck`).then(r => r.json()),
-        ]);
-        setSummary(s);
-        setStuck(st.items || []);
+        const data = await loadTracking();
+        const { summary, stuck } = computeFromRecords(data);
+        setSummary(summary);
+        setStuck(stuck);
       } catch (e: unknown) {
         setErr((e as Error).message);
       } finally {
