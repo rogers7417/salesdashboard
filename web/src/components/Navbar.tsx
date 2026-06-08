@@ -13,6 +13,8 @@ const navItems = [
   { href: '/exception-tm', label: 'Exception TM' },
   { href: '/install-tracking', label: '설치 트래킹' },
   { href: '/install-tracking-v2', label: '트래킹 v2' },
+  { href: '/visits', label: '방문 트래킹' },
+  { href: '/visits/route', label: '들렀다 가기' },
 ];
 
 function NavbarInner() {
@@ -26,7 +28,7 @@ function NavbarInner() {
       color: '#fff',
       boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
     }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px' }}>
+      <div style={{ width: '100%', padding: '0 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '56px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
             <Link href="/" style={{ fontSize: '1.3em', fontWeight: 300, color: '#fff', textDecoration: 'none' }}>

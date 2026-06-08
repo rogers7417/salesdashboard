@@ -85,7 +85,7 @@ async function runChannelExtract() {
 }
 
 async function runInboundExtract() {
-  console.log('\n📞 [4/4] 인바운드 세일즈 추출...');
+  console.log('\n📞 [4/5] 인바운드 세일즈 추출...');
   try {
     const { runInboundExtract: extract } = require('./inbound-extract');
     await extract();
@@ -96,13 +96,30 @@ async function runInboundExtract() {
   }
 }
 
+async function runVisitTracking() {
+  const fs = require('fs');
+  console.log('\n🗺️  [5/5] 방문 트래킹 데이터셋 빌드 + S3 업로드...');
+  const t0 = Date.now();
+  // 1) 신규 Opp 지오코딩 (증분 — 캐시 히트는 스킵)
+  await runScript(path.join(PROJECT_ROOT, 'scripts/analysis/geocode-visit-opps.js'));
+  // 2) Visit__c + Task 통합 데이터셋
+  await runScript(path.join(PROJECT_ROOT, 'scripts/analysis/build-visit-tracking-dataset.js'));
+  // 3) S3 업로드 (visits/tracking.json)
+  const trackingPath = path.join(PROJECT_ROOT, 'data/visit-tracking.json');
+  if (!fs.existsSync(trackingPath)) throw new Error('visit-tracking.json 미생성');
+  const content = JSON.parse(fs.readFileSync(trackingPath, 'utf8'));
+  await uploadJSON('visits/tracking.json', content);
+  return { success: true, duration: `${((Date.now() - t0) / 1000).toFixed(1)}s` };
+}
+
 async function main() {
   const startTime = Date.now();
   const args = process.argv.slice(2);
   const kpiOnly = args.includes('--kpi-only');
   const channelOnly = args.includes('--channel-only');
   const inboundOnly = args.includes('--inbound-only');
-  const runAll = !kpiOnly && !channelOnly && !inboundOnly;
+  const visitOnly = args.includes('--visit-only');
+  const runAll = !kpiOnly && !channelOnly && !inboundOnly && !visitOnly;
 
   console.log('============================================');
   console.log('☁️  S3 데이터 추출 오케스트레이터');
@@ -153,7 +170,18 @@ async function main() {
     }
   }
 
-  // 5. last-updated.json 업로드
+  // 5. Visit Tracking (지오코딩 + Visit__c/Task 통합 + S3 업로드)
+  if (runAll || visitOnly) {
+    try {
+      results.visitTracking = await runVisitTracking();
+      console.log(`   ✅ 방문 트래킹 완료 (${results.visitTracking.duration})`);
+    } catch (err) {
+      results.visitTracking = { success: false, error: err.message };
+      console.error(`   ❌ 방문 트래킹 실패: ${err.message}`);
+    }
+  }
+
+  // 6. last-updated.json 업로드
   const totalDuration = ((Date.now() - startTime) / 1000).toFixed(1);
   try {
     await uploadJSON('last-updated.json', {

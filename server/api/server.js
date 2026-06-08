@@ -30,6 +30,7 @@ const channelRoutes = require('./routes/channel');
 const kpiRoutes = require('./routes/kpi');
 const installTrackingRoutes = require('./routes/install-tracking');
 const exceptionRoutes = require('./routes/exception');
+const visitsRoutes = require('./routes/visits');
 
 // 캐시 프리워밍용
 const channelReport = require('./services/channel-report');
@@ -39,6 +40,7 @@ app.use('/api/channel', channelRoutes);
 app.use('/api/kpi', kpiRoutes);
 app.use('/api/install-tracking', installTrackingRoutes);
 app.use('/api/exception', exceptionRoutes);
+app.use('/api/visits', visitsRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

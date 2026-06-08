@@ -11,12 +11,17 @@ set -e
 # 설정
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-FRONTEND_DIR="$ROOT_DIR/dashboard/frontend"
+FRONTEND_DIR="$ROOT_DIR/web"
 S3_BUCKET="torder-salesforce-dashboard"
 S3_PREFIX="frontend"
 CF_DISTRIBUTION_ID="E1311NVZLY1JN"
 CF_DOMAIN="dffqkvzh0w37t.cloudfront.net"
 DATA_URL="https://${CF_DOMAIN}/dashboard"
+
+# 카카오 JS 키 (방문 트래킹 지도용) — .env 또는 외부에서 주입
+if [ -z "$KAKAO_JS_KEY" ] && [ -f "$ROOT_DIR/.env" ]; then
+  KAKAO_JS_KEY=$(grep -E '^KAKAO_MAP_KEY=' "$ROOT_DIR/.env" | cut -d= -f2)
+fi
 
 echo "============================================"
 echo "🚀 프론트엔드 배포 시작"
@@ -26,7 +31,9 @@ echo "============================================"
 echo ""
 echo "📦 [1/3] Next.js 빌드..."
 cd "$FRONTEND_DIR"
-NEXT_PUBLIC_S3_DATA_URL="$DATA_URL" npm run build
+NEXT_PUBLIC_S3_DATA_URL="$DATA_URL" \
+  NEXT_PUBLIC_KAKAO_JS_KEY="$KAKAO_JS_KEY" \
+  npm run build
 echo "   ✅ 빌드 완료 → out/ 디렉토리"
 
 # 2. S3 업로드
