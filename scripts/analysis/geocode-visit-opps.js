@@ -12,7 +12,15 @@ const axios = require('axios');
 const CACHE_PATH = path.join(__dirname, '../../data/opp-geocode.json');
 const KAKAO_KEY = process.env.KAKAO_REST_KEY || process.env.KAKAO_REST_API_KEY;
 const THROTTLE_MS = 250;
-const START_DATE = '2026-05-01';
+// 기본: 롤링 3개월 (오늘 기준 3개월 전 월초). env로 override 가능.
+function rolling3MonthsAgo() {
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9 * 3600000);
+  kst.setUTCDate(1);
+  kst.setUTCMonth(kst.getUTCMonth() - 3);
+  return kst.toISOString().slice(0, 10);
+}
+const START_DATE = process.env.VISIT_START_DATE || rolling3MonthsAgo();
 
 if (!KAKAO_KEY) { console.error('KAKAO_REST_KEY 없음'); process.exit(1); }
 
@@ -60,10 +68,11 @@ async function geocode(addr) {
 
 (async () => {
   const t0 = Date.now();
+  console.log(`기간: ${START_DATE} ~ 오늘 (롤링 3개월)`);
   console.log('1) SF 인증');
   const sf = await sfAuth();
 
-  console.log('2) 방문 Task → distinct Opp 추출 (5/1~오늘)');
+  console.log(`2) 방문 Task → distinct Opp 추출 (${START_DATE}~오늘)`);
   const tasks = await soql(sf, `SELECT WhatId FROM Task WHERE Subject LIKE '%방문%' AND ActivityDate >= ${START_DATE} AND ActivityDate <= TODAY AND WhatId != null`);
   const oppIdSet = new Set();
   for (const t of tasks) if (t.WhatId?.startsWith('006')) oppIdSet.add(t.WhatId);
