@@ -15,6 +15,7 @@ const navItems = [
   { href: '/install-tracking-v2', label: '트래킹 v2' },
   { href: '/visits', label: '방문 트래킹' },
   { href: '/visits/route', label: '들렀다 가기' },
+  { href: '/partners', label: '파트너 라운드' },
 ];
 
 function NavbarInner() {

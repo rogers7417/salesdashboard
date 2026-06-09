@@ -96,6 +96,17 @@ async function runInboundExtract() {
   }
 }
 
+async function runPartnerTracking() {
+  const fs = require('fs');
+  console.log('\n🤝 [6/6] 파트너 라운드 데이터셋 빌드 + S3 업로드...');
+  const t0 = Date.now();
+  await runScript(path.join(PROJECT_ROOT, 'scripts/analysis/build-partner-tracking-dataset.js'));
+  const trackingPath = path.join(PROJECT_ROOT, 'data/partner-tracking.json');
+  if (!fs.existsSync(trackingPath)) throw new Error('partner-tracking.json 미생성');
+  await uploadJSON('partners/tracking.json', JSON.parse(fs.readFileSync(trackingPath, 'utf8')));
+  return { success: true, duration: `${((Date.now() - t0) / 1000).toFixed(1)}s` };
+}
+
 async function runVisitTracking() {
   const fs = require('fs');
   console.log('\n🗺️  [5/5] 방문 트래킹 데이터셋 빌드 + S3 업로드...');
@@ -129,7 +140,8 @@ async function main() {
   const channelOnly = args.includes('--channel-only');
   const inboundOnly = args.includes('--inbound-only');
   const visitOnly = args.includes('--visit-only');
-  const runAll = !kpiOnly && !channelOnly && !inboundOnly && !visitOnly;
+  const partnerOnly = args.includes('--partner-only');
+  const runAll = !kpiOnly && !channelOnly && !inboundOnly && !visitOnly && !partnerOnly;
 
   console.log('============================================');
   console.log('☁️  S3 데이터 추출 오케스트레이터');
@@ -188,6 +200,17 @@ async function main() {
     } catch (err) {
       results.visitTracking = { success: false, error: err.message };
       console.error(`   ❌ 방문 트래킹 실패: ${err.message}`);
+    }
+  }
+
+  // 6. Partner Tracking (파트너 라운드 + 지오코딩 + S3)
+  if (runAll || partnerOnly) {
+    try {
+      results.partnerTracking = await runPartnerTracking();
+      console.log(`   ✅ 파트너 라운드 완료 (${results.partnerTracking.duration})`);
+    } catch (err) {
+      results.partnerTracking = { success: false, error: err.message };
+      console.error(`   ❌ 파트너 라운드 실패: ${err.message}`);
     }
   }
 
