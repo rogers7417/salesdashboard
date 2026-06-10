@@ -16,10 +16,12 @@ const SF_BASE = 'https://torder.lightning.force.com/lightning/r/Account';
 const KAKAO_KEY = process.env.KAKAO_REST_KEY || process.env.KAKAO_REST_API_KEY;
 const THROTTLE_MS = 250;
 
-const STUCK_DAYS = 60;       // 미팅 60일+ 없음
-const LATENT_DAYS = 90;      // 신규 등록 90일 이내 + 미팅 0
-const ACTIVE_WINDOW = 90;    // 최근 90일 미팅
+const STUCK_DAYS = 60;       // 활동(미팅+Lead) 60일+ 없음
+const LATENT_DAYS = 90;      // 신규 등록 90일 이내 + 활동 0
+const ACTIVE_WINDOW = 90;    // 최근 90일 활동
 const MULTI_STORE_TH = 5;    // 5매장+
+const LEAD_TOP = 10;         // 90일 Lead 10+ = Top
+const LEAD_MID = 3;          // 3~9 = Mid (1~2 = Low, 0 = Zero)
 
 const utcToKstDate = utc => utc ? new Date(new Date(utc).getTime() + 9 * 3600000).toISOString().slice(0, 10) : null;
 const daysBetween = (a, b) => (a && b) ? Math.round((new Date(b) - new Date(a)) / 86400000) : null;
@@ -94,6 +96,25 @@ async function soql(sf, q) {
   `.replace(/\s+/g, ' '));
   console.log(`   ${events.length}건`);
 
+  console.log('3b) 최근 Lead 조회 (3개월)');
+  const leads = await soql(sf, `
+    SELECT Id, PartnerName__c, CreatedDate, LeadSource, Status
+    FROM Lead
+    WHERE PartnerName__c != null AND CreatedDate >= 2026-03-01T00:00:00Z
+  `.replace(/\s+/g, ' '));
+  console.log(`   ${leads.length}건`);
+
+  const leadsByPartner = {};
+  for (const l of leads) {
+    if (!leadsByPartner[l.PartnerName__c]) leadsByPartner[l.PartnerName__c] = [];
+    leadsByPartner[l.PartnerName__c].push({
+      id: l.Id,
+      createdAt: utcToKstDate(l.CreatedDate),
+      leadSource: l.LeadSource,
+      status: l.Status,
+    });
+  }
+
   console.log('4) 파트너별 미팅 집계');
   const meetingsByAcc = {};
   for (const e of events) {
@@ -134,28 +155,48 @@ async function soql(sf, q) {
   fs.writeFileSync(GEOCODE_PATH, JSON.stringify(geocodeCache, null, 1), 'utf8');
   console.log(`   ${geocoded} 신규 / ${geoCached} 캐시 / ${geoFailed} 실패`);
 
-  console.log('6) 시그널 계산 + 레코드 생성');
+  console.log('6) 시그널 + 산출 등급 계산');
   const records = partners.map(a => {
     const meetings = meetingsByAcc[a.Id] || [];
     meetings.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     const lastMeetingDate = meetings[0]?.date || null;
     const daysSinceLastMeeting = lastMeetingDate ? daysBetween(lastMeetingDate, today) : null;
     const meetingCount90d = meetings.filter(m => m.date && daysBetween(m.date, today) <= ACTIVE_WINDOW).length;
+
+    // Lead 집계
+    const partnerLeads = leadsByPartner[a.Id] || [];
+    partnerLeads.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    const lastLeadDate = partnerLeads[0]?.createdAt || null;
+    const daysSinceLastLead = lastLeadDate ? daysBetween(lastLeadDate, today) : null;
+    const leadCount90d = partnerLeads.filter(l => l.createdAt && daysBetween(l.createdAt, today) <= 90).length;
+    const leadCount30d = partnerLeads.filter(l => l.createdAt && daysBetween(l.createdAt, today) <= 30).length;
+    const leadTotal = partnerLeads.length;
+
+    // 산출 등급 (90일 Lead 기준)
+    let leadTier = 'zero';
+    if (leadCount90d >= LEAD_TOP) leadTier = 'top';
+    else if (leadCount90d >= LEAD_MID) leadTier = 'mid';
+    else if (leadCount90d >= 1) leadTier = 'low';
+
     const createdAt = utcToKstDate(a.CreatedDate);
     const ageInDays = createdAt ? daysBetween(createdAt, today) : null;
     const storeQty = a.PartnerTorderStoreQty__c || 0;
-    const hasMeeting = meetings.length > 0;
+    const hasActivity = meetings.length > 0 || partnerLeads.length > 0;
+
+    // 마지막 활동 (미팅 vs Lead 중 더 최근)
+    const lastActivityDate = [lastMeetingDate, lastLeadDate].filter(Boolean).sort().pop() || null;
+    const daysSinceLastActivity = lastActivityDate ? daysBetween(lastActivityDate, today) : null;
 
     const isMultiStore = storeQty >= MULTI_STORE_TH;
-    const isActive = meetingCount90d > 0;
-    const isLatent = !hasMeeting && ageInDays != null && ageInDays <= LATENT_DAYS;
-    const isStuck = hasMeeting && daysSinceLastMeeting >= STUCK_DAYS;
+    const isActive = meetingCount90d > 0 || leadCount90d > 0;
+    const isLatent = !hasActivity && ageInDays != null && ageInDays <= LATENT_DAYS;
+    const isStuck = hasActivity && daysSinceLastActivity != null && daysSinceLastActivity >= STUCK_DAYS && !isActive;
 
     let signal = 'idle';
-    if (isStuck) signal = 'stuck';
-    else if (isActive) signal = 'active';
+    if (isActive) signal = 'active';
+    else if (isStuck) signal = 'stuck';
     else if (isLatent) signal = 'latent';
-    else if (!hasMeeting && ageInDays > LATENT_DAYS) signal = 'cold';
+    else if (!hasActivity && ageInDays > LATENT_DAYS) signal = 'cold';
 
     const g = geocodeCache[a.Id];
     return {
@@ -180,7 +221,16 @@ async function soql(sf, q) {
       lastMeetingDate,
       daysSinceLastMeeting,
       meetingCount90d,
-      meetings: meetings.slice(0, 5), // 최근 5건만 (페이지에서 보기용)
+      meetings: meetings.slice(0, 5),
+      // Lead 산출
+      leadCount30d,
+      leadCount90d,
+      leadTotal,
+      lastLeadDate,
+      daysSinceLastLead,
+      leadTier,
+      lastActivityDate,
+      daysSinceLastActivity,
       isStuck,
       isLatent,
       isActive,
@@ -208,6 +258,9 @@ async function soql(sf, q) {
     multiStore: records.filter(r => r.isMultiStore).length,
     withPhone: records.filter(r => r.phone).length,
     withAddress: records.filter(r => r.address).length,
+    byTier: records.reduce((m, r) => { m[r.leadTier] = (m[r.leadTier] || 0) + 1; return m; }, {}),
+    totalLeads90d: records.reduce((s, r) => s + (r.leadCount90d || 0), 0),
+    totalLeads30d: records.reduce((s, r) => s + (r.leadCount30d || 0), 0),
   };
 
   const out = {

@@ -27,6 +27,14 @@ type Partner = {
   daysSinceLastMeeting: number | null;
   meetingCount90d: number;
   meetings: Meeting[];
+  leadCount30d: number;
+  leadCount90d: number;
+  leadTotal: number;
+  lastLeadDate: string | null;
+  daysSinceLastLead: number | null;
+  leadTier: 'top' | 'mid' | 'low' | 'zero';
+  lastActivityDate: string | null;
+  daysSinceLastActivity: number | null;
   isStuck: boolean;
   isLatent: boolean;
   isActive: boolean;
@@ -43,14 +51,43 @@ type Summary = {
   multiStore: number;
   withPhone: number;
   withAddress: number;
+  byTier: { top?: number; mid?: number; low?: number; zero?: number };
+  totalLeads90d: number;
+  totalLeads30d: number;
 };
 
-const SIGNAL_META: Record<string, { label: string; color: string; bg: string }> = {
-  stuck: { label: '정체', color: '#c62828', bg: '#ffebee' },
-  latent: { label: '잠재', color: '#ef6c00', bg: '#fff3e0' },
-  active: { label: '활성', color: '#2e7d32', bg: '#e8f5e9' },
-  cold: { label: '미접촉', color: '#666', bg: '#f5f5f5' },
-  idle: { label: '대기', color: '#888', bg: '#fafafa' },
+const TIER_META: Record<string, { label: string; color: string; bg: string }> = {
+  top:  { label: 'Top',  color: '#5e35b1', bg: '#ede7f6' },
+  mid:  { label: 'Mid',  color: '#1565c0', bg: '#e3f2fd' },
+  low:  { label: 'Low',  color: '#558b2f', bg: '#f1f8e9' },
+  zero: { label: 'Zero', color: '#999',    bg: '#fafafa' },
+};
+
+const SIGNAL_META: Record<string, { label: string; color: string; bg: string; desc: string }> = {
+  stuck:  { label: '정체',   color: '#c62828', bg: '#ffebee', desc: '미팅 60일 이상 없음' },
+  latent: { label: '잠재',   color: '#ef6c00', bg: '#fff3e0', desc: '신규 등록 90일 이내 + 미팅 0회' },
+  active: { label: '활성',   color: '#2e7d32', bg: '#e8f5e9', desc: '최근 90일 안 미팅 있음' },
+  cold:   { label: '미접촉', color: '#666',    bg: '#f5f5f5', desc: '등록 90일+ + 미팅 0회' },
+  idle:   { label: '대기',   color: '#888',    bg: '#fafafa', desc: '기타' },
+};
+
+const SIDO_LIST = ['서울특별시', '경기도', '인천광역시', '강원특별자치도', '대전광역시', '충청남도', '충청북도', '세종특별자치시', '대구광역시', '부산광역시', '울산광역시', '경상남도', '경상북도', '광주광역시', '전라남도', '전라북도', '제주특별자치도'];
+function sidoOf(addr: string | null): string | null {
+  if (!addr) return null;
+  for (const s of SIDO_LIST) {
+    if (addr.startsWith(s)) return s;
+    // 짧은 표기 호환
+    const short = s.replace(/특별자치시|특별자치도|광역시|특별시|도$/, '');
+    if (addr.startsWith(short + ' ') || addr.startsWith(short + '시 ')) return s;
+  }
+  return null;
+}
+const SIDO_SHORT: Record<string, string> = {
+  '서울특별시': '서울', '경기도': '경기', '인천광역시': '인천', '강원특별자치도': '강원',
+  '대전광역시': '대전', '충청남도': '충남', '충청북도': '충북', '세종특별자치시': '세종',
+  '대구광역시': '대구', '부산광역시': '부산', '울산광역시': '울산',
+  '경상남도': '경남', '경상북도': '경북', '광주광역시': '광주',
+  '전라남도': '전남', '전라북도': '전북', '제주특별자치도': '제주',
 };
 
 declare global { interface Window { kakao: any } }
@@ -89,8 +126,10 @@ export default function PartnersPage() {
   const [err, setErr] = useState<string | null>(null);
   const [ownerFilter, setOwnerFilter] = useState('');
   const [signalFilter, setSignalFilter] = useState<string>('');
+  const [tierFilter, setTierFilter] = useState<string>('');
   const [typeFilter, setTypeFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [sidoFilter, setSidoFilter] = useState<string>('');
   const [selected, setSelected] = useState<Partner | null>(null);
   const [mapReady, setMapReady] = useState(false);
 
@@ -144,8 +183,10 @@ export default function PartnersPage() {
     let list = data.records;
     if (signalFilter === 'multi') list = list.filter(r => r.isMultiStore);
     else if (signalFilter) list = list.filter(r => r.signal === signalFilter);
+    if (tierFilter) list = list.filter(r => r.leadTier === tierFilter);
     if (ownerFilter) list = list.filter(r => r.owner === ownerFilter);
     if (typeFilter) list = list.filter(r => (r.partnerType || '(미입력)') === typeFilter);
+    if (sidoFilter) list = list.filter(r => sidoOf(r.address) === sidoFilter);
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       list = list.filter(r => (r.name || '').toLowerCase().includes(q) || (r.owner || '').toLowerCase().includes(q));
@@ -157,7 +198,27 @@ export default function PartnersPage() {
       if (a.isStuck) return (b.daysSinceLastMeeting || 0) - (a.daysSinceLastMeeting || 0);
       return (b.torderStoreQty || 0) - (a.torderStoreQty || 0);
     });
-  }, [data, signalFilter, ownerFilter, typeFilter, search]);
+  }, [data, signalFilter, tierFilter, ownerFilter, typeFilter, sidoFilter, search]);
+
+  // 시도별 분포 (현재 필터 결과 기준, sido 필터 제외)
+  const sidoDist = useMemo(() => {
+    if (!data) return [];
+    let pool = data.records;
+    if (signalFilter === 'multi') pool = pool.filter(r => r.isMultiStore);
+    else if (signalFilter) pool = pool.filter(r => r.signal === signalFilter);
+    if (ownerFilter) pool = pool.filter(r => r.owner === ownerFilter);
+    if (typeFilter) pool = pool.filter(r => (r.partnerType || '(미입력)') === typeFilter);
+    const m: Record<string, { total: number; stuck: number }> = {};
+    let noAddr = 0;
+    for (const r of pool) {
+      const sido = sidoOf(r.address);
+      if (!sido) { noAddr++; continue; }
+      if (!m[sido]) m[sido] = { total: 0, stuck: 0 };
+      m[sido].total++;
+      if (r.isStuck) m[sido].stuck++;
+    }
+    return { list: Object.entries(m).map(([sido, v]) => ({ sido, ...v })).sort((a, b) => b.total - a.total), noAddr };
+  }, [data, signalFilter, ownerFilter, typeFilter]);
 
   // 지도 마커 렌더 (좌표 있는 것만)
   useEffect(() => {
@@ -228,11 +289,21 @@ export default function PartnersPage() {
               파트너 라운드 <span style={{ color: '#999', fontWeight: 400, fontSize: '0.82em' }}>{filtered.length} / {s.total}</span>
             </h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 6 }}>
             <SignalCard label="정체" count={s.bySignal.stuck || 0} active={signalFilter === 'stuck'} onClick={() => setSignalFilter(signalFilter === 'stuck' ? '' : 'stuck')} signal="stuck" />
             <SignalCard label="잠재" count={s.bySignal.latent || 0} active={signalFilter === 'latent'} onClick={() => setSignalFilter(signalFilter === 'latent' ? '' : 'latent')} signal="latent" />
             <SignalCard label="활성" count={s.bySignal.active || 0} active={signalFilter === 'active'} onClick={() => setSignalFilter(signalFilter === 'active' ? '' : 'active')} signal="active" />
             <SignalCard label="다매장" count={s.multiStore} active={signalFilter === 'multi'} onClick={() => setSignalFilter(signalFilter === 'multi' ? '' : 'multi')} signal="active" />
+          </div>
+          {/* Lead 산출 등급 */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 8 }}>
+            <TierCard tier="top" count={s.byTier?.top || 0} active={tierFilter === 'top'} onClick={() => setTierFilter(tierFilter === 'top' ? '' : 'top')} />
+            <TierCard tier="mid" count={s.byTier?.mid || 0} active={tierFilter === 'mid'} onClick={() => setTierFilter(tierFilter === 'mid' ? '' : 'mid')} />
+            <TierCard tier="low" count={s.byTier?.low || 0} active={tierFilter === 'low'} onClick={() => setTierFilter(tierFilter === 'low' ? '' : 'low')} />
+            <TierCard tier="zero" count={s.byTier?.zero || 0} active={tierFilter === 'zero'} onClick={() => setTierFilter(tierFilter === 'zero' ? '' : 'zero')} />
+          </div>
+          <div style={{ fontSize: '0.72em', color: '#666', marginBottom: 4 }}>
+            Lead 산출 (90일): <strong>{s.totalLeads90d}</strong>건 · 최근 30일: <strong>{s.totalLeads30d}</strong>건
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 6 }}>
             <select value={ownerFilter} onChange={e => setOwnerFilter(e.target.value)} style={selectStyle}>
@@ -262,11 +333,52 @@ export default function PartnersPage() {
       <div style={{ position: 'relative' }}>
         <div ref={mapRef} style={{ width: '100%', height: '100%', background: '#eee' }} />
         {!mapReady && <div style={overlay}>지도 로드 중…</div>}
-        <div style={{ position: 'absolute', top: 12, right: 12, background: '#fff', padding: '8px 12px', borderRadius: 6, fontSize: '0.78em', color: '#444', border: '1px solid #e0e0e0', boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}>
-          <span><span style={dot('#c62828')}/>정체</span>
-          <span style={{ marginLeft: 10 }}><span style={dot('#ef6c00')}/>잠재</span>
-          <span style={{ marginLeft: 10 }}><span style={dot('#2e7d32')}/>활성</span>
-          <span style={{ marginLeft: 10 }}><span style={dot('#666')}/>미접촉</span>
+        {/* 시도별 분포 — 좌측 세로 패널 */}
+        <div style={{
+          position: 'absolute', top: 12, left: 12, background: '#fff',
+          border: '1px solid #e0e0e0', borderRadius: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+          fontSize: '0.78em', width: 170, maxHeight: 'calc(100% - 24px)', overflow: 'auto',
+          zIndex: 100, pointerEvents: 'auto',
+        }}>
+          <div style={{ padding: '8px 10px', borderBottom: '1px solid #eee', fontWeight: 700, color: '#444', display: 'flex', justifyContent: 'space-between' }}>
+            <span>지역별 분포</span>
+            {sidoFilter && <span onClick={() => setSidoFilter('')} style={{ color: '#1976d2', cursor: 'pointer', fontWeight: 400 }}>초기화</span>}
+          </div>
+          {sidoDist && (sidoDist as { list: Array<{sido: string; total: number; stuck: number}>; noAddr: number }).list.map(s => (
+            <div key={s.sido}
+              onClick={() => setSidoFilter(sidoFilter === s.sido ? '' : s.sido)}
+              style={{
+                padding: '5px 10px', cursor: 'pointer',
+                background: sidoFilter === s.sido ? '#e3f2fd' : '#fff',
+                borderBottom: '1px solid #f5f5f5',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+              <span style={{ fontWeight: sidoFilter === s.sido ? 700 : 500, color: '#333' }}>
+                {SIDO_SHORT[s.sido] || s.sido}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                {s.stuck > 0 && <span style={{ color: '#c62828', fontWeight: 700, fontSize: '0.9em' }}>{s.stuck}</span>}
+                <span style={{ color: '#999', fontWeight: 600 }}>{s.total}</span>
+              </span>
+            </div>
+          ))}
+          {sidoDist && (sidoDist as { noAddr: number }).noAddr > 0 && (
+            <div style={{ padding: '5px 10px', fontSize: '0.88em', color: '#aaa', borderTop: '1px solid #f0f0f0' }}>
+              주소 미입력 {(sidoDist as { noAddr: number }).noAddr}건
+            </div>
+          )}
+        </div>
+
+        {/* 시그널 범례 + 기준 */}
+        <div style={{ position: 'absolute', top: 12, right: 12, background: '#fff', padding: '8px 12px', borderRadius: 6, fontSize: '0.76em', color: '#444', border: '1px solid #e0e0e0', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', maxWidth: 260, zIndex: 100 }}>
+          <div style={{ fontWeight: 700, marginBottom: 6, color: '#222' }}>시그널 기준</div>
+          {Object.entries(SIGNAL_META).filter(([k]) => k !== 'idle').map(([k, m]) => (
+            <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
+              <span style={{ ...dot(m.color), marginRight: 2 }}/>
+              <strong style={{ color: m.color, minWidth: 40 }}>{m.label}</strong>
+              <span style={{ color: '#666' }}>{m.desc}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -316,8 +428,10 @@ function PartnerRow({ p, selected, onClick }: { p: Partner; selected: boolean; o
       <div style={{ fontSize: '0.78em', color: '#666' }}>
         {p.owner} {p.partnerType && <span style={{ color: '#999' }}>· {p.partnerType}</span>}
       </div>
-      <div style={{ fontSize: '0.76em', color: '#888', marginTop: 2 }}>
-        {p.lastMeetingDate ? `마지막 미팅 ${p.lastMeetingDate} (${p.daysSinceLastMeeting}일 전)` : `미팅 없음 · 등록 ${p.ageInDays}일 전`}
+      <div style={{ fontSize: '0.76em', color: '#888', marginTop: 2, display: 'flex', gap: 6 }}>
+        <span>📋 미팅 {p.meetingCount90d}건</span>
+        <span style={{ color: p.leadCount90d > 0 ? (TIER_META[p.leadTier]?.color || '#888') : '#888' }}>📨 Lead {p.leadCount90d}건</span>
+        {p.lastActivityDate && <span style={{ color: '#aaa' }}>· 마지막 {p.daysSinceLastActivity}일 전</span>}
       </div>
     </div>
   );
@@ -344,6 +458,16 @@ function PartnerDetail({ p }: { p: Partner }) {
         {p.channelProgramName && <Field label="채널 프로그램">{p.channelProgramName}{p.channelProgramLevel && ` · ${p.channelProgramLevel}`}</Field>}
         <Field label="최근 90일 미팅">{p.meetingCount90d}건</Field>
         {p.lastMeetingDate && <Field label="마지막 미팅">{p.lastMeetingDate} ({p.daysSinceLastMeeting}일 전)</Field>}
+        <Field label="Lead 산출">
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span style={{
+              padding: '1px 8px', borderRadius: 8, fontSize: '0.78em', fontWeight: 700,
+              background: TIER_META[p.leadTier].bg, color: TIER_META[p.leadTier].color,
+            }}>{TIER_META[p.leadTier].label}</span>
+            <span>최근 90일 <strong>{p.leadCount90d}</strong>건 · 30일 <strong>{p.leadCount30d}</strong>건 · 전체 <strong>{p.leadTotal}</strong></span>
+          </span>
+        </Field>
+        {p.lastLeadDate && <Field label="마지막 Lead">{p.lastLeadDate} ({p.daysSinceLastLead}일 전)</Field>}
 
         {p.meetings.length > 0 && (
           <>
@@ -410,6 +534,20 @@ function SignalCard({ label, count, active, onClick, signal }: { label: string; 
     }}>
       <div style={{ fontSize: '0.7em', fontWeight: 600 }}>{label}</div>
       <div style={{ fontSize: '1.05em', fontWeight: 700 }}>{count}</div>
+    </div>
+  );
+}
+
+function TierCard({ tier, count, active, onClick }: { tier: string; count: number; active: boolean; onClick: () => void }) {
+  const meta = TIER_META[tier];
+  return (
+    <div onClick={onClick} style={{
+      padding: '4px 6px', background: active ? meta.color : meta.bg, color: active ? '#fff' : meta.color,
+      borderRadius: 4, cursor: 'pointer', textAlign: 'center',
+      border: active ? `1px solid ${meta.color}` : `1px solid ${meta.color}30`,
+    }}>
+      <div style={{ fontSize: '0.65em', fontWeight: 600, opacity: 0.85 }}>Lead {meta.label}</div>
+      <div style={{ fontSize: '0.95em', fontWeight: 700 }}>{count}</div>
     </div>
   );
 }
