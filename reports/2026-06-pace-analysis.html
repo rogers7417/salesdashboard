@@ -2,144 +2,164 @@
 <title>6월 태블릿 페이스 분석 — 목표 5,500대</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif;background:#0A1626;color:#E6EDF5;line-height:1.5;padding:32px 20px}
-.wrap{max-width:1040px;margin:0 auto}
-.hero{background:linear-gradient(135deg,#13294B,#0E1D38);border:1px solid #1E3A5F;border-radius:20px;padding:30px 32px;margin-bottom:22px}
-.hero h1{font-size:24px;font-weight:800;letter-spacing:-.5px}
-.hero .sub{color:#8FA8C8;font-size:13.5px;margin-top:6px}
-.kpibig{display:flex;gap:28px;flex-wrap:wrap;margin-top:22px;align-items:flex-end}
-.kpibig .big{font-size:46px;font-weight:800;line-height:1}
-.kpibig .unit{font-size:16px;color:#8FA8C8;font-weight:600}
-.kpibig .lbl{font-size:12.5px;color:#8FA8C8;margin-bottom:4px}
-.att{font-size:30px;font-weight:800}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Segoe UI',sans-serif;background:#070F1C;color:#E6EDF5;line-height:1.45;padding:22px 22px 44px}
+.wrap{max-width:1640px;margin:0 auto}
+a{color:#5FB0FF;text-decoration:none}a:hover{text-decoration:underline}
 .warn{color:#F59E0B}.bad{color:#F0556C}.good{color:#34D399}.muted{color:#7E96B5}
-section{background:#0E1D34;border:1px solid #1A3052;border-radius:18px;padding:24px 26px;margin-bottom:18px}
-section h2{font-size:17px;font-weight:800;margin-bottom:4px}
-section .desc{color:#8FA8C8;font-size:13px;margin-bottom:18px}
-.seg{margin-bottom:16px}
-.seg-h{display:flex;align-items:baseline;gap:8px;font-size:14px}
-.seg-h .seg-num{margin-left:auto;font-size:13px;color:#C5D5E8}
-.dot{width:9px;height:9px;border-radius:5px;display:inline-block}
-.bar{position:relative;height:13px;background:#13243F;border-radius:7px;margin:7px 0 5px;overflow:visible}
-.bar .fill{height:100%;border-radius:7px}
-.bar .proj{position:absolute;top:-3px;bottom:-3px;width:3px;background:#fff;border-radius:2px}
-.seg-sub{font-size:11.5px;color:#8FA8C8}
+
+/* HERO */
+.hero{margin-bottom:14px}
+.hero h1{font-size:31px;font-weight:800;letter-spacing:-.7px}
+.hero h1 .accent{color:#F59E0B}
+.hero h1 .tg{font-size:15px;color:#7E96B5;font-weight:600;margin-left:6px}
+.hero .sub{color:#8FA8C8;font-size:12.5px;margin-top:7px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:15px}
+.ktile{padding:16px 18px;border-radius:4px;color:#fff;position:relative;overflow:hidden}
+.ktile .kl{font-size:12px;opacity:.9;font-weight:600;margin-bottom:9px;letter-spacing:.2px}
+.ktile .kv{font-size:42px;font-weight:800;line-height:.95;letter-spacing:-1px}
+.ktile .ku{font-size:14px;opacity:.85;font-weight:600;margin-left:4px}
+
+/* PANEL */
+.panel{background:#0C1A30;border:1px solid #16304E;border-radius:10px;padding:20px 22px;margin-top:14px}
+.phead{display:flex;align-items:center;gap:11px;margin-bottom:5px}
+.pnum{background:#F59E0B;color:#0A1626;font-weight:800;font-size:14px;width:27px;height:27px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.phead h2{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.panel .desc{color:#8FA8C8;font-size:12.5px;margin:3px 0 16px}
+.legend{font-size:11px;color:#7E96B5;margin-top:11px;line-height:1.6}
+
+/* METRO SEGMENT TILES */
+.mtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:12px}
+.mtile{border-radius:4px;padding:17px 19px;color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.07) inset}
+.mt-lbl{font-size:14.5px;font-weight:700;opacity:.95;margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.mt-key{font-size:10px;font-weight:700;background:rgba(255,255,255,.22);padding:1px 7px;border-radius:4px;letter-spacing:.5px}
+.mt-big{font-size:36px;font-weight:800;line-height:1;letter-spacing:-1px}
+.mt-slash{font-size:14px;font-weight:600;opacity:.8;margin-left:7px}
+.mt-cw{font-size:13px;opacity:.95;margin-top:9px}
+.mt-bar{position:relative;height:8px;background:rgba(255,255,255,.25);border-radius:4px;margin:11px 0 9px}
+.mt-fill{height:100%;background:#fff;border-radius:4px}
+.mt-proj{position:absolute;top:-3px;bottom:-3px;width:3px;background:#070F1C;border-radius:2px}
+.mt-status{font-size:12.5px;font-weight:700}
+.mt-foot{font-size:11px;opacity:.82;margin-top:5px}
+
+/* 진단 2-up */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.col{background:#0A1728;border:1px solid #16304E;border-radius:8px;padding:16px 18px}
+.col h3{font-size:14px;font-weight:800;margin-bottom:11px}
+.col.gd{border-left:4px solid #34D399}.col.gd h3{color:#34D399}
+.col.bd{border-left:4px solid #F0556C}.col.bd h3{color:#F0556C}
+.col li{font-size:12.5px;color:#C5D5E8;margin-bottom:9px;list-style:none;padding-left:16px;position:relative}
+.col li:before{content:'';position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:3px}
+.col.gd li:before{background:#34D399}.col.bd li:before{background:#F0556C}
+
+/* 테이블 */
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;color:#7E96B5;font-weight:600;font-size:11.5px;padding:6px 8px;border-bottom:1px solid #1A3052}
 td{padding:8px;border-bottom:1px solid #14253F;vertical-align:middle}
-td a{color:#5FB0FF;text-decoration:none}
+td a{color:#5FB0FF}
 .num{text-align:right;font-variant-numeric:tabular-nums}
 .num.r{color:#F0556C;font-weight:700}.num.o{color:#F59E0B;font-weight:700}
-.fbar{display:inline-block;width:120px;height:11px;background:#13243F;border-radius:5px;overflow:hidden;vertical-align:middle}
+.task{font-size:11.5px;color:#A8BDD8;max-width:320px}
+.fbar{display:inline-block;width:130px;height:11px;background:#13243F;border-radius:5px;overflow:hidden;vertical-align:middle}
 .fbar>div{height:100%;border-radius:5px}
 .fv{font-size:11.5px;margin-left:6px;color:#C5D5E8;vertical-align:middle}
 tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 .tag{font-size:10px;background:#F0556C;color:#fff;border-radius:5px;padding:1px 6px;font-weight:700}
 .st{font-weight:600}
-.seg-pill{font-size:11px;padding:2px 8px;border-radius:6px;font-weight:700}
-.task{font-size:11.5px;color:#A8BDD8;max-width:300px}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.col h3{font-size:13.5px;font-weight:700;margin-bottom:10px}
-.col.gd h3{color:#34D399}.col.bd h3{color:#F0556C}
-.col li{font-size:12.5px;color:#C5D5E8;margin-bottom:8px;list-style:none;padding-left:16px;position:relative}
-.col li:before{content:'';position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:3px}
-.col.gd li:before{background:#34D399}.col.bd li:before{background:#F0556C}
-.legend{font-size:11px;color:#7E96B5;margin-top:10px}
-.lever{background:#0B1A30;border:1px solid #1A3052;border-radius:12px;padding:14px 16px;margin-bottom:12px}
-.lever-h{font-size:14px;margin-bottom:8px}
-.kpirow{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0}
-.kpi-sig{width:8px;height:8px;border-radius:4px;flex-shrink:0}.kpi-sig.g{background:#34D399}.kpi-sig.b{background:#F0556C}
-.kpi-name{color:#C5D5E8;min-width:130px}.kpi-val{font-weight:700}.kpi-tgt{color:#7E96B5;font-size:11.5px}
+
+/* KPI 레버 */
+.lever{background:#0A1728;border:1px solid #16304E;border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.lever-h{font-size:14.5px;margin-bottom:8px}
 .funnel-line{font-size:12px;color:#9FD0E8;background:#0A2030;border-radius:8px;padding:7px 10px;margin-bottom:10px;font-variant-numeric:tabular-nums}
 .kpirow2{padding:6px 0;border-bottom:1px solid #112038}.kpirow2:last-of-type{border-bottom:0}
 .kpi-top{display:flex;align-items:center;gap:8px;font-size:12.5px;flex-wrap:wrap}
+.kpi-sig{width:8px;height:8px;border-radius:4px;flex-shrink:0}.kpi-sig.g{background:#34D399}.kpi-sig.b{background:#F0556C}
+.kpi-name{color:#C5D5E8;min-width:130px}.kpi-val{font-weight:700}.kpi-tgt{color:#7E96B5;font-size:11.5px}
 .kpi-aff{margin-left:auto;font-size:10.5px;color:#7E96B5;background:#13243F;border-radius:5px;padding:1px 7px}
 .kpi-act{font-size:11.5px;color:#A8BDD8;margin:3px 0 0 16px}
-.lever-txt{font-size:12px;color:#CDE0F0;margin-top:10px;padding-top:9px;border-top:1px solid #1A3052;font-weight:500}
 .part{background:#0D2138;border:1px solid #16304E;border-radius:10px;padding:11px 13px;margin:9px 0}
 .part-h{font-size:13px;font-weight:700;color:#9FC4E8;margin-bottom:6px}
 .loss{margin-top:8px;padding-top:7px;border-top:1px dashed #2A3F5C}
 .loss-h{font-size:11.5px;color:#F0A0AC;margin-bottom:4px}
 .loss-item{font-size:11.5px;color:#C5D5E8;padding:1px 0 1px 12px}
-.loss-item a{color:#5FB0FF;text-decoration:none}
+.loss-item a{color:#5FB0FF}
 .stall{background:#0B1A30;border:1px solid #1A3052;border-radius:10px;padding:12px 14px;margin:9px 0}
-.stall-h{font-size:13px;font-weight:600}.stall-h a{color:#5FB0FF;text-decoration:none}
+.stall-h{font-size:13px;font-weight:600}.stall-h a{color:#5FB0FF}
 .stall-sum{font-size:12px;color:#C5D5E8;margin-top:7px;background:#0E2236;border-radius:7px;padding:7px 9px}
 .stall-next{font-size:12px;color:#9FE0C0;margin-top:6px}
 .tk-wrap{margin-top:7px}.tk-wrap summary{font-size:11px;color:#7E96B5;cursor:pointer}
 .tk{font-size:11px;color:#A8BDD8;padding:3px 0 3px 10px;border-left:2px solid #1A3052;margin-top:4px}
 .tk-d{color:#6E86A5;font-variant-numeric:tabular-nums}
-.foot{text-align:center;color:#5A7193;font-size:11.5px;margin-top:14px}
-@media(max-width:720px){.two{grid-template-columns:1fr}.task{display:none}}
+.foot{text-align:center;color:#5A7193;font-size:11.5px;margin-top:16px}
+@media(max-width:760px){.two{grid-template-columns:1fr}.task{display:none}}
 </style></head><body><div class="wrap">
 
 <div class="hero">
-  <h1>6월 태블릿 페이스 분석 <span class="muted" style="font-size:15px">· 신규 목표 5,500대</span></h1>
+  <h1>6월 태블릿 페이스 분석 <span class="tg">· 신규 목표 <span class="accent">5,500대</span></span></h1>
   <div class="sub">기준일 2026-06-11 · 영업일 9/22일 경과 · 대상: 테이블오더 신규+추가설치 · 국내(KRW) · 재계약·양도양수·해외 제외</div>
-  <div class="sub" style="margin-top:3px">CW = 당월 <b>계약시작일(ContractDateStart)</b> + 영업기회 <b>Closed Won</b> 의 태블릿 대수 합 (사내 /contracts API와 동일 · 신규+추가설치·KRW)</div>
-  <div class="kpibig">
-    <div><div class="lbl">예상 CW (현재 페이스)</div><span class="big warn">2,547</span><span class="unit"> / 5,500대</span></div>
-    <div><div class="lbl">목표 달성률 (CW)</div><span class="att warn">46.3%</span></div>
-    <div><div class="lbl">예상 갭</div><span class="att bad">-2,953대</span></div>
-    <div><div class="lbl">현재 누적 실적</div><span class="att">1,042대</span></div>
+  <div class="sub" style="margin-top:2px">CW = 당월 <b>계약시작일(ContractDateStart)</b> + 영업기회 <b>Closed Won</b> 태블릿 대수 합 (사내 /contracts API와 동일)</div>
+  <div class="kpis">
+    <div class="ktile" style="background:#B45309"><div class="kl">예상 CW (현재 페이스)</div><div class="kv">2,547<span class="ku">/ 5,500대</span></div></div>
+    <div class="ktile" style="background:#B45309"><div class="kl">목표 달성률 (CW)</div><div class="kv">46.3<span class="ku">%</span></div></div>
+    <div class="ktile" style="background:#B91C1C"><div class="kl">예상 갭</div><div class="kv">-2,953<span class="ku">대</span></div></div>
+    <div class="ktile" style="background:#1E3A8A"><div class="kl">현재 누적 실적</div><div class="kv">1,042<span class="ku">대</span></div></div>
   </div>
 </div>
 
-<section>
-  <h2>① 6월말 예상 CW — 세그먼트별</h2>
-  <div class="desc">현재 CW(계약시작일 기준) 페이스를 월말까지 단순 투영. 흰 선 = 예상 CW 위치.</div>
-  <div class="seg">
-    <div class="seg-h"><span class="dot" style="background:#3B82F6"></span><b>인바운드</b>
-      <span class="seg-num">362 / 2,410대 <span class="muted">· CW 885 (37%)</span></span></div>
-    <div class="bar"><div class="fill" style="width:15.020746887966805%;background:#3B82F6"></div>
-      <div class="proj" style="left:36.72199170124482%" title="예상CW"></div></div>
-    <div class="seg-sub"><span class="bad">▼ 미달 37%</span>
-      · 필요 일일 157.5대 · 파이프라인 1,601대(커버 78.2%) · 리드타임 12.036111111111111일</div>
-  </div><div class="seg">
-    <div class="seg-h"><span class="dot" style="background:#A78BFA"></span><b>아웃바운드</b>
-      <span class="seg-num">122 / 480대 <span class="muted">· CW 298 (62%)</span></span></div>
-    <div class="bar"><div class="fill" style="width:25.416666666666664%;background:#A78BFA"></div>
-      <div class="proj" style="left:62.083333333333336%" title="예상CW"></div></div>
-    <div class="seg-sub"><span class="bad">▼ 미달 62%</span>
-      · 필요 일일 27.5대 · 파이프라인 244대(커버 68.2%) · 리드타임 7.164282407407407일</div>
-  </div><div class="seg">
-    <div class="seg-h"><span class="dot" style="background:#22D3EE"></span><b>프랜차이즈</b>
-      <span class="seg-num">221 / 1,305대 <span class="muted">· CW 540 (41%)</span></span></div>
-    <div class="bar"><div class="fill" style="width:16.93486590038314%;background:#22D3EE"></div>
-      <div class="proj" style="left:41.37931034482759%" title="예상CW"></div></div>
-    <div class="seg-sub"><span class="bad">▼ 미달 41%</span>
-      · 필요 일일 83.4대 · 파이프라인 425대(커버 39.2%) · 리드타임 14.041400462962962일</div>
-  </div><div class="seg">
-    <div class="seg-h"><span class="dot" style="background:#34D399"></span><b>파트너스</b>
-      <span class="seg-num">337 / 1,305대 <span class="muted">· CW 824 (63%)</span></span></div>
-    <div class="bar"><div class="fill" style="width:25.82375478927203%;background:#34D399"></div>
-      <div class="proj" style="left:63.14176245210727%" title="예상CW"></div></div>
-    <div class="seg-sub"><span class="bad">▼ 미달 63%</span>
-      · 필요 일일 74.5대 · 파이프라인 1,721대(커버 177.8%) · 리드타임 12.057210648148148일</div>
-  </div>
-  <div class="legend">막대 = 현재 실적 / 흰 선 = 예상 CW(목표 대비). 현 페이스론 <b>전 세그먼트 목표 미달</b> — 파트너스 63%가 상대 최선, 인바운드 37% 최저.</div>
-</section>
+<div class="panel">
+  <div class="phead"><span class="pnum">1</span><h2>6월말 예상 CW — 세그먼트별</h2></div>
+  <div class="desc">현재 CW(계약시작일 기준) 페이스를 월말까지 단순 투영. 흰 막대 = 현재 실적 / 검은 선 = 예상 CW 위치(목표 대비).</div>
+  <div class="mtiles"><div class="mtile" style="background:#2563EB">
+    <div class="mt-lbl">인바운드 <span class="mt-key">IBS</span></div>
+    <div class="mt-big">362<span class="mt-slash">/ 2,410대</span></div>
+    <div class="mt-cw">예상 CW <b>885</b> · <b>37%</b></div>
+    <div class="mt-bar"><div class="mt-fill" style="width:15.020746887966805%"></div><div class="mt-proj" style="left:37%"></div></div>
+    <div class="mt-status">▼ 미달 · 필요 일 157.5대</div>
+    <div class="mt-foot">파이프라인 1,601대(커버 78.2%) · 리드타임 12.036111111111111일</div>
+  </div><div class="mtile" style="background:#7C5CE0">
+    <div class="mt-lbl">아웃바운드 <span class="mt-key">OBS</span></div>
+    <div class="mt-big">122<span class="mt-slash">/ 480대</span></div>
+    <div class="mt-cw">예상 CW <b>298</b> · <b>62%</b></div>
+    <div class="mt-bar"><div class="mt-fill" style="width:25.416666666666664%"></div><div class="mt-proj" style="left:62%"></div></div>
+    <div class="mt-status">▼ 미달 · 필요 일 27.5대</div>
+    <div class="mt-foot">파이프라인 244대(커버 68.2%) · 리드타임 7.164282407407407일</div>
+  </div><div class="mtile" style="background:#0E8FA3">
+    <div class="mt-lbl">프랜차이즈 <span class="mt-key">FR</span></div>
+    <div class="mt-big">221<span class="mt-slash">/ 1,305대</span></div>
+    <div class="mt-cw">예상 CW <b>540</b> · <b>41%</b></div>
+    <div class="mt-bar"><div class="mt-fill" style="width:16.93486590038314%"></div><div class="mt-proj" style="left:41%"></div></div>
+    <div class="mt-status">▼ 미달 · 필요 일 83.4대</div>
+    <div class="mt-foot">파이프라인 425대(커버 39.2%) · 리드타임 14.041400462962962일</div>
+  </div><div class="mtile" style="background:#15976F">
+    <div class="mt-lbl">파트너스 <span class="mt-key">PT</span></div>
+    <div class="mt-big">337<span class="mt-slash">/ 1,305대</span></div>
+    <div class="mt-cw">예상 CW <b>824</b> · <b>63%</b></div>
+    <div class="mt-bar"><div class="mt-fill" style="width:25.82375478927203%"></div><div class="mt-proj" style="left:63%"></div></div>
+    <div class="mt-status">▼ 미달 · 필요 일 74.5대</div>
+    <div class="mt-foot">파이프라인 1,721대(커버 177.8%) · 리드타임 12.057210648148148일</div>
+  </div></div>
+  <div class="legend">현 페이스론 <b>전 세그먼트 목표 미달</b> — 파트너스 63%가 상대 최선, 인바운드 37% 최저.</div>
+</div>
 
-<section>
-  <h2>② KPI 잘되는 부분 / 안되는 부분</h2>
+<div class="panel">
+  <div class="phead"><span class="pnum">2</span><h2>잘되는 부분 / 안되는 부분</h2></div>
   <div class="desc">CW 기준 진단.</div>
   <div class="two">
-    <div class="col gd"><h3>상대적으로 나은 부분</h3><ul>
+    <div class="col gd"><h3>🟢 상대적으로 나은 부분</h3><ul>
       <li><b>파트너스 63% CW</b> — 4세그먼트 중 페이스 가장 앞섬(그래도 목표 미달)</li>
       <li><b>파트너스 파이프라인 1,721대(커버 177.8%)</b> — 잔여목표 대비 후보 충분, 전환만 되면 회복 여지</li>
       <li>마감(CW)건 리드타임 중앙값 7.164282407407407~14.041400462962962일 — 닫히는 건은 빠르게 통과(생성→CW)</li>
     </ul></div>
-    <div class="col bd"><h3>안되고 있음</h3><ul>
+    <div class="col bd"><h3>🔴 안되고 있음</h3><ul>
       <li><b>인바운드 37% CW</b> — 페이스 최저, 절대량·전환 모두 부족</li>
       <li><b>인바운드 37% CW</b> — 최대 목표(2,410)인데 미달, 갭 절대값 최대</li>
       <li><b>전사 46.3% CW 전망</b> — 이대로면 2,953대 미달. 잔여 영업일 13일 내 일일 페이스 대폭 상향 필요</li>
     </ul></div>
   </div>
-</section>
+</div>
 
-<section>
-  <h2>③ 파트별 KPI → 퍼널 레버 + 전환 실패 — 무엇을 끌어올려야 5,500에 닿나</h2>
-  <div class="desc">본부 KPI 실값(6월 누적)을 <b>파트별</b>로. 신호등 <span class="good">●</span>달성/<span class="bad">●</span>미달. 각 파트의 <span class="bad">⚠️ 전환 실패/이탈건</span>은 실제 업체·사유까지 표기(클릭 시 Salesforce).</div>
+<div class="panel">
+  <div class="phead"><span class="pnum">3</span><h2>파트별 KPI → 퍼널 레버 + 전환 실패</h2></div>
+  <div class="desc">본부 KPI 실값(6월 누적)을 <b>파트별</b>로. 신호등 <span class="good">●</span>달성/<span class="bad">●</span>미달. 각 파트의 <span class="bad">⚠️ 전환 실패/이탈건</span>은 실제 업체·사유까지 표기(클릭 시 Salesforce). <b>인바운드 필드(FS)</b>=견적 raw·<b>인바운드 BO</b>=방치 계류건+후속조치 포함.</div>
   <div class="lever">
     <div class="lever-h"><b>인바운드세일즈</b> <span class="muted">· 목표 2,410 · 잔여 갭 1,525대 · 필요 일 157.5대 <span class="bad">(현재 40.2대)</span></span></div>
     <div class="funnel-line">📊 Lead 256 → MQL 154(60%) → SQL 144(94%) → 방문 140 → 계약</div>
@@ -245,13 +265,13 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
       <div class="kpi-act">↳ 잔량 소진</div>
     </div></div>
   </div>
-  <div class="legend"><b>공통 병목</b>: 견적 단계 정체(CL의 70~86%가 견적 이탈)가 전 세그먼트 마감을 막음 — <b>KPI 개선 + 견적 후속 가속</b>이 5,500 달성의 두 축. <b>인바운드 필드(FS)</b>·<b>인바운드 BO</b> 파트에 견적 방치 raw 포함.</div>
-</section>
+  <div class="legend"><b>공통 병목</b>: 견적 단계 정체(CL의 70~86%가 견적 이탈)가 전 세그먼트 마감을 막음 — <b>KPI 개선 + 견적 후속 가속</b>이 5,500 달성의 두 축.</div>
+</div>
 
-<section>
-  <h2>④ 퍼널 개선 — 견적 단계가 생사를 가른다</h2>
+<div class="panel">
+  <div class="phead"><span class="pnum">4</span><h2>퍼널 개선 — 견적 단계가 생사를 가른다</h2></div>
   <div class="desc">단계별 체류기간 중앙값: 마감(CW) vs 현재 계류 vs 이탈(CL). 견적에서 갈립니다.</div>
-  <table><thead><tr><th>단계</th><th>CW(마감) 통과</th><th>계류(현재) 정체</th><th>CL(이탈) 정체</th></tr></thead><tbody><tr class="">
+  <table><thead><tr><th>단계</th><th>🟢 CW(마감) 통과</th><th>🟠 계류(현재) 정체</th><th>🔴 CL(이탈) 정체</th></tr></thead><tbody><tr class="">
     <td class="st">방문배정</td>
     <td><div class="fbar"><div style="width:3%;background:#34D399"></div></div><span class="fv">1.4일</span></td>
     <td><div class="fbar"><div style="width:100%;background:#F59E0B"></div></div><span class="fv">72일</span></td>
@@ -277,162 +297,13 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
     <td><div class="fbar"><div style="width:3%;background:#F59E0B"></div></div><span class="fv">2일</span></td>
     <td><div class="fbar"><div style="width:3%;background:#F0556C"></div></div><span class="fv">1.8일</span></td></tr></tbody></table>
   <div class="legend">🟢 마감되는 건은 견적을 1~2일에 통과 · 🟠 지금 계류건은 견적에서 10~28일 정체 · 🔴 이탈건은 견적에서 평균 15일 묶이다 죽음(전체 CL의 70~86%가 견적 이탈). <b>→ 견적 단계 후속 속도(견적 N일+ 자동 에스컬레이션·재견적 차단)가 목표 달성의 최대 레버.</b></div>
-</section>
+</div>
 
-<section>
-  <h2>⑤ KANBAN — 지금 안 챙기면 새는 영업기회 <span class="muted" style="font-size:13px">(Task까지 확인)</span></h2>
-  <div class="desc">마감 단계(견적·계약진행 등) · 태블릿 보유 · 최근 생성(좀비 제외) 중 정체+Task 방치 상위. 총 178건 · 2,548대 위험 (Task 14일+ 방치 35건).</div>
-  <table><thead><tr><th>매장</th><th>세그먼트</th><th>단계</th><th>태블릿</th><th>단계경과</th><th>마지막 Task</th><th>최근 활동 내용</th></tr></thead><tbody><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mz55ZYAQ/view" target="_blank">김해어부</a></td>
-    <td><span class="seg-pill" style="background:#3B82F622;color:#3B82F6">인바운드</span></td>
-    <td>견적</td>
-    <td class="num">16대</td>
-    <td class="num r">84일</td>
-    <td class="num r">69일전</td>
-    <td class="task">방문: [260402 윤효근] OBS 이관 타사 오더 진행하기로 했다고 함 설치 전 계약 철회 가능하며 티오더 가치 전달&amp;최대 혜택가 전달드렸으나 무반응 타사명 여쭤보니 타사명 노출 거부</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nJ0heYAC/view" target="_blank">대상해</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">19대</td>
-    <td class="num r">78일</td>
-    <td class="num r">78일전</td>
-    <td class="task">방문: 요청자 @이경호_인바운드세일즈 상호 지점명 대상해(공덕점) 사업자 등록증 대표 연락처 . 상담 시작 시간 2026년 3월 25일 오후 1:00:00 상담 종료 시간 2026년 3월</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oxWS5YAM/view" target="_blank">더바른곱</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">14대</td>
-    <td class="num r">55일</td>
-    <td class="num r">55일전</td>
-    <td class="task">선납금: 260608 11:58 이은지 아직 검토중이라고 하며 통화 선종료됨 260527 15:24 이은지 아직 생각중이라고하여, 6월 전화드림 안내완료 6/10일 전후 소통 필요 2605</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000o7mcbYAA/view" target="_blank">자프란레스토랑</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">11대</td>
-    <td class="num r">65일</td>
-    <td class="num r">36일전</td>
-    <td class="task">리터치: 부재</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000o6ZXlYAM/view" target="_blank">공주칼국수</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">11대</td>
-    <td class="num r">55일</td>
-    <td class="num r">55일전</td>
-    <td class="task">견적: ▶ 3년 약정 ▶ 10+1(마스터태블릿) = 총 11대 ▶ 자체 전기 ▶ 선결제형 ▶ 블랙 / 고정형 거치대 ▶ 대당금액 16,500원(VAT 별도) ★★ 대당 4,500 할인 +</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pCjSDYA0/view" target="_blank">미정</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">21대</td>
-    <td class="num r">51일</td>
-    <td class="num r">51일전</td>
-    <td class="task">선납금: 260527 16:15 이은지 투자자들 등의 문제로 오픈이 지연된 상황 6월 말 전화드림 안내 완료 260507 12:54 이은지 문자로 매챗 인입 안내 완료 260423 17:5</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000ooWEPYA2/view" target="_blank">포옹남</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">11대</td>
-    <td class="num r">55일</td>
-    <td class="num r">49일전</td>
-    <td class="task">통화: 리터치 생각보다 비싸서 어려울거같다고함 얼마까지 생각하셨냐고 직접적으로 물어보니 뭐 대당 15000원까지 들었다고함 대표님 선결제로 15000원은 나올수가 없다고 안내 일단 알겠다</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pMnmKYAS/view" target="_blank">미애네바다속칼국수</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">61대</td>
-    <td class="num r">49일</td>
-    <td class="num r">49일전</td>
-    <td class="task">선납금: [260610 11:30 송슬기] 6차 부재 [260609 14:24 송슬기] 5차 부재 [260609 10:50 송슬기] 4차 부재 [260604 16:35 송슬기] 3차 부재 </td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nteINYAY/view" target="_blank">펀비어킹</a></td>
-    <td><span class="seg-pill" style="background:#22D3EE22;color:#22D3EE">프랜차이즈</span></td>
-    <td>견적</td>
-    <td class="num">8대</td>
-    <td class="num r">63일</td>
-    <td class="num r">31일전</td>
-    <td class="task">보류: 260511 15:46 정주희 잠정 보류 / 잠정 대기 / 포스 문제 : 점주 포스 변경 비용부담 (약 100~150만원 이상) / 미진행 가능성크나 우선 잠정 보류(김종훈바이저 </td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pIIPJYA4/view" target="_blank">1번지통닭</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">16대</td>
-    <td class="num r">50일</td>
-    <td class="num r">50일전</td>
-    <td class="task">선납금: 260604 14:01 이은지 문자로 스프라이트 프로모션 안내 완료 260511 15:23 이은지 문자로 고연령층/저연령층 대비 운영 이점 안내 완료 6월 프로모션 발생 시, 추가</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oytHlYAI/view" target="_blank">인생아구찜</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">12대</td>
-    <td class="num r">51일</td>
-    <td class="num r">50일전</td>
-    <td class="task">정산 특이사항: 인생아구찜(동탄점) 아정당 캐시백 &gt; 1천원 추가 할인으로 대체</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oFXwXYAW/view" target="_blank">식당(미정)</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">31대</td>
-    <td class="num r">62일</td>
-    <td class="num r">16일전</td>
-    <td class="task">리터치: 온도 나쁘지 않음 아직 한창 공사중 내용은 많이 까먹으신 듯 함 6월 중순쯤 다시 연락 달라고 하심 7월초에서 6월 말일 쯤 오픈 예상하심. 소방이 6월 20일 예상한다고 함</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nS9QjYAK/view" target="_blank">타카이</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">11대</td>
-    <td class="num r">76일</td>
-    <td class="num ">-6일전</td>
-    <td class="task">유선 소통 필요: </td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pN2OjYAK/view" target="_blank">욧삐떼</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">9대</td>
-    <td class="num r">49일</td>
-    <td class="num r">49일전</td>
-    <td class="task">선납금: 260610 13:33 이은지 부재(130 만원 위약금 지원 시, 기본 할인가로 34퍼 나옴) 260604 14:16 이은지 통화 거절, 문자 안내 260527 16:34 이은지 </td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nebe9YAA/view" target="_blank">신주양꼬치</a></td>
-    <td><span class="seg-pill" style="background:#3B82F622;color:#3B82F6">인바운드</span></td>
-    <td>견적</td>
-    <td class="num">12대</td>
-    <td class="num r">72일</td>
-    <td class="num ">0일전</td>
-    <td class="task">통화: 20일에 리터치 예정</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nIDNaYAO/view" target="_blank">유가네 한우곰탕</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>재견적</td>
-    <td class="num">24대</td>
-    <td class="num r">45일</td>
-    <td class="num r">45일전</td>
-    <td class="task">재견적: 260601 13:00 이은지 고용진님 리터치 요청 완료 공사 마무리 일정 확인 및 티오더 설치 의사 재확인 필요 4/22(수) 인바운드세일즈 고용진님 : 매장 공사 중 4/8(수</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000o1UKEYA2/view" target="_blank">수린한정식</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">51대</td>
-    <td class="num r">70일</td>
-    <td class="num ">-13일전</td>
-    <td class="task">유선 소통 필요: [260527 14:58 송슬기] - 인터넷 관련 업체와 포스 진행 하였으며, 오더 없이 오픈 예정 - 내부적으로 결정 되어 당장 도입 하지 않고 나중에 연락 주신다고 함 - 6월</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000q8oJQYAY/view" target="_blank">고향소갈비찜</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">19대</td>
-    <td class="num r">36일</td>
-    <td class="num r">36일전</td>
-    <td class="task">선납금: 260601 14:28 이은지 매챗 리터치, 6월 중순 유선 터치 후 최종 확인 필요 260521 15:@3 이은지 본인이 필요하면 연락주겠다 함. 오더 도입 아예 안하는건 아니라</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pb76rYAA/view" target="_blank">청천국수</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">9대</td>
-    <td class="num r">38일</td>
-    <td class="num r">38일전</td>
-    <td class="task">선납금: 260604 16:20 이은지 종소세 마감 6/30으로 매챗 우선 리터치 260513 14:26 이은지 종소세 기간 이후 포스 설치하신다고 했다함. 6초까지 지연될 듯 티오더 고민</td></tr><tr>
-    <td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oOflBYAS/view" target="_blank">중문색달냉면</a></td>
-    <td><span class="seg-pill" style="background:#34D39922;color:#34D399">파트너스</span></td>
-    <td>견적</td>
-    <td class="num">8대</td>
-    <td class="num r">63일</td>
-    <td class="num ">-13일전</td>
-    <td class="task">유선 소통 필요: </td></tr></tbody></table>
-  <div class="legend">단계경과·Task 방치일이 클수록 CL 위험. 빨강 = 14일+ 방치. 견적 단계 고가치건의 즉시 재컨택이 CW율 방어의 핵심.</div>
-
-  <div style="margin-top:18px"><div class="part-h" style="font-size:14px;margin-bottom:8px">🔻 견적 방치 (후속 끊김) — 상시 모니터링</div>
-    <div class="desc">견적/재견적 · 영업중 · 후속과업 없음 · 7일+ 방치 (FieldUser 부서 기준 · TEST 제외). 빨강=14일+.</div>
-    <div style="font-size:12.5px;font-weight:700;color:#3B82F6;margin:6px 0 4px">인바운드 5건</div>
-    <table><thead><tr><th>매장</th><th>단계</th><th>방치</th><th>담당</th><th>최근 활동</th></tr></thead><tbody><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oeGCXYA2/view" target="_blank">더맛있는족발보쌈 분당점</a></td><td>견적</td><td class="num r">15일</td><td>이경호</td><td class="task">장기터치필요: 유오더 사용기한까지 사용후 재계약/ 티오더 중 결정하실예정 6월말 재터치예정</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000r6nE1YAI/view" target="_blank">투다리 문정본점</a></td><td>견적</td><td class="num r">14일</td><td>한용우</td><td class="task">통화: [260528 1619 소동준] 메뉴잇 견적이 지연 돼서 대기중 / 가격 제일 중</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000rFQ8YYAW/view" target="_blank">솥고집 광교점</a></td><td>견적</td><td class="num o">13일</td><td>최준일</td><td class="task">통화: ★상호 지점명 솥고집(광교점) ★사업자 등록증 대표 연락처 010-4821-080</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000niRjUYAU/view" target="_blank">조가네갑오징어 중대물빛공원점</a></td><td>견적</td><td class="num o">10일</td><td>최옥환</td><td class="task">리터치: 건물주로 옆 메가커피가 나가야지 인테리어 시작하고 티오더 설치를 하실수 있다고 하</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000rSes1YAC/view" target="_blank">커피프렌즈 창원점</a></td><td>견적</td><td class="num o">10일</td><td>변상훈</td><td class="task">통화: [260601 1751 소동준] 타 오더사 2곳 보다 비싸다 하심 / 아직 도입 </td></tr></tbody></table>
-    <div style="font-size:12.5px;font-weight:700;color:#A78BFA;margin:14px 0 4px">아웃바운드 51건 <span class="muted" style="font-weight:400">(상위 15)</span></div>
-    <table><thead><tr><th>매장</th><th>단계</th><th>방치</th><th>담당</th><th>최근 활동</th></tr></thead><tbody><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mr3tlYAA/view" target="_blank">홍인참치 구미점</a></td><td>견적</td><td class="num r">85일</td><td>한진희</td><td class="task">방문: 3/17-도입의사 없음</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mr2uTYAQ/view" target="_blank">싱글벙글복어 김천점</a></td><td>견적</td><td class="num r">80일</td><td>한진희</td><td class="task">통화: [260323 한진희] 먼저 연락주신다고 따로 연락하지 말라고 하심</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mr6y5YAA/view" target="_blank">정백정참숯구이 북삼본점</a></td><td>견적</td><td class="num r">80일</td><td>한진희</td><td class="task">통화: [260323 한진희] 먼저 연락주신다고 따로 연락하지 말라고 하심</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nJKtFYAW/view" target="_blank">등촌샤브칼국수 양산덕계점</a></td><td>견적</td><td class="num r">79일</td><td>한진희</td><td class="task">방문: [260324 한진희] 현재 유니온오더 1만원대에 사용중, 불편함도 별로없다고함,</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nMyEFYA0/view" target="_blank">베르데레스토랑 경북영덕점</a></td><td>견적</td><td class="num r">78일</td><td>정종찬</td><td class="task">방문: [260325 정종찬] 하이오더 13,000원 사용중으로 가격이 안맞다고 함</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nN8geYAC/view" target="_blank">구가연어 포항점</a></td><td>견적</td><td class="num r">77일</td><td>정종찬</td><td class="task">방문: [260325 17:00 정종찬] 업오더 6개월남음 지금 장사가 안돼서 폐업할지 </td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mrRssYAE/view" target="_blank">채선당 경주황성점</a></td><td>견적</td><td class="num r">76일</td><td>한진희</td><td class="task">방문: [260326 16:00 한진희] 비용이 비싸서 도입의사 없음</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nJDIIYA4/view" target="_blank">봄가내쭈꾸미 양산물금점</a></td><td>견적</td><td class="num r">76일</td><td>한진희</td><td class="task">방문: [260326 14:30 한진희] 히엘페이 사용중, 티오더보다 싸지만 불만있음, </td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000ncnUwYAI/view" target="_blank">고혼 사직점</a></td><td>견적</td><td class="num r">73일</td><td>한진희</td><td class="task">방문: [260327 18:00 한진희] 타사오더 대당 5천원에 사용 중이셔서 기존꺼 유</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mz55ZYAQ/view" target="_blank">김해어부 주촌점</a></td><td>견적</td><td class="num r">69일</td><td>윤효근</td><td class="task">방문: [260402 윤효근] OBS 이관 타사 오더 진행하기로 했다고 함 설치 전 계약</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nY1IPYA0/view" target="_blank">토종칼국수 부산기장점</a></td><td>견적</td><td class="num r">69일</td><td>한진희</td><td class="task">방문: [260327 10:00 한진희] 법인, 이지오더가 너무 저렴함, 4/3(금) 연</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nbtmCYAQ/view" target="_blank">초함 초읍동점</a></td><td>견적</td><td class="num r">69일</td><td>한진희</td><td class="task">방문: [260327 13:00 한진희] 하이오더 크게 불편하지 않아 기존 오더 유지하신</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000no2OzYAI/view" target="_blank">우연횟집 장림직영점</a></td><td>견적</td><td class="num r">69일</td><td>박성빈</td><td class="task">방문: [260402 박성빈] CL DB 리터치 매장에서 상담완료 15+1=16대 고정형</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000o1CvBYAU/view" target="_blank">김할머니의령소바 의령본점</a></td><td>견적</td><td class="num r">65일</td><td>윤효근</td><td class="task">통화: [260407 윤효근] OBS 이관 가족들이랑 상의 중이라는 답변 후 통화 종료,</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oJuo7YAC/view" target="_blank">파시 대전유성점</a></td><td>견적</td><td class="num r">65일</td><td>박성빈</td><td class="task">통화: [260407 17:16 박성빈] CL DB 리터치 4/9(목) 10:40 파시(</td></tr></tbody></table>
-  </div>
-</section>
+<div class="panel">
+  <div class="phead"><span class="pnum">5</span><h2>아웃바운드 견적 방치 — 상시 모니터링</h2></div>
+  <div class="desc">견적/재견적 · 영업중 · 후속과업 없음 · 7일+ 방치 (FieldUser 부서 기준 · TEST 제외). 빨강=14일+ 방치. 총 51건 (상위 15).<br><span class="muted">※ 인바운드 방치는 ③의 인바운드 BO 파트(Task 요약·후속조치)에 포함.</span></div>
+  <table><thead><tr><th>매장</th><th>단계</th><th>방치</th><th>담당</th><th>최근 활동</th></tr></thead><tbody><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mr3tlYAA/view" target="_blank">홍인참치 구미점</a></td><td>견적</td><td class="num r">85일</td><td>한진희</td><td class="task">방문: 3/17-도입의사 없음</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mr2uTYAQ/view" target="_blank">싱글벙글복어 김천점</a></td><td>견적</td><td class="num r">80일</td><td>한진희</td><td class="task">통화: [260323 한진희] 먼저 연락주신다고 따로 연락하지 말라고 하심</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mr6y5YAA/view" target="_blank">정백정참숯구이 북삼본점</a></td><td>견적</td><td class="num r">80일</td><td>한진희</td><td class="task">통화: [260323 한진희] 먼저 연락주신다고 따로 연락하지 말라고 하심</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nJKtFYAW/view" target="_blank">등촌샤브칼국수 양산덕계점</a></td><td>견적</td><td class="num r">79일</td><td>한진희</td><td class="task">방문: [260324 한진희] 현재 유니온오더 1만원대에 사용중, 불편함도 별로없다고함,</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nMyEFYA0/view" target="_blank">베르데레스토랑 경북영덕점</a></td><td>견적</td><td class="num r">78일</td><td>정종찬</td><td class="task">방문: [260325 정종찬] 하이오더 13,000원 사용중으로 가격이 안맞다고 함</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nN8geYAC/view" target="_blank">구가연어 포항점</a></td><td>견적</td><td class="num r">77일</td><td>정종찬</td><td class="task">방문: [260325 17:00 정종찬] 업오더 6개월남음 지금 장사가 안돼서 폐업할지 </td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mrRssYAE/view" target="_blank">채선당 경주황성점</a></td><td>견적</td><td class="num r">76일</td><td>한진희</td><td class="task">방문: [260326 16:00 한진희] 비용이 비싸서 도입의사 없음</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nJDIIYA4/view" target="_blank">봄가내쭈꾸미 양산물금점</a></td><td>견적</td><td class="num r">76일</td><td>한진희</td><td class="task">방문: [260326 14:30 한진희] 히엘페이 사용중, 티오더보다 싸지만 불만있음, </td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000ncnUwYAI/view" target="_blank">고혼 사직점</a></td><td>견적</td><td class="num r">73일</td><td>한진희</td><td class="task">방문: [260327 18:00 한진희] 타사오더 대당 5천원에 사용 중이셔서 기존꺼 유</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000mz55ZYAQ/view" target="_blank">김해어부 주촌점</a></td><td>견적</td><td class="num r">69일</td><td>윤효근</td><td class="task">방문: [260402 윤효근] OBS 이관 타사 오더 진행하기로 했다고 함 설치 전 계약</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nY1IPYA0/view" target="_blank">토종칼국수 부산기장점</a></td><td>견적</td><td class="num r">69일</td><td>한진희</td><td class="task">방문: [260327 10:00 한진희] 법인, 이지오더가 너무 저렴함, 4/3(금) 연</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nbtmCYAQ/view" target="_blank">초함 초읍동점</a></td><td>견적</td><td class="num r">69일</td><td>한진희</td><td class="task">방문: [260327 13:00 한진희] 하이오더 크게 불편하지 않아 기존 오더 유지하신</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000no2OzYAI/view" target="_blank">우연횟집 장림직영점</a></td><td>견적</td><td class="num r">69일</td><td>박성빈</td><td class="task">방문: [260402 박성빈] CL DB 리터치 매장에서 상담완료 15+1=16대 고정형</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000o1CvBYAU/view" target="_blank">김할머니의령소바 의령본점</a></td><td>견적</td><td class="num r">65일</td><td>윤효근</td><td class="task">통화: [260407 윤효근] OBS 이관 가족들이랑 상의 중이라는 답변 후 통화 종료,</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oJuo7YAC/view" target="_blank">파시 대전유성점</a></td><td>견적</td><td class="num r">65일</td><td>박성빈</td><td class="task">통화: [260407 17:16 박성빈] CL DB 리터치 4/9(목) 10:40 파시(</td></tr></tbody></table>
+</div>
 
 <div class="foot">데이터: Salesforce · 실적=계약-CW(계약시작일) 기준 · 퍼널=단계변경 기준 · 생성 2026-06-11 · 태블릿 페이스 파이프라인 연동</div>
 </div></body></html>
