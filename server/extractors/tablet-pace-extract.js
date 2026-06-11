@@ -258,11 +258,12 @@ async function main() {
 
   // ---- CW 단계별 체류기간 (OpportunityFieldHistory 전체 이력 기반) ----
   const median = (arr) => { if (!arr.length) return null; const s = [...arr].sort((a, b) => a - b); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
-  const dwellByOpp = {}; // oppId → { stage: 누적 체류일 }
-  const cwIds = cw.map(o => o.id);
-  const createdMap = {}; cw.forEach(o => { createdMap[o.id] = o.createdDate; });
-  for (let i = 0; i < cwIds.length; i += 200) {
-    const ids = cwIds.slice(i, i + 200).map(id => `'${id}'`).join(',');
+  const dwellByOpp = {}; // oppId → { stage: 누적 체류일 } — CW·CL 둘 다
+  const dwellSrc = [...cw, ...cl];
+  const dwellIds = [...new Set(dwellSrc.map(o => o.id))];
+  const createdMap = {}; dwellSrc.forEach(o => { createdMap[o.id] = o.createdDate; });
+  for (let i = 0; i < dwellIds.length; i += 200) {
+    const ids = dwellIds.slice(i, i + 200).map(id => `'${id}'`).join(',');
     const rows = await soqlAll(instanceUrl, accessToken, `
       SELECT OpportunityId, OldValue, NewValue, CreatedDate FROM OpportunityFieldHistory
       WHERE Field='StageName' AND OpportunityId IN (${ids}) ORDER BY CreatedDate ASC`);
@@ -281,7 +282,7 @@ async function main() {
       dwellByOpp[oppId] = dwell;
     }
   }
-  console.log(`  ⏳ CW 단계 체류기간 계산: ${Object.keys(dwellByOpp).length}건`);
+  console.log(`  ⏳ CW·CL 단계 체류기간 계산: ${Object.keys(dwellByOpp).length}건`);
 
   // ---- 영업일 / 할당 ----
   const bizTotal = bizDaysInMonth(month);
@@ -367,7 +368,7 @@ async function main() {
       cl: { total: clTeam.length, stageDist: clStageDist },
       // opp별 원본 (페이지에서 기간 필터 재계산용) — created=생성일
       cwDwellOpps: cwTeam.map(o => ({ created: o.createdDate, dwell: dwellByOpp[o.id] || {} })),
-      clOpps: clTeam.map(o => ({ created: o.createdDate, deathStage: o.deathStage })),
+      clDwellOpps: clTeam.map(o => ({ created: o.createdDate, dwell: dwellByOpp[o.id] || {} })),
       pipeline: { count: pipelineCount, tablets: pipelineTablets, coverage, stages },
     };
     console.log(`  ▸ ${team}: 목표 ${target} / 오늘누적목표 ${cumTargetToday} / 실적 ${actualMTD}(${actualCount}건) / 갭 ${gap >= 0 ? '+' : ''}${gap} / 파이프라인 ${pipelineCount}건 ${pipelineTablets}대 (커버 ${coverage ?? '-'}%)`);

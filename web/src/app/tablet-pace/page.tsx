@@ -157,41 +157,40 @@ function OpenDwellPanel({ team, maxAge }: { team: any; maxAge: number | null }) 
   );
 }
 
-// CL(Closed Lost) 단계별 이탈 분포 — 당월 이탈건이 어느 단계에서 죽었나 · 기간 필터(생성일) 연동
+// CL 단계별 체류기간 — 이탈 건이 죽기 전 각 단계에 머문 일수(중앙값) · 기간 필터(생성일) 연동
 function ClDistPanel({ team, maxAge, asOf }: { team: any; maxAge: number | null; asOf: string }) {
   const cutoff = cutoffDate(asOf, maxAge);
-  const opps = (team.clOpps || []).filter((o: any) => !cutoff || (o.created && o.created >= cutoff));
-  const total = opps.length;
-  const order = [...STAGE_ORDER, '부재', '(미상)'];
-  const counts: Record<string, number> = {};
-  opps.forEach((o: any) => { const st = o.deathStage || '(미상)'; counts[st] = (counts[st] || 0) + 1; });
-  const rows = Object.entries(counts).map(([stage, count]) => ({ stage, count }))
-    .sort((a, b) => { const ia = order.indexOf(a.stage), ib = order.indexOf(b.stage); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); });
-  const max = Math.max(...rows.map((r) => r.count), 1);
+  const opps = (team.clDwellOpps || []).filter((o: any) => !cutoff || (o.created && o.created >= cutoff));
+  const dwell = STAGE_ORDER.map((st) => {
+    const vals = opps.map((o: any) => o.dwell?.[st]).filter((v: any) => v != null && v >= 0);
+    return { stage: st, count: vals.length, median: +medianOf(vals).toFixed(1) };
+  }).filter((d) => d.count > 0);
+  const leadVals = opps.map((o: any) => STAGE_ORDER.reduce((s, st) => s + (o.dwell?.[st] || 0), 0)).filter((v: number) => v > 0);
+  const leadTimeMedian = leadVals.length ? +medianOf(leadVals).toFixed(1) : null;
+  const max = Math.max(...dwell.map((d) => d.median), 0.1);
   return (
     <CardWrap style={{ flex: 1, minWidth: 300 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: C.text }}>CL 단계별 이탈</div>
-        <div style={{ fontSize: 12, color: C.muted }}>당월 실주 {fmt(total)}건</div>
+        <div style={{ fontSize: 15, fontWeight: 800, color: C.text }}>CL 단계별 체류기간</div>
+        <div style={{ fontSize: 12, color: C.muted }}>중앙값 · 당월 CL {fmt(opps.length)}건</div>
       </div>
-      <div style={{ fontSize: 12.5, color: C.secondary, margin: '4px 0 14px' }}>어느 단계에서 이탈했나 <span style={{ color: C.muted }}>(사망 직전 단계 · {maxAge == null ? '전체' : `최근 ${maxAge}일`})</span></div>
-      {rows.length === 0 ? (
-        <div style={{ fontSize: 12, color: C.muted, padding: '20px 0' }}>당월 실주 데이터 없음</div>
+      <div style={{ fontSize: 12.5, color: C.secondary, margin: '4px 0 14px' }}>
+        CL까지 중앙값 <b style={{ color: C.text, fontSize: 15 }}>{leadTimeMedian ?? '-'}일</b> <span style={{ color: C.muted }}>(생성 → CL · {maxAge == null ? '전체' : `최근 ${maxAge}일`})</span>
+      </div>
+      {dwell.length === 0 ? (
+        <div style={{ fontSize: 12, color: C.muted, padding: '20px 0' }}>당월 CL 데이터 없음</div>
       ) : (
-        rows.map((d) => {
-          const pct = total ? Math.round(d.count / total * 100) : 0;
-          return (
-            <div key={d.stage} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9 }}>
-              <span style={{ width: 64, fontSize: 11.5, color: C.secondary, textAlign: 'right', flexShrink: 0 }}>{d.stage}</span>
-              <div style={{ flex: 1, height: 18, background: C.bgSub, borderRadius: 5, position: 'relative' }}>
-                <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.max(d.count / max * 100, 4)}%`, background: C.red, opacity: 0.45 + 0.55 * (d.count / max), borderRadius: 5 }} />
-              </div>
-              <span style={{ width: 76, fontSize: 11.5, fontWeight: 700, color: C.text, flexShrink: 0 }}>{fmt(d.count)}건 <span style={{ color: C.muted, fontWeight: 400 }}>({pct}%)</span></span>
+        dwell.map((d) => (
+          <div key={d.stage} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9 }}>
+            <span style={{ width: 64, fontSize: 11.5, color: C.secondary, textAlign: 'right', flexShrink: 0 }}>{d.stage}</span>
+            <div style={{ flex: 1, height: 18, background: C.bgSub, borderRadius: 5, position: 'relative' }}>
+              <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${d.median > 0 ? Math.max(d.median / max * 100, 4) : 0}%`, background: C.red, opacity: 0.4 + 0.6 * (d.median / max), borderRadius: 5 }} />
             </div>
-          );
-        })
+            <span style={{ width: 76, fontSize: 11.5, fontWeight: 700, color: C.text, flexShrink: 0 }}>{d.median}일 <span style={{ color: C.muted, fontWeight: 400 }}>({d.count})</span></span>
+          </div>
+        ))
       )}
-      <div style={{ fontSize: 10, color: C.muted, marginTop: 8 }}>막대 진할수록 이탈 집중 단계 · (%)=전체 실주 중 비중</div>
+      <div style={{ fontSize: 10, color: C.muted, marginTop: 8 }}>CL 건이 죽기 전 각 단계 머문 일수 중앙값 · (n)=경유 건수</div>
     </CardWrap>
   );
 }
