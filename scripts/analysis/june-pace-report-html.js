@@ -34,8 +34,8 @@ const segTiles = SEGS.map(k => {
 // 퍼널 단계 비교 (전사)
 const funnel = A.stageCompare.filter(s => s.openCnt > 0 || s.cwMed > 0).map(s => {
   const hot = s.stage === '견적';
-  const max = Math.max(...A.stageCompare.map(x => Math.max(x.cwMed, x.clMed, x.openMed)), 1);
-  const bar = (v, c) => `<div class="fbar"><div style="width:${Math.max(v / max * 100, v > 0 ? 3 : 0)}%;background:${c}"></div></div><span class="fv">${v}일</span>`;
+  const max = Math.max(...A.stageCompare.map(x => Math.max(x.cwMed, x.openMed)), 1);
+  const bar = (v, c) => `<div class="fbar"><div style="width:${Math.max(v / max * 100, v > 0 ? 8 : 0)}%;background:${c}"></div></div><span class="fv">${v}일</span>`;
   return `<tr class="${hot ? 'hot' : ''}">
     <td class="st">${s.stage}${hot ? ' <span class="tag">병목</span>' : ''}</td>
     <td>${bar(s.cwMed, '#34D399')} <span class="fcnt">${s.cwCnt}건</span></td>
@@ -43,10 +43,10 @@ const funnel = A.stageCompare.filter(s => s.openCnt > 0 || s.cwMed > 0).map(s =>
 }).join('');
 
 // 퍼널 단계 비교 (팀별 상세) — 막대는 전 팀 공통 스케일
-const teamDwellMax = (() => { let m = 1; SEGS.forEach(k => (A.stageCompareByTeam?.[k] || []).forEach(s => { m = Math.max(m, s.cwMed, s.clMed, s.openMed); })); return m; })();
+const teamDwellMax = (() => { let m = 1; SEGS.forEach(k => (A.stageCompareByTeam?.[k] || []).forEach(s => { m = Math.max(m, s.cwMed, s.openMed); })); return m; })();
 const funnelByTeam = SEGS.map(k => {
   const arr = (A.stageCompareByTeam?.[k] || []).filter(s => s.openCnt > 0 || s.cwMed > 0);
-  const bar = (v, c) => `<div class="fbar" style="width:78px"><div style="width:${Math.max(v / teamDwellMax * 100, v > 0 ? 3 : 0)}%;background:${c}"></div></div><span class="fv">${v}일</span>`;
+  const bar = (v, c) => `<div class="fbar" style="width:78px"><div style="width:${Math.max(v / teamDwellMax * 100, v > 0 ? 8 : 0)}%;background:${c}"></div></div><span class="fv">${v}일</span>`;
   const rows = arr.map(s => { const hot = s.stage === '견적'; return `<tr class="${hot ? 'hot' : ''}"><td class="st">${s.stage}${hot ? ' <span class="tag">병목</span>' : ''}</td><td>${bar(s.cwMed, '#34D399')} <span class="fcnt">${s.cwCnt}</span></td><td>${bar(s.openMed, '#F59E0B')} <span class="fcnt">${s.openCnt}</span></td></tr>`; }).join('');
   const q = (A.stageCompareByTeam?.[k] || []).find(s => s.stage === '견적') || {};
   return `<div class="tfunnel"><div class="tf-h" style="border-left:4px solid ${SEGC[k]}"><b style="color:${SEGC[k]}">${esc(A.segments[k].name)}</b> <span class="muted">${k} · 견적 계류 ${q.openMed ?? '-'}일(${q.openCnt ?? 0}건)</span></div>
