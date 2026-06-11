@@ -74,6 +74,18 @@ const kpiSec = (A.kpiLevers || []).map(hq => {
   </div>`;
 }).join('');
 
+// 인바운드 방치 견적 — Task 요약 + 후속조치 (상세)
+const stalledRich = (A.stalled?.inbound || []).map(o => {
+  const tks = (o.tasks || []).slice(0, 5).map(t => `<div class="tk"><span class="tk-d">${t.date || ''}</span> <b>${esc(t.subject)}</b>${t.desc ? ` — ${esc(t.desc)}` : ''}</div>`).join('');
+  return `<div class="stall">
+    <div class="stall-h"><a href="${o.link}" target="_blank">${esc(o.store)}${o.branch ? ' ' + esc(o.branch) : ''}</a> <span class="muted">· ${o.stage} · <span class="bad">${o.daysSinceTask}일 방치</span> · 단계 ${o.stageAge}일 · 담당 ${o.field}</span></div>
+    ${o.note ? `<div class="stall-sum">📋 ${esc(o.note.summary)}</div><div class="stall-next">▶ 후속조치: <b>${esc(o.note.next)}</b></div>` : ''}
+    <details class="tk-wrap"><summary>Task 이력 ${(o.tasks || []).length}건 펼치기</summary>${tks}</details>
+  </div>`;
+}).join('');
+// KANBAN 방치 견적 표 (인바운드/아웃바운드)
+const stallTbl = (arr, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th>방치</th><th>담당</th><th>최근 활동</th></tr></thead><tbody>${(arr || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}${o.branch ? ' ' + esc(o.branch) : ''}</a></td><td>${o.stage}</td><td class="num ${o.daysSinceTask >= 14 ? 'r' : 'o'}">${o.daysSinceTask}일</td><td>${o.field}</td><td class="task">${o.tasks?.[0] ? `${esc(o.tasks[0].subject)}: ${esc((o.tasks[0].desc || '').slice(0, 45))}` : '-'}</td></tr>`).join('')}</tbody></table>`;
+
 const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>6월 태블릿 페이스 분석 — 목표 5,500대</title>
 <style>
@@ -138,6 +150,13 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 .loss-h{font-size:11.5px;color:#F0A0AC;margin-bottom:4px}
 .loss-item{font-size:11.5px;color:#C5D5E8;padding:1px 0 1px 12px}
 .loss-item a{color:#5FB0FF;text-decoration:none}
+.stall{background:#0B1A30;border:1px solid #1A3052;border-radius:10px;padding:12px 14px;margin:9px 0}
+.stall-h{font-size:13px;font-weight:600}.stall-h a{color:#5FB0FF;text-decoration:none}
+.stall-sum{font-size:12px;color:#C5D5E8;margin-top:7px;background:#0E2236;border-radius:7px;padding:7px 9px}
+.stall-next{font-size:12px;color:#9FE0C0;margin-top:6px}
+.tk-wrap{margin-top:7px}.tk-wrap summary{font-size:11px;color:#7E96B5;cursor:pointer}
+.tk{font-size:11px;color:#A8BDD8;padding:3px 0 3px 10px;border-left:2px solid #1A3052;margin-top:4px}
+.tk-d{color:#6E86A5;font-variant-numeric:tabular-nums}
 .foot{text-align:center;color:#5A7193;font-size:11.5px;margin-top:14px}
 @media(max-width:720px){.two{grid-template-columns:1fr}.task{display:none}}
 </style></head><body><div class="wrap">
@@ -183,6 +202,7 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
   <div class="desc">본부 KPI 실값(6월 누적)을 <b>파트별</b>로. 신호등 <span class="good">●</span>달성/<span class="bad">●</span>미달. 각 파트의 <span class="bad">⚠️ 전환 실패/이탈건</span>은 실제 업체·사유까지 표기(클릭 시 Salesforce).</div>
   ${kpiSec}
   <div class="legend"><b>공통 병목</b>: 견적 단계 정체(CL의 70~86%가 견적 이탈)가 전 세그먼트 마감을 막음 — <b>KPI 개선 + 견적 후속 가속</b>이 5,500 달성의 두 축.</div>
+  ${stalledRich ? `<div style="margin-top:16px"><div class="part-h" style="font-size:14px;margin-bottom:8px">📌 인바운드 BO — 견적 방치 계류건 (후속 끊김 · Task 요약·후속조치)</div>${stalledRich}<div class="legend">기준: FieldUser=인바운드 · 견적/재견적 · 영업중 · 후속과업 없음 · 7일+ 방치. 후속조치는 Task 이력 분석 스냅샷.</div></div>` : ''}
 </section>
 
 <section>
@@ -197,6 +217,14 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
   <div class="desc">마감 단계(견적·계약진행 등) · 태블릿 보유 · 최근 생성(좀비 제외) 중 정체+Task 방치 상위. 총 ${n(A.atRiskSummary.total)}건 · ${n(A.atRiskSummary.tabletsAtRisk)}대 위험 (Task 14일+ 방치 ${A.atRiskSummary.stale14}건).</div>
   <table><thead><tr><th>매장</th><th>세그먼트</th><th>단계</th><th>태블릿</th><th>단계경과</th><th>마지막 Task</th><th>최근 활동 내용</th></tr></thead><tbody>${risk}</tbody></table>
   <div class="legend">단계경과·Task 방치일이 클수록 CL 위험. 빨강 = 14일+ 방치. 견적 단계 고가치건의 즉시 재컨택이 CW율 방어의 핵심.</div>
+
+  <div style="margin-top:18px"><div class="part-h" style="font-size:14px;margin-bottom:8px">🔻 견적 방치 (후속 끊김) — 상시 모니터링</div>
+    <div class="desc">견적/재견적 · 영업중 · 후속과업 없음 · 7일+ 방치 (FieldUser 부서 기준 · TEST 제외). 빨강=14일+.</div>
+    <div style="font-size:12.5px;font-weight:700;color:#3B82F6;margin:6px 0 4px">인바운드 ${n((A.stalled?.inbound || []).length)}건</div>
+    ${stallTbl(A.stalled?.inbound, 15)}
+    <div style="font-size:12.5px;font-weight:700;color:#A78BFA;margin:14px 0 4px">아웃바운드 ${n((A.stalled?.outbound || []).length)}건 <span class="muted" style="font-weight:400">(상위 15)</span></div>
+    ${stallTbl(A.stalled?.outbound, 15)}
+  </div>
 </section>
 
 <div class="foot">데이터: Salesforce · 실적=계약-CW(계약시작일) 기준 · 퍼널=단계변경 기준 · 생성 ${A.asOf} · 태블릿 페이스 파이프라인 연동</div>

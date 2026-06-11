@@ -125,8 +125,25 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
     ];
   } catch (e) { console.log('  ⚠️ KPI 레버 스킵:', e.message); }
 
+  // ---- 방치 견적 (인바운드·아웃바운드) + 후속조치 노트 ----
+  let stalled = { inbound: [], outbound: [] };
+  try {
+    const SQ = JSON.parse(fs.readFileSync('data/stalled-quotes.json', 'utf8'));
+    // 인바운드 방치 후속조치 노트 (Task 이력 분석 스냅샷)
+    const NOTE = {
+      '006TJ00000oeGCXYA2': { summary: '유오더(U오더) 사용 중·약정 1년 미만 잔여. 위약금 부담으로 약정 더 소진 후 환승 희망. 특별승인(대당1,100 할인·배터리19EA·볼륨21.4%) 확보. "6월말 재터치 예정".', next: '6월말 약정 만료 임박 시점 재컨택 + 위약금 캐시백/지원 카드로 환승 결정 유도' },
+      '006TJ00000r6nE1YAI': { summary: '경쟁사(메뉴잇) 견적 대기 중. 가격이 최우선 결정요소. 특별승인(대당1,300 할인·볼륨20.5%) 확보. 7T 희망.', next: '메뉴잇 견적 나오는 즉시 가격 우위 강조하며 클로징 콜. 견적 지연 길어지면 선제 컨택' },
+      '006TJ00000rFQ8YYAW': { summary: '카카오 인입→통화·금요일 방문조율 완료. 15T 희망·운영중. 방문 이후 후속 끊김.', next: '방문 결과·견적 확정 여부 확인 콜 → 미진행 시 클로징 푸시' },
+      '006TJ00000niRjUYAU': { summary: '건물 증축·옆 매장 소송 이슈로 설치 지연(6월 예정). 서류 수취 완료·특별승인 받음.', next: '6월 설치 가능 일정 재확인(소송·증축 진행) → 확정 시 출고 준비, 지연 길면 일정 재합의' },
+      '006TJ00000rSes1YAC': { summary: '타사 오더 2곳 대비 비싸다는 가격 저항. 도입 시기도 아직 멂. 특별승인 받았으나 보류.', next: '타사 대비 가치(기능·지원) 비교 자료 + 도입 시기 재확인 리터치, 추가 혜택 카드 검토' },
+    };
+    const attach = (arr) => (arr || []).map(o => { const id = o.link.split('/r/Opportunity/')[1].split('/')[0]; return { ...o, oppId: id, note: NOTE[id] || null }; });
+    stalled = { inbound: attach(SQ.inbound), outbound: attach(SQ.outbound) };
+    console.log(`  방치 견적: 인바운드 ${stalled.inbound.length}건 / 아웃바운드 ${stalled.outbound.length}건`);
+  } catch (e) { console.log('  ⚠️ 방치 견적 스킵:', e.message); }
+
   const out = {
-    kpiLevers,
+    kpiLevers, stalled,
     period: D.period, asOf: D.asOf, bizElapsed: D.bizDaysElapsed, bizTotal: D.bizDaysTotal,
     total: { target: totTarget, actual: totActual, projected: totProj, gap: totProj - totTarget, attainment: +(totProj / totTarget * 100).toFixed(1), paceNow: +(totActual / D.teams.IBS.cumTargetToday).toFixed(2) },
     segments: seg, stageCompare,
