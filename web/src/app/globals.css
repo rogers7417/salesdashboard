@@ -265,3 +265,7 @@ h4 {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* 스크롤바 시각 숨김 (스크롤 기능 유지) */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; width: 0; height: 0; }

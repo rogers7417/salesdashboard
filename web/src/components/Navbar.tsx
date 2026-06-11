@@ -7,10 +7,10 @@ import { Suspense } from 'react';
 const navItems = [
   { href: '/kpi-v2', label: 'KPI v2' },
   { href: '/kpi-v2?tab=score', label: '🏆 스코어' },
-  { href: '/inbound', label: '인바운드 세일즈' },
-  { href: '/channel', label: '채널 세일즈' },
+  { href: '/tablet-pace', label: '📟 Kanban' },
+  // 숨김 (필요 시 복원): { href: '/inbound', label: '인바운드 세일즈' }, { href: '/channel', label: '채널 세일즈' },
   { href: '/kpi', label: 'KPI' },
-  { href: '/exception-tm', label: 'Exception TM' },
+  // 숨김 (필요 시 복원): { href: '/exception-tm', label: 'Exception TM' },
   { href: '/install-tracking', label: '설치 트래킹' },
   { href: '/install-tracking-v2', label: '트래킹 v2' },
   { href: '/visits', label: '방문 트래킹' },

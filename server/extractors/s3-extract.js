@@ -133,6 +133,12 @@ async function runVisitTracking() {
   return { success: true, duration: `${((Date.now() - t0) / 1000).toFixed(1)}s` };
 }
 
+async function runTabletPace() {
+  const month = getCurrentMonth();
+  console.log(`\n📟 태블릿 페이스 추출 (${month}, --s3)...`);
+  return runScript(path.join(EXTRACTORS_DIR, 'tablet-pace-extract.js'), [month, '--s3']);
+}
+
 async function main() {
   const startTime = Date.now();
   const args = process.argv.slice(2);
@@ -141,7 +147,8 @@ async function main() {
   const inboundOnly = args.includes('--inbound-only');
   const visitOnly = args.includes('--visit-only');
   const partnerOnly = args.includes('--partner-only');
-  const runAll = !kpiOnly && !channelOnly && !inboundOnly && !visitOnly && !partnerOnly;
+  const tabletPaceOnly = args.includes('--tablet-pace-only');
+  const runAll = !kpiOnly && !channelOnly && !inboundOnly && !visitOnly && !partnerOnly && !tabletPaceOnly;
 
   console.log('============================================');
   console.log('☁️  S3 데이터 추출 오케스트레이터');
@@ -158,6 +165,17 @@ async function main() {
     } catch (err) {
       results.kpi = { success: false, error: err.message };
       console.error(`   ❌ KPI 실패`);
+    }
+  }
+
+  // 1-b. 태블릿 페이스 (월 목표 → 일별/주별 할당 + 파이프라인) — 자체 S3 업로드
+  if (runAll || kpiOnly || tabletPaceOnly) {
+    try {
+      results.tabletPace = await runTabletPace();
+      console.log(`   ✅ 태블릿 페이스 완료 (${results.tabletPace.duration})`);
+    } catch (err) {
+      results.tabletPace = { success: false, error: err.message };
+      console.error(`   ❌ 태블릿 페이스 실패: ${err.message}`);
     }
   }
 

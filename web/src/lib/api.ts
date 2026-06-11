@@ -267,6 +267,23 @@ export async function fetchExceptionTM(month?: string) {
 }
 
 // ============================================
+// 태블릿 페이스 (월 목표 → 일별/주별 할당 + 파이프라인) API
+// S3: tablet-pace/{month}.json · 로컬 dev: Next public 정적 (/tablet-pace/{month}.json)
+// ============================================
+export async function fetchTabletPace(month?: string) {
+  const m = month || getCurrentMonth();
+  if (USE_S3) {
+    return fetchS3(`tablet-pace/${m}.json`);
+  }
+  const res = await fetch(`/tablet-pace/${m}.json`, { cache: 'no-store' });
+  if (!res.ok) {
+    if (res.status === 404) return null;
+    throw new Error(`Failed to fetch tablet pace (${res.status})`);
+  }
+  return res.json();
+}
+
+// ============================================
 // 헬스 체크 / 최종 업데이트 확인
 // ============================================
 export async function checkHealth() {
