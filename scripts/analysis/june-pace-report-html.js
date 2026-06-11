@@ -31,16 +31,27 @@ const segTiles = SEGS.map(k => {
   </div>`;
 }).join('');
 
-// 퍼널 단계 비교
+// 퍼널 단계 비교 (전사)
 const funnel = A.stageCompare.filter(s => s.openCnt > 0 || s.cwMed > 0).map(s => {
   const hot = s.stage === '견적';
   const max = Math.max(...A.stageCompare.map(x => Math.max(x.cwMed, x.clMed, x.openMed)), 1);
   const bar = (v, c) => `<div class="fbar"><div style="width:${Math.max(v / max * 100, v > 0 ? 3 : 0)}%;background:${c}"></div></div><span class="fv">${v}일</span>`;
   return `<tr class="${hot ? 'hot' : ''}">
     <td class="st">${s.stage}${hot ? ' <span class="tag">병목</span>' : ''}</td>
-    <td>${bar(s.cwMed, '#34D399')}</td>
-    <td>${bar(s.openMed, '#F59E0B')}</td>
-    <td>${bar(s.clMed, '#F0556C')}</td></tr>`;
+    <td>${bar(s.cwMed, '#34D399')} <span class="fcnt">${s.cwCnt}건</span></td>
+    <td>${bar(s.openMed, '#F59E0B')} <span class="fcnt">${s.openCnt}건</span></td>
+    <td>${bar(s.clMed, '#F0556C')} <span class="fcnt">${s.clCnt}건</span></td></tr>`;
+}).join('');
+
+// 퍼널 단계 비교 (팀별 상세) — 막대는 전 팀 공통 스케일
+const teamDwellMax = (() => { let m = 1; SEGS.forEach(k => (A.stageCompareByTeam?.[k] || []).forEach(s => { m = Math.max(m, s.cwMed, s.clMed, s.openMed); })); return m; })();
+const funnelByTeam = SEGS.map(k => {
+  const arr = (A.stageCompareByTeam?.[k] || []).filter(s => s.openCnt > 0 || s.cwMed > 0 || s.clMed > 0);
+  const bar = (v, c) => `<div class="fbar" style="width:78px"><div style="width:${Math.max(v / teamDwellMax * 100, v > 0 ? 3 : 0)}%;background:${c}"></div></div><span class="fv">${v}일</span>`;
+  const rows = arr.map(s => { const hot = s.stage === '견적'; return `<tr class="${hot ? 'hot' : ''}"><td class="st">${s.stage}${hot ? ' <span class="tag">병목</span>' : ''}</td><td>${bar(s.cwMed, '#34D399')} <span class="fcnt">${s.cwCnt}</span></td><td>${bar(s.openMed, '#F59E0B')} <span class="fcnt">${s.openCnt}</span></td><td>${bar(s.clMed, '#F0556C')} <span class="fcnt">${s.clCnt}</span></td></tr>`; }).join('');
+  const q = (A.stageCompareByTeam?.[k] || []).find(s => s.stage === '견적') || {};
+  return `<div class="tfunnel"><div class="tf-h" style="border-left:4px solid ${SEGC[k]}"><b style="color:${SEGC[k]}">${esc(A.segments[k].name)}</b> <span class="muted">${k} · 견적 계류 ${q.openMed ?? '-'}일(${q.openCnt ?? 0}건) · 견적 CL ${q.clMed ?? '-'}일(${q.clCnt ?? 0}건)</span></div>
+    <table><thead><tr><th>단계</th><th>🟢 CW</th><th>🟠 계류</th><th>🔴 CL</th></tr></thead><tbody>${rows || '<tr><td colspan="4" class="muted" style="text-align:center">데이터 없음</td></tr>'}</tbody></table></div>`;
 }).join('');
 
 // 인바운드 방치 견적 — Task 요약 + 후속조치 (상세) — 인바운드 BO 파트에 삽입
@@ -169,6 +180,14 @@ td a{color:#5FB0FF}
 .fbar{display:inline-block;width:130px;height:11px;background:#13243F;border-radius:5px;overflow:hidden;vertical-align:middle}
 .fbar>div{height:100%;border-radius:5px}
 .fv{font-size:11.5px;margin-left:6px;color:#C5D5E8;vertical-align:middle}
+.fcnt{font-size:10.5px;color:#7E96B5;margin-left:3px;vertical-align:middle}
+.tfunnels{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+.tfunnel{background:#0A1728;border:1px solid #16304E;border-radius:8px;padding:12px 14px}
+.tfunnel table{font-size:12px}.tfunnel td{padding:6px 8px}
+.tf-h{font-size:13.5px;font-weight:700;padding-left:9px;margin-bottom:8px;line-height:1.4}
+.tf-h .muted{font-size:11px;font-weight:400}
+.subhead{font-size:14px;font-weight:800;margin:18px 0 4px}
+@media(max-width:760px){.tfunnels{grid-template-columns:1fr}}
 tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 .tag{font-size:10px;background:#F0556C;color:#fff;border-radius:5px;padding:1px 6px;font-weight:700}
 .st{font-weight:600}
@@ -245,9 +264,14 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 
 <div class="panel">
   <div class="phead"><span class="pnum">4</span><h2>퍼널 개선</h2></div>
-  <div class="desc">단계별 체류기간 중앙값: 마감(CW) vs 현재 계류 vs 이탈(CL). 견적에서 갈립니다.</div>
+  <div class="desc">단계별 체류기간 중앙값: 마감(CW) vs 현재 계류 vs 이탈(CL). 막대 옆 숫자 = 표본 건수. 견적에서 갈립니다.</div>
   <table><thead><tr><th>단계</th><th>🟢 CW(마감) 통과</th><th>🟠 계류(현재) 정체</th><th>🔴 CL(이탈) 정체</th></tr></thead><tbody>${funnel}</tbody></table>
   <div class="legend">🟢 마감되는 건은 견적을 1~2일에 통과 · 🟠 지금 계류건은 견적에서 10~28일 정체 · 🔴 이탈건은 견적에서 평균 15일 묶이다 죽음(전체 CL의 70~86%가 견적 이탈). <b>→ 견적 단계 후속 속도(견적 N일+ 자동 에스컬레이션·재견적 차단)가 목표 달성의 최대 레버.</b></div>
+
+  <div class="subhead">팀별 단계 체류 상세</div>
+  <div class="desc">세그먼트별 단계 체류기간 중앙값. 막대 길이는 <b>전 팀 공통 스케일</b>(직접 비교 가능) · 막대 옆 숫자 = 표본 건수. 헤더에 견적 단계 계류·CL 요약.</div>
+  <div class="tfunnels">${funnelByTeam}</div>
+  <div class="legend">팀마다 견적 병목의 양상이 다름 — 계류 중앙값이 길수록 후속이 느린 팀, CL 중앙값이 길수록 견적에서 오래 끌다 죽는 팀. 표본(건수)이 작은 단계는 중앙값 변동성 큼.</div>
 </div>
 
 <div class="panel">

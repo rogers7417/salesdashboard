@@ -25,8 +25,20 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
       (D.teams[t].clDwellOpps || []).forEach(o => { if (o.dwell?.[st] != null) cl.push(o.dwell[st]); });
       (D.teams[t].pipeline.stages.find(s => s.stage === st)?.opps || []).forEach(o => { if (o.stageAge != null) op.push(o.stageAge); });
     }
-    return { stage: st, cwMed: +median(cw).toFixed(1), clMed: +median(cl).toFixed(1), openMed: +median(op).toFixed(1), openCnt: op.length };
+    return { stage: st, cwMed: +median(cw).toFixed(1), clMed: +median(cl).toFixed(1), openMed: +median(op).toFixed(1), cwCnt: cw.length, clCnt: cl.length, openCnt: op.length };
   });
+
+  // 2-1) 단계별 체류 — 팀별 분해
+  const stageCompareByTeam = {};
+  for (const t of TEAMS) {
+    stageCompareByTeam[t] = ['방문배정', '견적', '재견적', '선납금', '계약진행', '출고진행'].map(st => {
+      const cw = [], cl = [], op = [];
+      (D.teams[t].cwDwellOpps || []).forEach(o => { if (o.dwell?.[st] != null) cw.push(o.dwell[st]); });
+      (D.teams[t].clDwellOpps || []).forEach(o => { if (o.dwell?.[st] != null) cl.push(o.dwell[st]); });
+      (D.teams[t].pipeline.stages.find(s => s.stage === st)?.opps || []).forEach(o => { if (o.stageAge != null) op.push(o.stageAge); });
+      return { stage: st, cwMed: +median(cw).toFixed(1), clMed: +median(cl).toFixed(1), openMed: +median(op).toFixed(1), cwCnt: cw.length, clCnt: cl.length, openCnt: op.length };
+    });
+  }
 
   // 3) 위험 영업기회 후보 — 마감단계 + 태블릿 보유, 정체순
   const atRisk = [];
@@ -182,7 +194,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
     kpiLevers, stalled, channelRaw,
     period: D.period, asOf: D.asOf, bizElapsed: D.bizDaysElapsed, bizTotal: D.bizDaysTotal,
     total: { target: totTarget, actual: totActual, projected: totProj, gap: totProj - totTarget, attainment: +(totProj / totTarget * 100).toFixed(1), paceNow: +(totActual / D.teams.IBS.cumTargetToday).toFixed(2) },
-    segments: seg, stageCompare,
+    segments: seg, stageCompare, stageCompareByTeam,
     atRisk: atRisk.slice(0, 30),
     atRiskSummary: { total: atRisk.length, stale14: atRisk.filter(o => (o.daysSinceTask ?? 0) >= 14).length, tabletsAtRisk: atRisk.reduce((s, o) => s + o.tablets, 0) },
   };
