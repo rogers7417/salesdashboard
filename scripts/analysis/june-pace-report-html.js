@@ -60,6 +60,10 @@ const stallTbl = (arr, limit) => `<table><thead><tr><th>매장</th><th>단계</t
 const aeRawTbl = (r, limit) => `<table><thead><tr><th>매장(파트너)</th><th>담당 AE</th><th>발송일</th><th class="num">미서명 경과</th></tr></thead><tbody>${(r?.list || []).slice(0, limit).map(o => `<tr><td>${o.link ? `<a href="${o.link}" target="_blank">${esc(o.store)}</a>` : esc(o.store)}</td><td>${esc(o.owner || '-')}</td><td class="task">${o.sent || '-'}</td><td class="num ${o.overdue ? 'r' : 'o'}">${o.daysSinceSent}일</td></tr>`).join('')}</tbody></table>`;
 // 채널 AM raw — MOU 후 미안착 (매장 미전환)
 const amRawTbl = (r, limit) => `<table><thead><tr><th>파트너</th><th>MOU 체결일</th><th class="num">MOU 경과</th><th class="num">MOU후 Lead</th></tr></thead><tbody>${(r?.list || []).slice(0, limit).map(o => `<tr><td>${esc(o.partner)}</td><td class="task">${o.mou || '-'}</td><td class="num ${(o.daysSinceMou || 0) >= 60 ? 'r' : 'o'}">${o.daysSinceMou != null ? o.daysSinceMou + '일' : '-'}</td><td class="num ${o.leadsAfter === 0 ? 'r' : ''}">${o.leadsAfter}건</td></tr>`).join('')}</tbody></table>`;
+// 채널 TM raw — 입금일자(선납금) 미입력 open opp
+const tmRawTbl = (r, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th class="num">경과</th><th>입금일자</th><th>마지막 활동</th><th>담당</th></tr></thead><tbody>${(r?.list || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}</a></td><td>${esc(o.stage)}</td><td class="num ${(o.age || 0) >= 7 ? 'r' : 'o'}">${o.age}일</td><td class="bad">없음</td><td class="task">${o.lastTask ? esc(o.lastTask) + (o.lastTaskDate ? ` (${o.lastTaskDate})` : '') : '-'}</td><td>${esc(o.owner || '-')}</td></tr>`).join('')}</tbody></table>`;
+// 채널 BO raw — 계류건 (처리 대기)
+const boRawTbl = (r, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th class="num">경과</th><th>입금</th><th>마지막 활동</th><th>담당 BO</th></tr></thead><tbody>${(r?.list || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}</a></td><td>${esc(o.stage)}</td><td class="num ${(o.age || 0) >= 7 ? 'r' : 'o'}">${o.age}일</td><td>${o.hasPay ? '<span class="good">완료</span>' : '<span class="bad">없음</span>'}</td><td class="task">${o.lastTask ? esc(o.lastTask) + (o.lastTaskDate ? ` (${o.lastTaskDate})` : '') : '-'}</td><td>${esc(o.bo || '-')}</td></tr>`).join('')}</tbody></table>`;
 
 // KPI → 퍼널 레버
 const kpiSec = (A.kpiLevers || []).map(hq => {
@@ -85,6 +89,12 @@ const kpiSec = (A.kpiLevers || []).map(hq => {
     } else if ((p.part || '').includes('AM') && A.channelRaw?.am?.total) {
       const r = A.channelRaw.am;
       extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">🏪 MOU 후 미안착 — 매장 미전환 <span class="muted">(${n(r.total)}건 · MOU 경과 오래된 순)</span></div>${amRawTbl(r, 15)}<div class="legend">기준: MOU 체결 후 매장 미전환. 빨강=MOU 60일+ 또는 MOU후 Lead 0건(완전 방치). AM 안착 푸시 대상.</div></div>`;
+    } else if ((p.part || '').includes('TM') && A.channelRaw?.tm?.total) {
+      const r = A.channelRaw.tm;
+      extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">💳 입금일자(선납금) 미입력 — 계약 미진행 <span class="muted">(${n(r.total)}건 · 7일+ 정체 ${n(r.over7)}건 · 나이순)</span></div>${tmRawTbl(r, 15)}<div class="legend">기준: 영업중 open opp 중 선납금 입금일자 미입력. 빨강=7일+ 정체. 입금 확인·독려가 계약 진행의 1차 관문.</div></div>`;
+    } else if ((p.part || '').includes('CH BO') && A.channelRaw?.bo?.total) {
+      const r = A.channelRaw.bo;
+      extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📦 계류건 — 처리 대기 <span class="muted">(${n(r.total)}건 · 7일+ ${n(r.over7)}건 · 나이순)</span></div>${boRawTbl(r, 15)}<div class="legend">기준: 채널 BO 담당 open opp(계약진행·설치 등). 빨강=7일+ 정체. 입금 '없음'은 입금 확인 대기. 처리 SLA 우선 소진 대상.</div></div>`;
     }
     return `<div class="part"><div class="part-h">${p.part}</div>${rows}${lossHtml}${extra}</div>`;
   }).join('');
@@ -234,7 +244,7 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 </div>
 
 <div class="panel">
-  <div class="phead"><span class="pnum">4</span><h2>퍼널 개선 — 견적 단계가 생사를 가른다</h2></div>
+  <div class="phead"><span class="pnum">4</span><h2>퍼널 개선</h2></div>
   <div class="desc">단계별 체류기간 중앙값: 마감(CW) vs 현재 계류 vs 이탈(CL). 견적에서 갈립니다.</div>
   <table><thead><tr><th>단계</th><th>🟢 CW(마감) 통과</th><th>🟠 계류(현재) 정체</th><th>🔴 CL(이탈) 정체</th></tr></thead><tbody>${funnel}</tbody></table>
   <div class="legend">🟢 마감되는 건은 견적을 1~2일에 통과 · 🟠 지금 계류건은 견적에서 10~28일 정체 · 🔴 이탈건은 견적에서 평균 15일 묶이다 죽음(전체 CL의 70~86%가 견적 이탈). <b>→ 견적 단계 후속 속도(견적 N일+ 자동 에스컬레이션·재견적 차단)가 목표 달성의 최대 레버.</b></div>
