@@ -8,6 +8,11 @@ const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</
 
 const t = A.total;
 const overall = t.attainment;
+// 세그먼트 진단(데이터 기반 — 하드코딩 금지)
+const segArr = SEGS.map(k => ({ k, name: A.segments[k].name, att: Math.round(A.segments[k].projected / A.segments[k].target * 100), cov: A.segments[k].coverage ?? 0, pipe: A.segments[k].pipelineTab, lead: A.segments[k].leadTimeMedian }));
+const best = [...segArr].sort((a, b) => b.att - a.att)[0];
+const worst = [...segArr].sort((a, b) => a.att - b.att)[0];
+const bestCov = [...segArr].sort((a, b) => b.cov - a.cov)[0];
 // 세그먼트 진행 바
 const segBars = SEGS.map(k => {
   const s = A.segments[k]; const pct = Math.min(100, s.actual / s.target * 100); const projPct = Math.min(115, s.projected / s.target * 100);
@@ -115,21 +120,21 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
   <h2>① 6월말 예상 CW — 세그먼트별</h2>
   <div class="desc">현재 CW(계약시작일 기준) 페이스를 월말까지 단순 투영. 흰 선 = 예상 CW 위치.</div>
   ${segBars}
-  <div class="legend">막대 = 현재 실적 / 흰 선 = 예상 CW(목표 대비). 현 페이스론 <b>전 세그먼트 목표 미달</b> — 프랜차이즈 ${Math.round(A.segments.FR.projected / A.segments.FR.target * 100)}%가 상대 최선, 인바운드·파트너스 30%대 최저.</div>
+  <div class="legend">막대 = 현재 실적 / 흰 선 = 예상 CW(목표 대비). 현 페이스론 <b>전 세그먼트 목표 미달</b> — ${best.name} ${best.att}%가 상대 최선, ${worst.name} ${worst.att}% 최저.</div>
 </section>
 
 <section>
   <h2>② KPI 잘되는 부분 / 안되는 부분</h2>
   <div class="desc">CW 기준 진단.</div>
   <div class="two">
-    <div class="col gd"><h3>잘되고 있음</h3><ul>
-      <li><b>프랜차이즈 ${Math.round(A.segments.FR.projected / A.segments.FR.target * 100)}% CW</b> — 4세그먼트 중 상대적으로 가장 앞선 페이스. fm_FRHQ 연결 신규 회수 견조</li>
-      <li><b>파트너스 파이프라인 ${n(A.segments.PT.pipelineTab)}대(커버 ${A.segments.PT.coverage}%)</b> — 잔여목표 대비 후보 충분, 전환만 되면 회복 가능</li>
-      <li>리드타임 중앙값 ${A.segments.FR.leadTimeMedian}~${A.segments.IBS.leadTimeMedian}일 — 마감되는 건은 빠르게 통과(생성→CW)</li>
+    <div class="col gd"><h3>상대적으로 나은 부분</h3><ul>
+      <li><b>${best.name} ${best.att}% CW</b> — 4세그먼트 중 페이스 가장 앞섬(그래도 목표 미달)</li>
+      <li><b>${bestCov.name} 파이프라인 ${n(bestCov.pipe)}대(커버 ${bestCov.cov}%)</b> — 잔여목표 대비 후보 충분, 전환만 되면 회복 여지</li>
+      <li>마감(CW)건 리드타임 중앙값 ${Math.min(...segArr.map(s => s.lead))}~${Math.max(...segArr.map(s => s.lead))}일 — 닫히는 건은 빠르게 통과(생성→CW)</li>
     </ul></div>
     <div class="col bd"><h3>안되고 있음</h3><ul>
-      <li><b>아웃바운드 ${Math.round(A.segments.OBS.projected / A.segments.OBS.target * 100)}% CW</b> — 목표 480 중 ${n(A.segments.OBS.projected)}대 예상, 절대량·전환 모두 부족</li>
-      <li><b>인바운드 ${Math.round(A.segments.IBS.projected / A.segments.IBS.target * 100)}% CW</b> — 최대 목표(2,410)인데 페이스 미달, 갭 절대값 최대</li>
+      <li><b>${worst.name} ${worst.att}% CW</b> — 페이스 최저, 절대량·전환 모두 부족</li>
+      <li><b>인바운드 ${Math.round(A.segments.IBS.projected / A.segments.IBS.target * 100)}% CW</b> — 최대 목표(2,410)인데 미달, 갭 절대값 최대</li>
       <li><b>전사 ${overall}% CW 전망</b> — 이대로면 ${n(-t.gap)}대 미달. 잔여 영업일 ${A.bizTotal - A.bizElapsed}일 내 일일 페이스 대폭 상향 필요</li>
     </ul></div>
   </div>

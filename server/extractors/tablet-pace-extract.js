@@ -131,15 +131,17 @@ function applyChannelOverride(team, leadSource, ownerUserDept) {
   if (leadSource === '파트너사 소개' || leadSource === '프랜차이즈소개' || (ownerUserDept && CHANNEL_DEPTS.has(ownerUserDept))) return 'CHS';
   return team;
 }
-// 채널(CHS)을 프랜차이즈(FR)/파트너스(PT)로 분할 — FR본사(fm_FRHQ__c) 연결 또는 LeadSource '프랜차이즈소개' → FR, 그 외 → PT
-function channelSplit(team, leadSource, frHQ) {
+// 채널(CHS)을 프랜차이즈(FR)/파트너스(PT)로 분할
+// 우선순위: ① 파트너사 정보(fm_AccountPartner__c) 있으면 → PT, ② FR본사(fm_FRHQ__c)/LeadSource '프랜차이즈소개' → FR, ③ 그 외 → PT
+function channelSplit(team, leadSource, frHQ, partner) {
   if (team !== 'CHS') return team;
+  if (partner) return 'PT';
   return (frHQ || leadSource === '프랜차이즈소개') ? 'FR' : 'PT';
 }
-// 계약-CW 실적 분류 — 사내 /contracts API 기준: opp 소유부서(Owner_Department__c) → 팀, 채널은 FR/PT 분할 (FieldUser·B+C 미적용)
-function classifyContract(dept, frHQ, leadSource) {
+// 계약-CW 실적 분류 — 사내 /contracts API 기준: opp 소유부서 → 팀, 채널은 FR/PT 분할(파트너사 정보 우선)
+function classifyContract(dept, frHQ, leadSource, partner) {
   const team = DEPT_TEAM[dept] || '기타';
-  if (team === 'CHS') return (frHQ || leadSource === '프랜차이즈소개') ? 'FR' : 'PT';
+  if (team === 'CHS') return channelSplit('CHS', leadSource, frHQ, partner);
   return team;
 }
 // 국내(한국) 판별 — 원화(KRW) 기준. 해외 영업기회는 USD/CAD 등으로 통화가 찍힘 (CurrencyIsoCode 는 항상 채워짐).
@@ -231,7 +233,7 @@ async function main() {
     companyStatus: o.fm_CompanyStatus__c || null,
     leadSource: o.LeadSource || null,
     baseTeam: classify(o.Owner_Department__c, o.FieldUser__r?.Department),
-    team: channelSplit(applyChannelOverride(classify(o.Owner_Department__c, o.FieldUser__r?.Department), o.LeadSource || null, o.Owner?.Department || null), o.LeadSource || null, o.Account?.fm_FRHQ__c || null),
+    team: channelSplit(applyChannelOverride(classify(o.Owner_Department__c, o.FieldUser__r?.Department), o.LeadSource || null, o.Owner?.Department || null), o.LeadSource || null, o.Account?.fm_FRHQ__c || null, o.fm_AccountPartner__c || null),
     link: lightning(o.Id),
   });
 
@@ -300,7 +302,7 @@ async function main() {
   const contractRows = await soqlAll(instanceUrl, accessToken, `
     SELECT Id, ContractDateStart__c, Opportunity__r.Id, Opportunity__r.Owner_Department__c,
            Opportunity__r.TotalNumberofEveryTablet__c, Opportunity__r.LeadSource,
-           Opportunity__r.Account.Name, Account__r.fm_FRHQ__c
+           Opportunity__r.fm_AccountPartner__c, Opportunity__r.Account.Name, Account__r.fm_FRHQ__c
     FROM Contract__c
     WHERE Opportunity__c != NULL
       AND ContractDateStart__c >= ${start} AND ContractDateStart__c < ${next}
@@ -313,7 +315,7 @@ async function main() {
   let cwEtc = 0;
   contractRows.forEach(r => {
     const o = r.Opportunity__r || {};
-    const team = classifyContract(o.Owner_Department__c, r.Account__r?.fm_FRHQ__c, o.LeadSource);
+    const team = classifyContract(o.Owner_Department__c, r.Account__r?.fm_FRHQ__c, o.LeadSource, o.fm_AccountPartner__c);
     if (team === '기타') { cwEtc++; return; }
     (cwByTeam[team] = cwByTeam[team] || []).push({ tablets: o.TotalNumberofEveryTablet__c || 0, date: r.ContractDateStart__c, account: o.Account?.Name || '', oppId: o.Id });
   });
