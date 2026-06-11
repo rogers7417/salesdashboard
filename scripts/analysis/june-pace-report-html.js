@@ -62,8 +62,8 @@ const aeRawTbl = (r, limit) => `<table><thead><tr><th>매장(파트너)</th><th>
 const amRawTbl = (r, limit) => `<table><thead><tr><th>파트너</th><th>MOU 체결일</th><th class="num">MOU 경과</th><th class="num">MOU후 Lead</th></tr></thead><tbody>${(r?.list || []).slice(0, limit).map(o => `<tr><td>${esc(o.partner)}</td><td class="task">${o.mou || '-'}</td><td class="num ${(o.daysSinceMou || 0) >= 60 ? 'r' : 'o'}">${o.daysSinceMou != null ? o.daysSinceMou + '일' : '-'}</td><td class="num ${o.leadsAfter === 0 ? 'r' : ''}">${o.leadsAfter}건</td></tr>`).join('')}</tbody></table>`;
 // 채널 TM raw — 입금일자(선납금) 미입력 open opp
 const tmRawTbl = (r, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th class="num">경과</th><th>입금일자</th><th>마지막 활동</th><th>담당</th></tr></thead><tbody>${(r?.list || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}</a></td><td>${esc(o.stage)}</td><td class="num ${(o.age || 0) >= 7 ? 'r' : 'o'}">${o.age}일</td><td class="bad">없음</td><td class="task">${o.lastTask ? esc(o.lastTask) + (o.lastTaskDate ? ` (${o.lastTaskDate})` : '') : '-'}</td><td>${esc(o.owner || '-')}</td></tr>`).join('')}</tbody></table>`;
-// 채널 BO raw — 계류건 (처리 대기)
-const boRawTbl = (r, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th class="num">경과</th><th>입금</th><th>마지막 활동</th><th>담당 BO</th></tr></thead><tbody>${(r?.list || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}</a></td><td>${esc(o.stage)}</td><td class="num ${(o.age || 0) >= 7 ? 'r' : 'o'}">${o.age}일</td><td>${o.hasPay ? '<span class="good">완료</span>' : '<span class="bad">없음</span>'}</td><td class="task">${o.lastTask ? esc(o.lastTask) + (o.lastTaskDate ? ` (${o.lastTaskDate})` : '') : '-'}</td><td>${esc(o.bo || '-')}</td></tr>`).join('')}</tbody></table>`;
+// 채널 BO raw — 견적 단계 계류건 (견적 체류일순)
+const boRawTbl = (r, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th class="num">견적 체류</th><th>마지막 활동</th><th>담당</th></tr></thead><tbody>${(r?.list || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}</a></td><td>${esc(o.stage)}</td><td class="num ${(o.stageDays || 0) >= 7 ? 'r' : 'o'}">${o.stageDays}일</td><td class="task">${o.lastTask ? esc(o.lastTask) + (o.lastTaskDate ? ` (${o.lastTaskDate})` : '') : '-'}</td><td>${esc(o.owner || '-')}</td></tr>`).join('')}</tbody></table>`;
 
 // KPI → 퍼널 레버
 const kpiSec = (A.kpiLevers || []).map(hq => {
@@ -94,7 +94,7 @@ const kpiSec = (A.kpiLevers || []).map(hq => {
       extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">💳 입금일자(선납금) 미입력 — 계약 미진행 <span class="muted">(${n(r.total)}건 · 7일+ 정체 ${n(r.over7)}건 · 나이순)</span></div>${tmRawTbl(r, 15)}<div class="legend">기준: 영업중 open opp 중 선납금 입금일자 미입력. 빨강=7일+ 정체. 입금 확인·독려가 계약 진행의 1차 관문.</div></div>`;
     } else if ((p.part || '').includes('CH BO') && A.channelRaw?.bo?.total) {
       const r = A.channelRaw.bo;
-      extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📦 계류건 — 처리 대기 <span class="muted">(${n(r.total)}건 · 7일+ ${n(r.over7)}건 · 나이순)</span></div>${boRawTbl(r, 15)}<div class="legend">기준: 채널 BO 담당 open opp(계약진행·설치 등). 빨강=7일+ 정체. 입금 '없음'은 입금 확인 대기. 처리 SLA 우선 소진 대상.</div></div>`;
+      extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📦 견적 단계 계류건 <span class="muted">(${n(r.total)}건 · 견적 7일+ ${n(r.over7)}건 · 견적 체류일순)</span></div>${boRawTbl(r, 15)}<div class="legend">기준: 채널 open opp 중 <b>견적 단계</b>만(담당 무관) · 영업중. 빨강=견적 7일+ 정체. 견적 후속·입금 독려가 계약 진입의 관문.</div></div>`;
     }
     return `<div class="part"><div class="part-h">${p.part}</div>${rows}${lossHtml}${extra}</div>`;
   }).join('');

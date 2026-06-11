@@ -150,15 +150,15 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
           .sort((a, b) => (b.age || 0) - (a.age || 0));
         return { label: '입금일자 미입력 (SQL 적체)', total: list.length, over7: list.filter(o => (o.age || 0) >= 7).length, list };
       })(),
-      // BO = 처리 SLA·계약진행 → 계류 open opp (처리 대기), 나이순
+      // BO = 견적 단계 계류 (채널 전체 open opp 중 견적 단계만, BO 담당 무관) — 견적 체류일순
       bo: (() => {
-        const list = (cbo.rawData?.rawOpenOpps || [])
-          .map(o => ({ store: o.accountName || o.name, stage: o.stageName, age: o.ageInDays ?? 0, hasPay: !!o.advancePaymentDate, bo: o.boUser, lastTask: o.lastTaskSubject || null, lastTaskDate: (o.lastTaskDate || '').slice(0, 10), link: OPP(o.oppId) }))
-          .sort((a, b) => (b.age || 0) - (a.age || 0));
-        return { label: '계류건 (처리 대기)', total: list.length, over7: list.filter(o => (o.age || 0) >= 7).length, list };
+        const list = (tm.rawData?.rawOpenOpps || []).filter(o => /견적/.test(o.stageName))
+          .map(o => ({ store: o.accountName || o.name, stage: o.stageName, stageDays: Math.round(o.currentStageDays ?? o.ageInDays ?? 0), owner: o.ownerName, lastTask: o.lastTaskSubject || null, lastTaskDate: (o.lastTaskDate || '').slice(0, 10), link: OPP(o.oppId) }))
+          .sort((a, b) => (b.stageDays || 0) - (a.stageDays || 0));
+        return { label: '견적 단계 계류건', total: list.length, over7: list.filter(o => (o.stageDays || 0) >= 7).length, list };
       })(),
     };
-    console.log(`  채널 raw: AE 미서명 ${channelRaw.ae.total}건(초과 ${channelRaw.ae.overdue}) / AM 미안착 ${channelRaw.am.total}건 / TM 입금없음 ${channelRaw.tm.total}건 / BO 계류 ${channelRaw.bo.total}건(over7 ${channelRaw.bo.over7})`);
+    console.log(`  채널 raw: AE 미서명 ${channelRaw.ae.total}건(초과 ${channelRaw.ae.overdue}) / AM 미안착 ${channelRaw.am.total}건 / TM 입금없음 ${channelRaw.tm.total}건 / BO 견적계류 ${channelRaw.bo.total}건(over7 ${channelRaw.bo.over7})`);
   } catch (e) { console.log('  ⚠️ KPI 레버 스킵:', e.message); }
 
   // ---- 방치 견적 (인바운드·아웃바운드) + 후속조치 노트 ----
