@@ -300,7 +300,7 @@ async function main() {
   // ---- 실적: 계약-CW 기준 (사내 /contracts API 정의와 일치) ----
   // 계약시작일(ContractDateStart) 당월 + opp Closed Won + 신규/추가설치 + KRW + 특정 계약RT 제외
   const contractRows = await soqlAll(instanceUrl, accessToken, `
-    SELECT Id, ContractDateStart__c, Opportunity__r.Id, Opportunity__r.Owner_Department__c,
+    SELECT Id, ContractDateStart__c, ProductPaymentType__c, Opportunity__r.Id, Opportunity__r.Owner_Department__c,
            Opportunity__r.TotalNumberofEveryTablet__c, Opportunity__r.LeadSource,
            Opportunity__r.fm_AccountPartner__c, Opportunity__r.Account.Name, Account__r.fm_FRHQ__c
     FROM Contract__c
@@ -313,12 +313,19 @@ async function main() {
       AND CurrencyIsoCode = 'KRW'`);
   const cwByTeam = {};
   let cwEtc = 0;
+  const paymentMix = {}; // 결제방법(ProductPaymentType__c)별 CW 비중 — 전체 CW 기준
   contractRows.forEach(r => {
     const o = r.Opportunity__r || {};
+    const tab = o.TotalNumberofEveryTablet__c || 0;
+    const pt = r.ProductPaymentType__c || '(미입력)';
+    (paymentMix[pt] = paymentMix[pt] || { cnt: 0, tablets: 0 }).cnt++;
+    paymentMix[pt].tablets += tab;
     const team = classifyContract(o.Owner_Department__c, r.Account__r?.fm_FRHQ__c, o.LeadSource, o.fm_AccountPartner__c);
     if (team === '기타') { cwEtc++; return; }
-    (cwByTeam[team] = cwByTeam[team] || []).push({ tablets: o.TotalNumberofEveryTablet__c || 0, date: r.ContractDateStart__c, account: o.Account?.Name || '', oppId: o.Id });
+    (cwByTeam[team] = cwByTeam[team] || []).push({ tablets: tab, date: r.ContractDateStart__c, account: o.Account?.Name || '', oppId: o.Id });
   });
+  const paymentMixArr = Object.entries(paymentMix).map(([type, v]) => ({ type, cnt: v.cnt, tablets: v.tablets })).sort((a, b) => b.tablets - a.tablets);
+  console.log(`  💳 결제방법 비중(CW ${contractRows.length}건): ` + paymentMixArr.map(p => `${p.type} ${p.tablets}대`).join(' / '));
   console.log(`  📑 계약-CW 실적: ${contractRows.length}건 → ` + TEAMS.map(t => `${t} ${(cwByTeam[t] || []).reduce((s, c) => s + c.tablets, 0)}대`).join(' / ') + (cwEtc ? ` (기타 ${cwEtc}건 제외)` : ' (기타 0)'));
 
   // ---- 팀별 집계 ----
@@ -412,6 +419,7 @@ async function main() {
     cw: { count: cw.filter(o => o.team === '기타').length, tablets: cw.filter(o => o.team === '기타').reduce((s, o) => s + o.tablets, 0) },
     open: { count: open.filter(o => o.team === '기타').length },
   };
+  result.paymentMix = { total: contractRows.length, totalTablets: paymentMixArr.reduce((s, p) => s + p.tablets, 0), types: paymentMixArr }; // CW 결제방법 비중
   result.overseasExcluded = { cw: overseasCw, open: overseasOpen }; // 원화(KRW) 외 해외 건 제외 수
   result.reclassifiedToChannel = { // B+C 보정: 인바운드 → 채널로 옮긴 건
     rule: "LeadSource='파트너사 소개' OR 소유자 User 부서 ∈ 채널",

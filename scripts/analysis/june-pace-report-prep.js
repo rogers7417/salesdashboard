@@ -193,7 +193,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
   } catch (e) { console.log('  ⚠️ 방치 견적 스킵:', e.message); }
 
   const out = {
-    kpiLevers, stalled, channelRaw,
+    kpiLevers, stalled, channelRaw, paymentMix: D.paymentMix || null,
     period: D.period, asOf: D.asOf, bizElapsed: D.bizDaysElapsed, bizTotal: D.bizDaysTotal,
     total: { target: totTarget, actual: totActual, projected: totProj, gap: totProj - totTarget, attainment: +(totProj / totTarget * 100).toFixed(1), paceNow: +(totActual / D.teams.IBS.cumTargetToday).toFixed(2) },
     segments: seg, stageCompare, stageCompareByTeam,

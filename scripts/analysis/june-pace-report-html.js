@@ -115,6 +115,18 @@ const kpiSec = (A.kpiLevers || []).map(hq => {
   </div>`;
 }).join('');
 
+// CW 결제방법 비중
+const PAYC = ['#6366F1', '#F59E0B', '#22D3EE', '#34D399', '#F472B6', '#A78BFA', '#FB923C', '#60A5FA', '#94A3B8'];
+const payMix = (() => {
+  const pm = A.paymentMix;
+  if (!pm || !(pm.types || []).length) return '';
+  const tot = pm.totalTablets || 1;
+  const seg = pm.types.map((p, i) => ({ ...p, pct: +(p.tablets / tot * 100).toFixed(1), color: PAYC[i % PAYC.length] }));
+  const stacked = seg.map(s => `<div class="paystack-seg" style="width:${s.pct}%;background:${s.color}" title="${esc(s.type)} ${s.pct}%">${s.pct >= 8 ? `<span>${s.pct}%</span>` : ''}</div>`).join('');
+  const rows = seg.map(s => `<div class="payrow"><span class="paydot" style="background:${s.color}"></span><span class="payname">${esc(s.type)}</span><span class="paybar-wrap"><span class="paybar" style="width:${Math.max(s.pct, 1.5)}%;background:${s.color}"></span></span><span class="payval"><b>${s.pct}%</b> <span class="muted">· ${n(s.tablets)}대 · ${n(s.cnt)}건</span></span></div>`).join('');
+  return `<div class="paystack">${stacked}</div><div class="payrows">${rows}</div>`;
+})();
+
 const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>6월 태블릿 페이스 분석 — 목표 5,500대</title>
 <style>
@@ -214,6 +226,16 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 .tk-wrap{margin-top:7px}.tk-wrap summary{font-size:11px;color:#7E96B5;cursor:pointer}
 .tk{font-size:11px;color:#A8BDD8;padding:3px 0 3px 10px;border-left:2px solid #1A3052;margin-top:4px}
 .tk-d{color:#6E86A5;font-variant-numeric:tabular-nums}
+.paystack{display:flex;width:100%;height:38px;border-radius:6px;overflow:hidden;margin:4px 0 18px}
+.paystack-seg{height:100%;display:flex;align-items:center;justify-content:center;color:#0A1626;font-size:12px;font-weight:800;min-width:2px;transition:width .3s}
+.payrows{display:flex;flex-direction:column;gap:9px}
+.payrow{display:flex;align-items:center;gap:10px;font-size:13px}
+.paydot{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+.payname{min-width:120px;font-weight:700;color:#E6EDF5}
+.paybar-wrap{flex:1;height:9px;background:#13243F;border-radius:5px;overflow:hidden}
+.paybar{display:block;height:100%;border-radius:5px}
+.payval{min-width:150px;text-align:right;font-variant-numeric:tabular-nums}
+@media(max-width:760px){.payname{min-width:84px}.payval{min-width:auto}}
 .foot{text-align:center;color:#5A7193;font-size:11.5px;margin-top:16px}
 @media(max-width:760px){.two{grid-template-columns:1fr}.task{display:none}}
 </style></head><body><div class="wrap">
@@ -278,6 +300,13 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
   <div class="desc">견적/재견적 · 영업중 · 후속과업 없음 · 7일+ 방치 (FieldUser 부서 기준 · TEST 제외). 빨강=14일+ 방치. 총 ${n((A.stalled?.outbound || []).length)}건 (상위 15).<br><span class="muted">※ 인바운드 방치는 ③의 인바운드 BO 파트(Task 요약·후속조치)에 포함.</span></div>
   ${stallTbl(A.stalled?.outbound, 15)}
 </div>
+
+${payMix ? `<div class="panel">
+  <div class="phead"><span class="pnum">6</span><h2>CW 결제방법 비중</h2></div>
+  <div class="desc">당월(6월) 마감(CW) 계약 <b>${n(A.paymentMix.total)}건 · ${n(A.paymentMix.totalTablets)}대</b> 기준 — 결제방법(ProductPaymentType__c)별 태블릿 비중.</div>
+  ${payMix}
+  <div class="legend">계약서상 결제방법 기준. 캐피탈(할부)·CMS(자동이체)·일시불(카드/현금) 구성. 양도양수·해외·재계약은 CW에서 제외된 상태.</div>
+</div>` : ''}
 
 <div class="foot">데이터: Salesforce · 실적=계약-CW(계약시작일) 기준 · 퍼널=단계변경 기준 · 생성 ${A.asOf} · 태블릿 페이스 파이프라인 연동</div>
 </div></body></html>`;
