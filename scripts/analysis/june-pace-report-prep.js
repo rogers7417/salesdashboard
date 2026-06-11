@@ -75,29 +75,53 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
     const cd = (a) => (D.bizDaysElapsed ? +(a / D.bizDaysElapsed).toFixed(1) : 0); // 현재 일평균 계약대수
     const k = (name, cur, target, ok, unit, affects, action) => ({ name, cur, target, ok, unit: unit || '', affects, action });
     const chReq = +(D.teams.FR.requiredDaily + D.teams.PT.requiredDaily).toFixed(1);
+    // 전환 실패/이탈 raw 사례
+    const LEAD = (id) => id ? `https://torder.lightning.force.com/lightning/r/Lead/${id}/view` : null;
+    const OPP = (id) => id ? `https://torder.lightning.force.com/lightning/r/Opportunity/${id}/view` : null;
+    const distOf = (arr, key) => { const m = {}; (arr || []).forEach(r => { let v = r[key]; if (!v || v === '-') v = '미입력'; m[v] = (m[v] || 0) + 1; }); return Object.entries(m).map(([reason, c]) => `${reason} ${c}`).join(' · '); };
+    const fsAvgCW = (() => { const u = fsK.cwConversionRate?.byUser || []; return u.length ? +(u.reduce((s, x) => s + (x.cwRate || 0), 0) / u.length).toFixed(1) : null; })();
+    const sMQL = (is.rawData?.unconvertedMQL || []).slice(0, 5).map(r => ({ store: r.company || r.name, reason: (r.lossReasonSub && r.lossReasonSub !== '-') ? r.lossReasonSub : (r.lastTaskSubject || '미입력'), link: LEAD(r.leadId) }));
+    const sNoVisit = (is.rawData?.noVisitSQL || []).slice(0, 3).map(r => ({ store: r.company || r.name, reason: (r.lossReasonSub && r.lossReasonSub !== '-') ? r.lossReasonSub : '방문 전 취소', link: LEAD(r.leadId) }));
+    const sStale = (fsK.staleVisit?.opps || []).slice(0, 5).map(o => ({ store: o.name, reason: `${o.ageInDays ?? o.daysSinceVisit ?? ''}일 방치 · 마지막 ${o.lastTaskSubject || '-'}`, link: OPP(o.oppId) }));
+    const sAmMiss = (am.settlementTimeline || []).filter(s => s.isSettled === false).slice(0, 5).map(s => ({ store: s.partnerName, reason: `MOU ${(s.mouContractDate || '').slice(0, 10)} 후 미안착`, link: null }));
+
     kpiLevers = [
-      { seg: '인바운드 (IBS)', gap: seg.IBS.target - seg.IBS.projected, requiredDaily: D.teams.IBS.requiredDaily, currentDaily: cd(seg.IBS.actual),
+      { hq: '인바운드세일즈', target: seg.IBS.target, gap: Math.round(seg.IBS.target - seg.IBS.projected), requiredDaily: D.teams.IBS.requiredDaily, currentDaily: cd(seg.IBS.actual),
         funnel: `Lead ${is.lead} → MQL ${is.mql}(${pct(is.mql, is.lead)}%) → SQL ${is.sql}(${pct(is.sql, is.mql)}%) → 방문 ${is.visitCount} → 계약`,
-        kpis: [
-          k('IS SQL전환율', is.sqlConversionRate, 90, is.sqlConversionRate >= 90, '%', 'MQL→SQL', '달성 — 자격검증 모수 양호, 현 수준 유지'),
-          k('IS FRT 준수율', frtRate, 90, frtRate >= 90, '%', '인입→응대속도', `업무외·주말 응대 커버 보강 → 초기 이탈 차단, 견적 진입량 ↑ (현재 ${frtRate}%, 절반 이상이 20분 초과)`),
-          k('IB BO SQL 7일+잔량', boK.sqlBacklog?.totalOver7, 10, (boK.sqlBacklog?.totalOver7 ?? 99) <= 10, '건', 'SQL→계약 처리', '7일+ 적체 우선 소진 → 마감 처리속도 회복'),
-        ],
-        lever: `SQL 모수(${is.sql}건)는 확보됨 → 병목은 응대(FRT)·잔량 처리. 잔여 갭 ${Math.round(seg.IBS.target - seg.IBS.projected)}대 → 일 ${D.teams.IBS.requiredDaily}대 계약 필요(현재 일 ${cd(seg.IBS.actual)}대)` },
-      { seg: '아웃바운드 (OBS)', gap: seg.OBS.target - seg.OBS.projected, requiredDaily: D.teams.OBS.requiredDaily, currentDaily: cd(seg.OBS.actual),
+        parts: [
+          { part: '인사이드세일즈 (IS)',
+            kpis: [k('SQL 전환율', is.sqlConversionRate, 90, is.sqlConversionRate >= 90, '%', 'MQL→SQL', '자격검증 모수 양호 — 유지'), k('FRT 준수율', frtRate, 90, frtRate >= 90, '%', '인입→응대', '업무외·주말 응대 커버 보강 → 초기 이탈 차단'), k('방문 완료율', is.visitRate, 90, (is.visitRate ?? 0) >= 90, '%', 'SQL→방문', '방문 누락 최소화')],
+            loss: { label: 'MQL 미전환 + 방문 전 취소', count: (is.rawData?.unconvertedMQL?.length || 0) + (is.rawData?.noVisitSQL?.length || 0), dist: '미전환 ' + distOf(is.rawData?.unconvertedMQL, 'lossReasonSub'), samples: [...sMQL, ...sNoVisit] } },
+          { part: '인바운드 필드 (FS)',
+            kpis: [k('SQL→CW 전환율', fsAvgCW, 60, (fsAvgCW ?? 0) >= 60, '%', '방문→계약', '견적·계약 단계 후속 가속'), k('골든타임 8일+ 정체', fsK.goldenTime?.stale8plus, 0, (fsK.goldenTime?.stale8plus ?? 9) === 0, '건', '견적 정체', '견적 8일+ 즉시 리터치'), k('방문후 14일+ 방치', fsK.staleVisit?.over14, 0, (fsK.staleVisit?.over14 ?? 9) === 0, '건', '방문후 이탈', '후속 과업 없는 방치건 일괄 재컨택')],
+            loss: { label: '방문후 방치(후속 과업 없음)', count: fsK.staleVisit?.opps?.length || 0, dist: null, samples: sStale } },
+          { part: '인바운드 BO (IB BO)',
+            kpis: [k('SQL 7일+ 잔량', boK.sqlBacklog?.totalOver7, 10, (boK.sqlBacklog?.totalOver7 ?? 99) <= 10, '건', 'SQL→계약 처리', '7일+ 적체 우선 소진'), k('일평균 마감 인원', (boK.dailyClose?.byUser || []).length, 3, true, '명', '처리 캐파', '마감 처리량 유지')],
+            loss: null },
+        ] },
+      { hq: '아웃바운드세일즈', target: seg.OBS.target, gap: Math.round(seg.OBS.target - seg.OBS.projected), requiredDaily: D.teams.OBS.requiredDaily, currentDaily: cd(seg.OBS.actual),
         funnel: `OBS Lead ${fsK.obsLeadCount?.total} / 목표 200 → 방문 → 계약`,
-        kpis: [
-          k('OBS Lead 생산', fsK.obsLeadCount?.total, 200, (fsK.obsLeadCount?.total ?? 0) >= 200, '건', '발굴 모수', `필드 발굴 활동량 확대 — 현재 모수가 목표의 ${pct(fsK.obsLeadCount?.total, 200)}% 수준`),
-        ],
-        lever: `퍼널 입구(발굴)부터 부족 — Lead ${fsK.obsLeadCount?.total}/200. 잔여 갭 ${Math.round(seg.OBS.target - seg.OBS.projected)}대 → 일 ${D.teams.OBS.requiredDaily}대 계약 필요(현재 일 ${cd(seg.OBS.actual)}대)` },
-      { seg: '채널 (FR·PT)', gap: (seg.FR.target + seg.PT.target) - (seg.FR.projected + seg.PT.projected), requiredDaily: chReq, currentDaily: cd(seg.FR.actual + seg.PT.actual),
+        parts: [
+          { part: '아웃바운드 (OBS)',
+            kpis: [k('OBS Lead 생산', fsK.obsLeadCount?.total, 200, (fsK.obsLeadCount?.total ?? 0) >= 200, '건', '발굴 모수', `필드 발굴량 확대 — 목표의 ${pct(fsK.obsLeadCount?.total, 200)}% 수준`)],
+            loss: null },
+        ] },
+      { hq: '채널 (프랜차이즈·파트너스)', target: seg.FR.target + seg.PT.target, gap: Math.round((seg.FR.target + seg.PT.target) - (seg.FR.projected + seg.PT.projected)), requiredDaily: chReq, currentDaily: cd(seg.FR.actual + seg.PT.actual),
         funnel: `AM Lead ${am.dailyLeadCount?.total}(일 ${am.dailyLeadCount?.avgDaily}) → MOU → 안착 ${am.onboardingRate?.settled}/${am.onboardingRate?.total}(${am.onboardingRate?.rate}%) → 계약`,
-        kpis: [
-          k('AM Lead 일평균', am.dailyLeadCount?.avgDaily, 20, (am.dailyLeadCount?.avgDaily ?? 0) >= 20, '건', '발굴 모수', `일 ${am.dailyLeadCount?.avgDaily}→20건 발굴 = 채널 마감 모수 +${Math.round((20 / (am.dailyLeadCount?.avgDaily || 20) - 1) * 100)}%`),
-          k('MOU 안착률', am.onboardingRate?.rate, 80, (am.onboardingRate?.rate ?? 0) >= 80, '%', 'MOU→매장전환', `안착 ${am.onboardingRate?.settled}/${am.onboardingRate?.total} — 저조 담당 집중관리로 전환율 끌어올리기`),
-          k('TM MQL 미전환', tm.unconvertedMQL?.count, 0, (tm.unconvertedMQL?.count ?? 9) === 0, '건', 'MQL→SQL', '미전환 사유(가격·보류) 대응 → SQL 누수 차단'),
-        ],
-        lever: `모수(AM Lead)와 전환(안착률 ${am.onboardingRate?.rate}%) 둘 다 미달 — 입구·중간 동시 개선. 잔여 갭 ${Math.round((seg.FR.target + seg.PT.target) - (seg.FR.projected + seg.PT.projected))}대 → 일 ${chReq}대 계약 필요(현재 일 ${cd(seg.FR.actual + seg.PT.actual)}대)` },
+        parts: [
+          { part: '채널 AE',
+            kpis: [k('MOU 체결', ae.mouCount?.total, 4, (ae.mouCount?.total ?? 0) >= 4, '건', '파트너 확보', '신규 MOU 견조'), k('네고 진입', ae.negoEntry?.thisMonth, 10, (ae.negoEntry?.thisMonth ?? 0) >= 10, '건', '협상 진입', '네고 진입 속도 가속'), k('미팅 일평균', ae.meetingCount?.avgDaily, 2, (ae.meetingCount?.avgDaily ?? 0) >= 2, '건', '활동량', '미팅 페이스 유지')],
+            loss: null },
+          { part: '채널 AM',
+            kpis: [k('Lead 일평균', am.dailyLeadCount?.avgDaily, 20, (am.dailyLeadCount?.avgDaily ?? 0) >= 20, '건', '발굴 모수', `일 ${am.dailyLeadCount?.avgDaily}→20 = 모수 +${Math.round((20 / (am.dailyLeadCount?.avgDaily || 20) - 1) * 100)}%`), k('MOU 안착률', am.onboardingRate?.rate, 80, (am.onboardingRate?.rate ?? 0) >= 80, '%', 'MOU→매장전환', '저조 담당 집중관리'), k('활성 파트너', am.activePartnerCount?.total, 70, (am.activePartnerCount?.total ?? 0) >= 70, '곳', '파트너 풀', '양적 포화 — 질적 전환 과제')],
+            loss: { label: 'MOU 후 미안착(매장 미전환)', count: (am.onboardingRate?.total || 0) - (am.onboardingRate?.settled || 0), dist: null, samples: sAmMiss } },
+          { part: '채널 TM',
+            kpis: [k('FRT 20분 초과', tm.frt?.frtOver20, 0, (tm.frt?.frtOver20 ?? 9) === 0, '건', '응대 속도', '초과 최소화'), k('MQL 미전환', tm.unconvertedMQL?.count, 0, (tm.unconvertedMQL?.count ?? 9) === 0, '건', 'MQL→SQL', '미전환 사유 대응'), k('SQL 7일+ 잔량', tm.sqlBacklog?.over7, 10, (tm.sqlBacklog?.over7 ?? 99) <= 10, '건', 'SQL→계약', '입금일자 미입력 적체 해소')],
+            loss: null },
+          { part: '채널 BO (CH BO)',
+            kpis: [k('리드타임 초과', cbo.leadTime?.overdueCount, 0, (cbo.leadTime?.overdueCount ?? 9) === 0, '건', '처리 SLA', '당일 완료율↑'), k('일일 마감 인원', (cbo.dailyClose?.byUser || []).length, 3, true, '명', '처리 캐파', '마감 처리량 유지'), k('SQL 7일+ 잔량', cbo.sqlBacklog?.totalOver7, 10, (cbo.sqlBacklog?.totalOver7 ?? 99) <= 10, '건', 'SQL→계약', '잔량 소진')],
+            loss: null },
+        ] },
     ];
   } catch (e) { console.log('  ⚠️ KPI 레버 스킵:', e.message); }
 

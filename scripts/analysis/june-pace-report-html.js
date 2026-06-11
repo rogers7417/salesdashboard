@@ -54,16 +54,23 @@ const risk = A.atRisk.slice(0, 20).map(o => {
 }).join('');
 
 // KPI → 퍼널 레버
-const kpiSec = (A.kpiLevers || []).map(l => {
-  const rows = l.kpis.map(kp => `<div class="kpirow2">
-    <div class="kpi-top"><span class="kpi-sig ${kp.ok ? 'g' : 'b'}"></span><span class="kpi-name">${kp.name}</span><span class="kpi-val ${kp.ok ? 'good' : 'bad'}">${kp.cur ?? '-'}${kp.unit}</span><span class="kpi-tgt">/ 목표 ${kp.target}${kp.unit}</span>${kp.affects ? `<span class="kpi-aff">${kp.affects}</span>` : ''}</div>
-    ${kp.action ? `<div class="kpi-act">↳ ${kp.action}</div>` : ''}
-  </div>`).join('');
+const kpiSec = (A.kpiLevers || []).map(hq => {
+  const partsHtml = (hq.parts || []).map(p => {
+    const rows = p.kpis.map(kp => `<div class="kpirow2">
+      <div class="kpi-top"><span class="kpi-sig ${kp.ok ? 'g' : 'b'}"></span><span class="kpi-name">${kp.name}</span><span class="kpi-val ${kp.ok ? 'good' : 'bad'}">${kp.cur ?? '-'}${kp.unit}</span><span class="kpi-tgt">/ 목표 ${kp.target}${kp.unit}</span>${kp.affects ? `<span class="kpi-aff">${kp.affects}</span>` : ''}</div>
+      ${kp.action ? `<div class="kpi-act">↳ ${kp.action}</div>` : ''}
+    </div>`).join('');
+    const samp = (p.loss?.samples || []).filter(s => s.store);
+    const lossHtml = (p.loss && p.loss.count) ? `<div class="loss">
+      <div class="loss-h">⚠️ 전환 실패/이탈 ${n(p.loss.count)}건${p.loss.dist ? ` <span class="muted">· ${esc(p.loss.dist)}</span>` : ''}</div>
+      ${samp.map(s => `<div class="loss-item">${s.link ? `<a href="${s.link}" target="_blank">${esc(s.store)}</a>` : esc(s.store)} <span class="muted">— ${esc(s.reason)}</span></div>`).join('')}
+    </div>` : '';
+    return `<div class="part"><div class="part-h">${p.part}</div>${rows}${lossHtml}</div>`;
+  }).join('');
   return `<div class="lever">
-    <div class="lever-h"><b>${l.seg}</b> <span class="muted">· 잔여 갭 ${n(l.gap)}대 · 필요 일 ${l.requiredDaily}대 <span class="bad">(현재 ${l.currentDaily}대)</span></span></div>
-    ${l.funnel ? `<div class="funnel-line">📊 ${l.funnel}</div>` : ''}
-    ${rows}
-    <div class="lever-txt">▸ ${l.lever}</div>
+    <div class="lever-h"><b>${hq.hq}</b> <span class="muted">· 목표 ${n(hq.target)} · 잔여 갭 ${n(hq.gap)}대 · 필요 일 ${hq.requiredDaily}대 <span class="bad">(현재 ${hq.currentDaily}대)</span></span></div>
+    ${hq.funnel ? `<div class="funnel-line">📊 ${hq.funnel}</div>` : ''}
+    ${partsHtml}
   </div>`;
 }).join('');
 
@@ -125,6 +132,12 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 .kpi-aff{margin-left:auto;font-size:10.5px;color:#7E96B5;background:#13243F;border-radius:5px;padding:1px 7px}
 .kpi-act{font-size:11.5px;color:#A8BDD8;margin:3px 0 0 16px}
 .lever-txt{font-size:12px;color:#CDE0F0;margin-top:10px;padding-top:9px;border-top:1px solid #1A3052;font-weight:500}
+.part{background:#0D2138;border:1px solid #16304E;border-radius:10px;padding:11px 13px;margin:9px 0}
+.part-h{font-size:13px;font-weight:700;color:#9FC4E8;margin-bottom:6px}
+.loss{margin-top:8px;padding-top:7px;border-top:1px dashed #2A3F5C}
+.loss-h{font-size:11.5px;color:#F0A0AC;margin-bottom:4px}
+.loss-item{font-size:11.5px;color:#C5D5E8;padding:1px 0 1px 12px}
+.loss-item a{color:#5FB0FF;text-decoration:none}
 .foot{text-align:center;color:#5A7193;font-size:11.5px;margin-top:14px}
 @media(max-width:720px){.two{grid-template-columns:1fr}.task{display:none}}
 </style></head><body><div class="wrap">
@@ -166,8 +179,8 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 </section>
 
 <section>
-  <h2>③ KPI → 퍼널 레버 — 무엇을 끌어올려야 5,500에 닿나</h2>
-  <div class="desc">본부 KPI 실값(6월 누적). <span class="bad">⚠️</span>=목표 미달. 갭을 메우려면 미달 KPI를 끌어올려 퍼널 모수·전환을 늘려야 함.</div>
+  <h2>③ 파트별 KPI → 퍼널 레버 + 전환 실패 — 무엇을 끌어올려야 5,500에 닿나</h2>
+  <div class="desc">본부 KPI 실값(6월 누적)을 <b>파트별</b>로. 신호등 <span class="good">●</span>달성/<span class="bad">●</span>미달. 각 파트의 <span class="bad">⚠️ 전환 실패/이탈건</span>은 실제 업체·사유까지 표기(클릭 시 Salesforce).</div>
   ${kpiSec}
   <div class="legend"><b>공통 병목</b>: 견적 단계 정체(CL의 70~86%가 견적 이탈)가 전 세그먼트 마감을 막음 — <b>KPI 개선 + 견적 후속 가속</b>이 5,500 달성의 두 축.</div>
 </section>
