@@ -264,12 +264,12 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 
 <div class="panel">
   <div class="phead"><span class="pnum">4</span><h2>퍼널 개선</h2></div>
-  <div class="desc">단계별 체류기간 중앙값: 마감(CW) vs 현재 계류 vs 이탈(CL). 막대 옆 숫자 = 표본 건수. 견적에서 갈립니다.</div>
-  <table><thead><tr><th>단계</th><th>🟢 CW(마감) 통과</th><th>🟠 계류(현재) 정체</th><th>🔴 CL(이탈) 정체</th></tr></thead><tbody>${funnel}</tbody></table>
-  <div class="legend">🟢 마감되는 건은 견적을 1~2일에 통과 · 🟠 지금 계류건은 견적에서 10~28일 정체 · 🔴 이탈건은 견적에서 평균 15일 묶이다 죽음(전체 CL의 70~86%가 견적 이탈). <b>→ 견적 단계 후속 속도(견적 N일+ 자동 에스컬레이션·재견적 차단)가 목표 달성의 최대 레버.</b></div>
+  <div class="desc">단계별 체류기간 중앙값: 마감(CW) vs 계류 vs 이탈(CL). 막대 옆 숫자 = 표본 건수. <b>계류는 당월(6월) 생성분 기준</b>(2024-08 이관 좀비 제외). 견적에서 갈립니다.</div>
+  <table><thead><tr><th>단계</th><th>🟢 CW(마감) 통과</th><th>🟠 계류(당월) 정체</th><th>🔴 CL(이탈) 정체</th></tr></thead><tbody>${funnel}</tbody></table>
+  <div class="legend">🟢 마감건은 견적을 1일 안팎에 통과 · 🟠 당월 신규 계류는 견적 3일 안팎(아직 살아있음) · 🔴 이탈건은 견적에서 오래 묶이다 죽음(견적 CL 중앙값 17일+, 전체 CL의 70~86%가 견적 이탈). <b>→ 견적 단계 후속 속도(견적 N일+ 자동 에스컬레이션·재견적 차단)가 목표 달성의 최대 레버.</b></div>
 
   <div class="subhead">팀별 단계 체류 상세</div>
-  <div class="desc">세그먼트별 단계 체류기간 중앙값. 막대 길이는 <b>전 팀 공통 스케일</b>(직접 비교 가능) · 막대 옆 숫자 = 표본 건수. 헤더에 견적 단계 계류·CL 요약.</div>
+  <div class="desc">세그먼트별 단계 체류기간 중앙값. 막대 길이는 <b>전 팀 공통 스케일</b>(직접 비교 가능) · 막대 옆 숫자 = 표본 건수 · 계류는 당월 생성분. 헤더에 견적 단계 계류·CL 요약.</div>
   <div class="tfunnels">${funnelByTeam}</div>
   <div class="legend">팀마다 견적 병목의 양상이 다름 — 계류 중앙값이 길수록 후속이 느린 팀, CL 중앙값이 길수록 견적에서 오래 끌다 죽는 팀. 표본(건수)이 작은 단계는 중앙값 변동성 큼.</div>
 </div>

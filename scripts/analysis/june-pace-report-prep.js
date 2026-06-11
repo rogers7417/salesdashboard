@@ -18,12 +18,14 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
   }
 
   // 2) 단계별 CW/CL/계류 체류 (전사) — 견적 누수 근거
+  // 계류(open) 정체는 당월(6월) 생성 영업기회만 — 2024-08 이관 좀비(태블릿0·단계무이동·676일) 제외
+  const monthDays = Math.round((new Date(D.asOf) - new Date(D.period + '-01')) / 86400000);
   const stageCompare = ['방문배정', '견적', '재견적', '선납금', '계약진행', '출고진행'].map(st => {
     const cw = [], cl = [], op = [];
     for (const t of TEAMS) {
       (D.teams[t].cwDwellOpps || []).forEach(o => { if (o.dwell?.[st] != null) cw.push(o.dwell[st]); });
       (D.teams[t].clDwellOpps || []).forEach(o => { if (o.dwell?.[st] != null) cl.push(o.dwell[st]); });
-      (D.teams[t].pipeline.stages.find(s => s.stage === st)?.opps || []).forEach(o => { if (o.stageAge != null) op.push(o.stageAge); });
+      (D.teams[t].pipeline.stages.find(s => s.stage === st)?.opps || []).forEach(o => { if (o.stageAge != null && (o.age ?? 999) <= monthDays) op.push(o.stageAge); });
     }
     return { stage: st, cwMed: +median(cw).toFixed(1), clMed: +median(cl).toFixed(1), openMed: +median(op).toFixed(1), cwCnt: cw.length, clCnt: cl.length, openCnt: op.length };
   });
@@ -35,7 +37,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
       const cw = [], cl = [], op = [];
       (D.teams[t].cwDwellOpps || []).forEach(o => { if (o.dwell?.[st] != null) cw.push(o.dwell[st]); });
       (D.teams[t].clDwellOpps || []).forEach(o => { if (o.dwell?.[st] != null) cl.push(o.dwell[st]); });
-      (D.teams[t].pipeline.stages.find(s => s.stage === st)?.opps || []).forEach(o => { if (o.stageAge != null) op.push(o.stageAge); });
+      (D.teams[t].pipeline.stages.find(s => s.stage === st)?.opps || []).forEach(o => { if (o.stageAge != null && (o.age ?? 999) <= monthDays) op.push(o.stageAge); });
       return { stage: st, cwMed: +median(cw).toFixed(1), clMed: +median(cl).toFixed(1), openMed: +median(op).toFixed(1), cwCnt: cw.length, clCnt: cl.length, openCnt: op.length };
     });
   }
