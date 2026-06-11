@@ -56,6 +56,10 @@ const stalledRich = (A.stalled?.inbound || []).map(o => {
 const fsQuoteTbl = (arr, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th class="num">태블릿</th><th>마지막 Task 생성일</th><th class="num">단계경과</th><th>담당</th></tr></thead><tbody>${(arr || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}${o.branch ? ' ' + esc(o.branch) : ''}</a></td><td>${o.stage}</td><td class="num">${o.tablets || '-'}</td><td class="task"><span class="num ${o.daysSinceTaskCreated >= 30 ? 'r' : 'o'}">${o.lastTaskCreated || '없음'}</span> <span class="muted">(${o.daysSinceTaskCreated}일전)</span></td><td class="num">${o.stageAge ?? '-'}일</td><td>${o.field}</td></tr>`).join('')}</tbody></table>`;
 // 방치 견적 표 (아웃바운드 상시 모니터링)
 const stallTbl = (arr, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th>방치</th><th>담당</th><th>최근 활동</th></tr></thead><tbody>${(arr || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}${o.branch ? ' ' + esc(o.branch) : ''}</a></td><td>${o.stage}</td><td class="num ${o.daysSinceTask >= 14 ? 'r' : 'o'}">${o.daysSinceTask}일</td><td>${o.field}</td><td class="task">${o.tasks?.[0] ? `${esc(o.tasks[0].subject)}: ${esc((o.tasks[0].desc || '').slice(0, 45))}` : '-'}</td></tr>`).join('')}</tbody></table>`;
+// 채널 AE raw — 계약서 발송 후 미서명 (협상 막판 정체)
+const aeRawTbl = (r, limit) => `<table><thead><tr><th>매장(파트너)</th><th>담당 AE</th><th>발송일</th><th class="num">미서명 경과</th></tr></thead><tbody>${(r?.list || []).slice(0, limit).map(o => `<tr><td>${o.link ? `<a href="${o.link}" target="_blank">${esc(o.store)}</a>` : esc(o.store)}</td><td>${esc(o.owner || '-')}</td><td class="task">${o.sent || '-'}</td><td class="num ${o.overdue ? 'r' : 'o'}">${o.daysSinceSent}일</td></tr>`).join('')}</tbody></table>`;
+// 채널 AM raw — MOU 후 미안착 (매장 미전환)
+const amRawTbl = (r, limit) => `<table><thead><tr><th>파트너</th><th>MOU 체결일</th><th class="num">MOU 경과</th><th class="num">MOU후 Lead</th></tr></thead><tbody>${(r?.list || []).slice(0, limit).map(o => `<tr><td>${esc(o.partner)}</td><td class="task">${o.mou || '-'}</td><td class="num ${(o.daysSinceMou || 0) >= 60 ? 'r' : 'o'}">${o.daysSinceMou != null ? o.daysSinceMou + '일' : '-'}</td><td class="num ${o.leadsAfter === 0 ? 'r' : ''}">${o.leadsAfter}건</td></tr>`).join('')}</tbody></table>`;
 
 // KPI → 퍼널 레버
 const kpiSec = (A.kpiLevers || []).map(hq => {
@@ -75,6 +79,12 @@ const kpiSec = (A.kpiLevers || []).map(hq => {
       extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📋 견적 단계 raw — 마지막 Task 생성일 오래된 순 <span class="muted">(상위 15 / 총 ${n(A.stalled.fsQuote.length)}건)</span></div>${fsQuoteTbl(A.stalled.fsQuote, 15)}<div class="legend">기준: FieldUser=인바운드·필드(Team) · 견적/재견적 · 영업중 · 최근90일 · TEST제외. 오래 방치될수록 상단 — 우선 재컨택 대상.</div></div>`;
     } else if ((p.part || '').includes('IB BO') && stalledRich) {
       extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📌 견적 방치 계류건 (후속 끊김 · Task 요약·후속조치)</div>${stalledRich}<div class="legend">기준: FieldUser=인바운드 · 견적/재견적 · 영업중 · 후속과업 없음 · 7일+ 방치. 후속조치는 Task 이력 분석 스냅샷.</div></div>`;
+    } else if ((p.part || '').includes('AE') && A.channelRaw?.ae?.total) {
+      const r = A.channelRaw.ae;
+      extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📄 계약서 발송 후 미서명 — 협상 막판 정체 <span class="muted">(${n(r.total)}건 · 목표 ${r.targetDays}일+ 초과 ${n(r.overdue)}건)</span></div>${aeRawTbl(r, 15)}<div class="legend">기준: 계약서 발송 완료·미서명. 빨강=목표 ${r.targetDays}일 초과. AE 클로징 즉시 푸시 대상.</div></div>`;
+    } else if ((p.part || '').includes('AM') && A.channelRaw?.am?.total) {
+      const r = A.channelRaw.am;
+      extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">🏪 MOU 후 미안착 — 매장 미전환 <span class="muted">(${n(r.total)}건 · MOU 경과 오래된 순)</span></div>${amRawTbl(r, 15)}<div class="legend">기준: MOU 체결 후 매장 미전환. 빨강=MOU 60일+ 또는 MOU후 Lead 0건(완전 방치). AM 안착 푸시 대상.</div></div>`;
     }
     return `<div class="part"><div class="part-h">${p.part}</div>${rows}${lossHtml}${extra}</div>`;
   }).join('');

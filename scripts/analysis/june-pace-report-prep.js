@@ -66,6 +66,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
 
   // ---- KPI 레버: 본부 KPI 실값 → 어느 퍼널을 끌어올려야 목표 달성하나 ----
   let kpiLevers = [];
+  let channelRaw = { ae: null, am: null };
   try {
     const K = JSON.parse(fs.readFileSync(`data/kpi-extract-${D.period}.json`, 'utf8'));
     const is = K.inbound.insideSales, fsK = K.inbound.fieldSales, boK = K.inbound.backOffice;
@@ -114,7 +115,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
             loss: null },
           { part: '채널 AM',
             kpis: [k('Lead 일평균', am.dailyLeadCount?.avgDaily, 20, (am.dailyLeadCount?.avgDaily ?? 0) >= 20, '건', '발굴 모수', `일 ${am.dailyLeadCount?.avgDaily}→20 = 모수 +${Math.round((20 / (am.dailyLeadCount?.avgDaily || 20) - 1) * 100)}%`), k('MOU 안착률', am.onboardingRate?.rate, 80, (am.onboardingRate?.rate ?? 0) >= 80, '%', 'MOU→매장전환', '저조 담당 집중관리'), k('활성 파트너', am.activePartnerCount?.total, 70, (am.activePartnerCount?.total ?? 0) >= 70, '곳', '파트너 풀', '양적 포화 — 질적 전환 과제')],
-            loss: { label: 'MOU 후 미안착(매장 미전환)', count: (am.onboardingRate?.total || 0) - (am.onboardingRate?.settled || 0), dist: null, samples: sAmMiss } },
+            loss: null }, // 미안착 raw는 channelRaw.am 표로 대체
           { part: '채널 TM',
             kpis: [k('FRT 20분 초과', tm.frt?.frtOver20, 0, (tm.frt?.frtOver20 ?? 9) === 0, '건', '응대 속도', '초과 최소화'), k('MQL 미전환', tm.unconvertedMQL?.count, 0, (tm.unconvertedMQL?.count ?? 9) === 0, '건', 'MQL→SQL', '미전환 사유 대응'), k('SQL 7일+ 잔량', tm.sqlBacklog?.over7, 10, (tm.sqlBacklog?.over7 ?? 99) <= 10, '건', 'SQL→계약', '입금일자 미입력 적체 해소')],
             loss: null },
@@ -123,6 +124,27 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
             loss: null },
         ] },
     ];
+
+    // ---- 채널 AE/AM raw (성격에 맞게) ----
+    const asOfD = new Date(D.asOf + 'T00:00:00+09:00');
+    const daysFrom = (d) => d ? Math.round((asOfD - new Date(d.slice(0, 10) + 'T00:00:00+09:00')) / 86400000) : null;
+    const aeUns = ae.unsignedContracts || {};
+    channelRaw = {
+      // AE = 파트너 확보·협상 → 계약서 발송 후 미서명(클로징 정체)
+      ae: {
+        label: '계약서 발송 후 미서명', targetDays: aeUns.target_days || 7, overdue: aeUns.overdue || 0, total: aeUns.total || 0,
+        list: (aeUns.list || []).slice().sort((a, b) => (b.daysSinceSent || 0) - (a.daysSinceSent || 0))
+          .map(x => ({ store: x.accountName || x.oppName, owner: x.owner, sent: (x.createdDate || '').slice(0, 10), daysSinceSent: x.daysSinceSent, overdue: x.isOverdue, link: OPP(x.oppId) })),
+      },
+      // AM = 발굴·안착 → MOU 후 매장 미전환(안착 실패)
+      am: (() => {
+        const miss = (am.settlementTimeline || []).filter(s => s.isSettled === false)
+          .map(s => ({ partner: s.partnerName, mou: (s.mouContractDate || '').slice(0, 10), daysSinceMou: daysFrom(s.mouContractDate), leadsAfter: s.leadsAfterMou3Months ?? 0 }))
+          .sort((a, b) => (b.daysSinceMou || 0) - (a.daysSinceMou || 0));
+        return { label: 'MOU 후 미안착(매장 미전환)', total: miss.length, list: miss };
+      })(),
+    };
+    console.log(`  채널 raw: AE 미서명 ${channelRaw.ae.total}건(초과 ${channelRaw.ae.overdue}) / AM 미안착 ${channelRaw.am.total}건`);
   } catch (e) { console.log('  ⚠️ KPI 레버 스킵:', e.message); }
 
   // ---- 방치 견적 (인바운드·아웃바운드) + 후속조치 노트 ----
@@ -143,7 +165,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
   } catch (e) { console.log('  ⚠️ 방치 견적 스킵:', e.message); }
 
   const out = {
-    kpiLevers, stalled,
+    kpiLevers, stalled, channelRaw,
     period: D.period, asOf: D.asOf, bizElapsed: D.bizDaysElapsed, bizTotal: D.bizDaysTotal,
     total: { target: totTarget, actual: totActual, projected: totProj, gap: totProj - totTarget, attainment: +(totProj / totTarget * 100).toFixed(1), paceNow: +(totActual / D.teams.IBS.cumTargetToday).toFixed(2) },
     segments: seg, stageCompare,
