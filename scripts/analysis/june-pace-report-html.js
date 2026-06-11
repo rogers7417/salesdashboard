@@ -55,8 +55,16 @@ const risk = A.atRisk.slice(0, 20).map(o => {
 
 // KPI → 퍼널 레버
 const kpiSec = (A.kpiLevers || []).map(l => {
-  const rows = l.kpis.map(kp => `<div class="kpirow"><span class="kpi-sig ${kp.ok ? 'g' : 'b'}"></span><span class="kpi-name">${kp.name}</span><span class="kpi-val ${kp.ok ? 'good' : 'bad'}">${kp.cur ?? '-'}${kp.unit}</span><span class="kpi-tgt">목표 ${kp.target}${kp.unit}</span></div>`).join('');
-  return `<div class="lever"><div class="lever-h"><b>${l.seg}</b> <span class="muted">· 잔여 갭 ${n(l.gap)}대</span></div>${rows}<div class="lever-txt">▸ ${l.lever}</div></div>`;
+  const rows = l.kpis.map(kp => `<div class="kpirow2">
+    <div class="kpi-top"><span class="kpi-sig ${kp.ok ? 'g' : 'b'}"></span><span class="kpi-name">${kp.name}</span><span class="kpi-val ${kp.ok ? 'good' : 'bad'}">${kp.cur ?? '-'}${kp.unit}</span><span class="kpi-tgt">/ 목표 ${kp.target}${kp.unit}</span>${kp.affects ? `<span class="kpi-aff">${kp.affects}</span>` : ''}</div>
+    ${kp.action ? `<div class="kpi-act">↳ ${kp.action}</div>` : ''}
+  </div>`).join('');
+  return `<div class="lever">
+    <div class="lever-h"><b>${l.seg}</b> <span class="muted">· 잔여 갭 ${n(l.gap)}대 · 필요 일 ${l.requiredDaily}대 <span class="bad">(현재 ${l.currentDaily}대)</span></span></div>
+    ${l.funnel ? `<div class="funnel-line">📊 ${l.funnel}</div>` : ''}
+    ${rows}
+    <div class="lever-txt">▸ ${l.lever}</div>
+  </div>`;
 }).join('');
 
 const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -111,7 +119,12 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 .kpirow{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0}
 .kpi-sig{width:8px;height:8px;border-radius:4px;flex-shrink:0}.kpi-sig.g{background:#34D399}.kpi-sig.b{background:#F0556C}
 .kpi-name{color:#C5D5E8;min-width:130px}.kpi-val{font-weight:700}.kpi-tgt{color:#7E96B5;font-size:11.5px}
-.lever-txt{font-size:12px;color:#A8BDD8;margin-top:8px;padding-top:8px;border-top:1px solid #14253F}
+.funnel-line{font-size:12px;color:#9FD0E8;background:#0A2030;border-radius:8px;padding:7px 10px;margin-bottom:10px;font-variant-numeric:tabular-nums}
+.kpirow2{padding:6px 0;border-bottom:1px solid #112038}.kpirow2:last-of-type{border-bottom:0}
+.kpi-top{display:flex;align-items:center;gap:8px;font-size:12.5px;flex-wrap:wrap}
+.kpi-aff{margin-left:auto;font-size:10.5px;color:#7E96B5;background:#13243F;border-radius:5px;padding:1px 7px}
+.kpi-act{font-size:11.5px;color:#A8BDD8;margin:3px 0 0 16px}
+.lever-txt{font-size:12px;color:#CDE0F0;margin-top:10px;padding-top:9px;border-top:1px solid #1A3052;font-weight:500}
 .foot{text-align:center;color:#5A7193;font-size:11.5px;margin-top:14px}
 @media(max-width:720px){.two{grid-template-columns:1fr}.task{display:none}}
 </style></head><body><div class="wrap">

@@ -71,17 +71,33 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
     const is = K.inbound.insideSales, fsK = K.inbound.fieldSales, boK = K.inbound.backOffice;
     const am = K.channel.am, tm = K.channel.tm, ae = K.channel.ae, cbo = K.channel.backOffice;
     const frtRate = is.frt?.totalWithTask ? +(is.frt.frtOk / is.frt.totalWithTask * 100).toFixed(1) : null;
-    const k = (name, cur, target, ok, unit) => ({ name, cur, target, ok, unit: unit || '' });
+    const pct = (a, b) => (b ? Math.round(a / b * 100) : 0);
+    const cd = (a) => (D.bizDaysElapsed ? +(a / D.bizDaysElapsed).toFixed(1) : 0); // 현재 일평균 계약대수
+    const k = (name, cur, target, ok, unit, affects, action) => ({ name, cur, target, ok, unit: unit || '', affects, action });
+    const chReq = +(D.teams.FR.requiredDaily + D.teams.PT.requiredDaily).toFixed(1);
     kpiLevers = [
-      { seg: '인바운드 (IBS)', gap: seg.IBS.target - seg.IBS.projected,
-        kpis: [k('IS SQL전환율', is.sqlConversionRate, 90, is.sqlConversionRate >= 90, '%'), k('IS FRT 준수율', frtRate, 90, frtRate >= 90, '%'), k('IB BO SQL 7일+잔량', boK.sqlBacklog?.totalOver7, 10, (boK.sqlBacklog?.totalOver7 ?? 99) <= 10, '건')],
-        lever: 'SQL전환은 달성 → FRT 준수율↑(응대속도)·IB BO 잔량 소진이 견적 진입·마감 가속의 핵심' },
-      { seg: '아웃바운드 (OBS)', gap: seg.OBS.target - seg.OBS.projected,
-        kpis: [k('OBS Lead 생산', fsK.obsLeadCount?.total, 200, (fsK.obsLeadCount?.total ?? 0) >= 200, '건')],
-        lever: '발굴 모수(OBS Lead) 자체가 부족 — 아웃바운드 활동량 확대가 1순위' },
-      { seg: '채널 (FR·PT)', gap: (seg.FR.target + seg.PT.target) - (seg.FR.projected + seg.PT.projected),
-        kpis: [k('AM Lead 일평균', am.dailyLeadCount?.avgDaily, 20, (am.dailyLeadCount?.avgDaily ?? 0) >= 20, '건'), k('MOU 안착률', am.onboardingRate?.rate, 80, (am.onboardingRate?.rate ?? 0) >= 80, '%'), k('TM MQL 미전환', tm.unconvertedMQL?.count, 0, (tm.unconvertedMQL?.count ?? 9) === 0, '건')],
-        lever: 'AM Lead 발굴량↑ + MOU 안착률↑(33→80%)이 채널 모수·전환의 두 축. 견적 정체 해소 병행' },
+      { seg: '인바운드 (IBS)', gap: seg.IBS.target - seg.IBS.projected, requiredDaily: D.teams.IBS.requiredDaily, currentDaily: cd(seg.IBS.actual),
+        funnel: `Lead ${is.lead} → MQL ${is.mql}(${pct(is.mql, is.lead)}%) → SQL ${is.sql}(${pct(is.sql, is.mql)}%) → 방문 ${is.visitCount} → 계약`,
+        kpis: [
+          k('IS SQL전환율', is.sqlConversionRate, 90, is.sqlConversionRate >= 90, '%', 'MQL→SQL', '달성 — 자격검증 모수 양호, 현 수준 유지'),
+          k('IS FRT 준수율', frtRate, 90, frtRate >= 90, '%', '인입→응대속도', `업무외·주말 응대 커버 보강 → 초기 이탈 차단, 견적 진입량 ↑ (현재 ${frtRate}%, 절반 이상이 20분 초과)`),
+          k('IB BO SQL 7일+잔량', boK.sqlBacklog?.totalOver7, 10, (boK.sqlBacklog?.totalOver7 ?? 99) <= 10, '건', 'SQL→계약 처리', '7일+ 적체 우선 소진 → 마감 처리속도 회복'),
+        ],
+        lever: `SQL 모수(${is.sql}건)는 확보됨 → 병목은 응대(FRT)·잔량 처리. 잔여 갭 ${Math.round(seg.IBS.target - seg.IBS.projected)}대 → 일 ${D.teams.IBS.requiredDaily}대 계약 필요(현재 일 ${cd(seg.IBS.actual)}대)` },
+      { seg: '아웃바운드 (OBS)', gap: seg.OBS.target - seg.OBS.projected, requiredDaily: D.teams.OBS.requiredDaily, currentDaily: cd(seg.OBS.actual),
+        funnel: `OBS Lead ${fsK.obsLeadCount?.total} / 목표 200 → 방문 → 계약`,
+        kpis: [
+          k('OBS Lead 생산', fsK.obsLeadCount?.total, 200, (fsK.obsLeadCount?.total ?? 0) >= 200, '건', '발굴 모수', `필드 발굴 활동량 확대 — 현재 모수가 목표의 ${pct(fsK.obsLeadCount?.total, 200)}% 수준`),
+        ],
+        lever: `퍼널 입구(발굴)부터 부족 — Lead ${fsK.obsLeadCount?.total}/200. 잔여 갭 ${Math.round(seg.OBS.target - seg.OBS.projected)}대 → 일 ${D.teams.OBS.requiredDaily}대 계약 필요(현재 일 ${cd(seg.OBS.actual)}대)` },
+      { seg: '채널 (FR·PT)', gap: (seg.FR.target + seg.PT.target) - (seg.FR.projected + seg.PT.projected), requiredDaily: chReq, currentDaily: cd(seg.FR.actual + seg.PT.actual),
+        funnel: `AM Lead ${am.dailyLeadCount?.total}(일 ${am.dailyLeadCount?.avgDaily}) → MOU → 안착 ${am.onboardingRate?.settled}/${am.onboardingRate?.total}(${am.onboardingRate?.rate}%) → 계약`,
+        kpis: [
+          k('AM Lead 일평균', am.dailyLeadCount?.avgDaily, 20, (am.dailyLeadCount?.avgDaily ?? 0) >= 20, '건', '발굴 모수', `일 ${am.dailyLeadCount?.avgDaily}→20건 발굴 = 채널 마감 모수 +${Math.round((20 / (am.dailyLeadCount?.avgDaily || 20) - 1) * 100)}%`),
+          k('MOU 안착률', am.onboardingRate?.rate, 80, (am.onboardingRate?.rate ?? 0) >= 80, '%', 'MOU→매장전환', `안착 ${am.onboardingRate?.settled}/${am.onboardingRate?.total} — 저조 담당 집중관리로 전환율 끌어올리기`),
+          k('TM MQL 미전환', tm.unconvertedMQL?.count, 0, (tm.unconvertedMQL?.count ?? 9) === 0, '건', 'MQL→SQL', '미전환 사유(가격·보류) 대응 → SQL 누수 차단'),
+        ],
+        lever: `모수(AM Lead)와 전환(안착률 ${am.onboardingRate?.rate}%) 둘 다 미달 — 입구·중간 동시 개선. 잔여 갭 ${Math.round((seg.FR.target + seg.PT.target) - (seg.FR.projected + seg.PT.projected))}대 → 일 ${chReq}대 계약 필요(현재 일 ${cd(seg.FR.actual + seg.PT.actual)}대)` },
     ];
   } catch (e) { console.log('  ⚠️ KPI 레버 스킵:', e.message); }
 
