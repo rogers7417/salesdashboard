@@ -53,6 +53,20 @@ const risk = A.atRisk.slice(0, 20).map(o => {
     <td class="task">${o.lastTaskSubject ? `${esc(o.lastTaskSubject)}: ${esc(o.lastTaskDesc)}` : '<span class="muted">활동 없음</span>'}</td></tr>`;
 }).join('');
 
+// 인바운드 방치 견적 — Task 요약 + 후속조치 (상세) — 인바운드 BO 파트에 삽입
+const stalledRich = (A.stalled?.inbound || []).map(o => {
+  const tks = (o.tasks || []).slice(0, 5).map(t => `<div class="tk"><span class="tk-d">${t.date || ''}</span> <b>${esc(t.subject)}</b>${t.desc ? ` — ${esc(t.desc)}` : ''}</div>`).join('');
+  return `<div class="stall">
+    <div class="stall-h"><a href="${o.link}" target="_blank">${esc(o.store)}${o.branch ? ' ' + esc(o.branch) : ''}</a> <span class="muted">· ${o.stage} · <span class="bad">${o.daysSinceTask}일 방치</span> · 단계 ${o.stageAge}일 · 담당 ${o.field}</span></div>
+    ${o.note ? `<div class="stall-sum">📋 ${esc(o.note.summary)}</div><div class="stall-next">▶ 후속조치: <b>${esc(o.note.next)}</b></div>` : ''}
+    <details class="tk-wrap"><summary>Task 이력 ${(o.tasks || []).length}건 펼치기</summary>${tks}</details>
+  </div>`;
+}).join('');
+// 인바운드 필드(FS) 견적 raw — 마지막 Task '생성일' 오래된 순
+const fsQuoteTbl = (arr, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th class="num">태블릿</th><th>마지막 Task 생성일</th><th class="num">단계경과</th><th>담당</th></tr></thead><tbody>${(arr || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}${o.branch ? ' ' + esc(o.branch) : ''}</a></td><td>${o.stage}</td><td class="num">${o.tablets || '-'}</td><td class="task"><span class="num ${o.daysSinceTaskCreated >= 30 ? 'r' : 'o'}">${o.lastTaskCreated || '없음'}</span> <span class="muted">(${o.daysSinceTaskCreated}일전)</span></td><td class="num">${o.stageAge ?? '-'}일</td><td>${o.field}</td></tr>`).join('')}</tbody></table>`;
+// KANBAN 방치 견적 표 (인바운드/아웃바운드)
+const stallTbl = (arr, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th>방치</th><th>담당</th><th>최근 활동</th></tr></thead><tbody>${(arr || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}${o.branch ? ' ' + esc(o.branch) : ''}</a></td><td>${o.stage}</td><td class="num ${o.daysSinceTask >= 14 ? 'r' : 'o'}">${o.daysSinceTask}일</td><td>${o.field}</td><td class="task">${o.tasks?.[0] ? `${esc(o.tasks[0].subject)}: ${esc((o.tasks[0].desc || '').slice(0, 45))}` : '-'}</td></tr>`).join('')}</tbody></table>`;
+
 // KPI → 퍼널 레버
 const kpiSec = (A.kpiLevers || []).map(hq => {
   const partsHtml = (hq.parts || []).map(p => {
@@ -65,7 +79,14 @@ const kpiSec = (A.kpiLevers || []).map(hq => {
       <div class="loss-h">⚠️ 전환 실패/이탈 ${n(p.loss.count)}건${p.loss.dist ? ` <span class="muted">· ${esc(p.loss.dist)}</span>` : ''}</div>
       ${samp.map(s => `<div class="loss-item">${s.link ? `<a href="${s.link}" target="_blank">${esc(s.store)}</a>` : esc(s.store)} <span class="muted">— ${esc(s.reason)}</span></div>`).join('')}
     </div>` : '';
-    return `<div class="part"><div class="part-h">${p.part}</div>${rows}${lossHtml}</div>`;
+    // 파트별 raw 데이터 삽입: FS=견적 raw / IB BO=방치 계류건 + 후속조치
+    let extra = '';
+    if ((p.part || '').includes('FS') && (A.stalled?.fsQuote || []).length) {
+      extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📋 견적 단계 raw — 마지막 Task 생성일 오래된 순 <span class="muted">(상위 15 / 총 ${n(A.stalled.fsQuote.length)}건)</span></div>${fsQuoteTbl(A.stalled.fsQuote, 15)}<div class="legend">기준: FieldUser=인바운드·필드(Team) · 견적/재견적 · 영업중 · 최근90일 · TEST제외. 오래 방치될수록 상단 — 우선 재컨택 대상.</div></div>`;
+    } else if ((p.part || '').includes('IB BO') && stalledRich) {
+      extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📌 견적 방치 계류건 (후속 끊김 · Task 요약·후속조치)</div>${stalledRich}<div class="legend">기준: FieldUser=인바운드 · 견적/재견적 · 영업중 · 후속과업 없음 · 7일+ 방치. 후속조치는 Task 이력 분석 스냅샷.</div></div>`;
+    }
+    return `<div class="part"><div class="part-h">${p.part}</div>${rows}${lossHtml}${extra}</div>`;
   }).join('');
   return `<div class="lever">
     <div class="lever-h"><b>${hq.hq}</b> <span class="muted">· 목표 ${n(hq.target)} · 잔여 갭 ${n(hq.gap)}대 · 필요 일 ${hq.requiredDaily}대 <span class="bad">(현재 ${hq.currentDaily}대)</span></span></div>
@@ -73,18 +94,6 @@ const kpiSec = (A.kpiLevers || []).map(hq => {
     ${partsHtml}
   </div>`;
 }).join('');
-
-// 인바운드 방치 견적 — Task 요약 + 후속조치 (상세)
-const stalledRich = (A.stalled?.inbound || []).map(o => {
-  const tks = (o.tasks || []).slice(0, 5).map(t => `<div class="tk"><span class="tk-d">${t.date || ''}</span> <b>${esc(t.subject)}</b>${t.desc ? ` — ${esc(t.desc)}` : ''}</div>`).join('');
-  return `<div class="stall">
-    <div class="stall-h"><a href="${o.link}" target="_blank">${esc(o.store)}${o.branch ? ' ' + esc(o.branch) : ''}</a> <span class="muted">· ${o.stage} · <span class="bad">${o.daysSinceTask}일 방치</span> · 단계 ${o.stageAge}일 · 담당 ${o.field}</span></div>
-    ${o.note ? `<div class="stall-sum">📋 ${esc(o.note.summary)}</div><div class="stall-next">▶ 후속조치: <b>${esc(o.note.next)}</b></div>` : ''}
-    <details class="tk-wrap"><summary>Task 이력 ${(o.tasks || []).length}건 펼치기</summary>${tks}</details>
-  </div>`;
-}).join('');
-// KANBAN 방치 견적 표 (인바운드/아웃바운드)
-const stallTbl = (arr, limit) => `<table><thead><tr><th>매장</th><th>단계</th><th>방치</th><th>담당</th><th>최근 활동</th></tr></thead><tbody>${(arr || []).slice(0, limit).map(o => `<tr><td><a href="${o.link}" target="_blank">${esc(o.store)}${o.branch ? ' ' + esc(o.branch) : ''}</a></td><td>${o.stage}</td><td class="num ${o.daysSinceTask >= 14 ? 'r' : 'o'}">${o.daysSinceTask}일</td><td>${o.field}</td><td class="task">${o.tasks?.[0] ? `${esc(o.tasks[0].subject)}: ${esc((o.tasks[0].desc || '').slice(0, 45))}` : '-'}</td></tr>`).join('')}</tbody></table>`;
 
 const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>6월 태블릿 페이스 분석 — 목표 5,500대</title>
@@ -201,8 +210,7 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
   <h2>③ 파트별 KPI → 퍼널 레버 + 전환 실패 — 무엇을 끌어올려야 5,500에 닿나</h2>
   <div class="desc">본부 KPI 실값(6월 누적)을 <b>파트별</b>로. 신호등 <span class="good">●</span>달성/<span class="bad">●</span>미달. 각 파트의 <span class="bad">⚠️ 전환 실패/이탈건</span>은 실제 업체·사유까지 표기(클릭 시 Salesforce).</div>
   ${kpiSec}
-  <div class="legend"><b>공통 병목</b>: 견적 단계 정체(CL의 70~86%가 견적 이탈)가 전 세그먼트 마감을 막음 — <b>KPI 개선 + 견적 후속 가속</b>이 5,500 달성의 두 축.</div>
-  ${stalledRich ? `<div style="margin-top:16px"><div class="part-h" style="font-size:14px;margin-bottom:8px">📌 인바운드 BO — 견적 방치 계류건 (후속 끊김 · Task 요약·후속조치)</div>${stalledRich}<div class="legend">기준: FieldUser=인바운드 · 견적/재견적 · 영업중 · 후속과업 없음 · 7일+ 방치. 후속조치는 Task 이력 분석 스냅샷.</div></div>` : ''}
+  <div class="legend"><b>공통 병목</b>: 견적 단계 정체(CL의 70~86%가 견적 이탈)가 전 세그먼트 마감을 막음 — <b>KPI 개선 + 견적 후속 가속</b>이 5,500 달성의 두 축. <b>인바운드 필드(FS)</b>·<b>인바운드 BO</b> 파트에 견적 방치 raw 포함.</div>
 </section>
 
 <section>

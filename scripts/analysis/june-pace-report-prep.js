@@ -138,8 +138,8 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
       '006TJ00000rSes1YAC': { summary: '타사 오더 2곳 대비 비싸다는 가격 저항. 도입 시기도 아직 멂. 특별승인 받았으나 보류.', next: '타사 대비 가치(기능·지원) 비교 자료 + 도입 시기 재확인 리터치, 추가 혜택 카드 검토' },
     };
     const attach = (arr) => (arr || []).map(o => { const id = o.link.split('/r/Opportunity/')[1].split('/')[0]; return { ...o, oppId: id, note: NOTE[id] || null }; });
-    stalled = { inbound: attach(SQ.inbound), outbound: attach(SQ.outbound) };
-    console.log(`  방치 견적: 인바운드 ${stalled.inbound.length}건 / 아웃바운드 ${stalled.outbound.length}건`);
+    stalled = { inbound: attach(SQ.inbound), outbound: attach(SQ.outbound), fsQuote: SQ.fsQuote || [] };
+    console.log(`  방치 견적: 인바운드 ${stalled.inbound.length}건 / 아웃바운드 ${stalled.outbound.length}건 / FS견적 ${stalled.fsQuote.length}건`);
   } catch (e) { console.log('  ⚠️ 방치 견적 스킵:', e.message); }
 
   const out = {

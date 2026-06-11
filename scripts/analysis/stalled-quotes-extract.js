@@ -5,6 +5,7 @@ const axios = require('axios'); axios.defaults.adapter = 'fetch';
 const fs = require('fs');
 const INB = ['인바운드세일즈', '인사이드세일즈', '필드세일즈1', '필드세일즈2', '필드세일즈3', '필드세일즈1팀', '필드세일즈2팀', '필드세일즈3팀', '영업지원1팀', '영업지원2팀', '온보딩팀'];
 const OBS = ['아웃바운드세일즈'];
+const FS_TEAM = ['필드세일즈', '현장영업']; // 인바운드 필드 = FieldUser.Team__c 기준 (Department는 전부 '인바운드세일즈')
 const teamOf = (dept) => INB.includes(dept) ? '인바운드' : (OBS.includes(dept) ? '아웃바운드' : '기타');
 
 (async () => {
@@ -16,7 +17,7 @@ const teamOf = (dept) => INB.includes(dept) ? '인바운드' : (OBS.includes(dep
   const opps = await q(`
     SELECT Id, Name, Account.Name, Account.BranchName__c, StageName, fm_CompanyStatus__c,
            TotalNumberofEveryTablet__c, LastStageChangeInDays, AgeInDays,
-           FieldUser__r.Name, FieldUser__r.Department, BOUser__r.Name
+           FieldUser__r.Name, FieldUser__r.Department, FieldUser__r.Team__c, BOUser__r.Name
     FROM Opportunity
     WHERE IsClosed=false AND CurrencyIsoCode='KRW'
       AND (RecordType.Name='1. 테이블오더 (신규)' OR RecordType.Name='3. 테이블오더 (추가설치)')
@@ -54,7 +55,30 @@ const teamOf = (dept) => INB.includes(dept) ? '인바운드' : (OBS.includes(dep
   }
   out.sort((a, b) => (b.daysSinceTask - a.daysSinceTask) || (b.tablets - a.tablets));
   const byTeam = (tm) => out.filter(o => o.team === tm);
-  fs.writeFileSync('data/stalled-quotes.json', JSON.stringify({ generatedAt: new Date().toISOString(), criteria: '견적/재견적·영업중·후속과업없음·7일+방치·최근90일·TEST제외 (FieldUser 부서 기준)', inbound: byTeam('인바운드'), outbound: byTeam('아웃바운드') }, null, 2));
-  console.log(`방치 견적 — 인바운드 ${byTeam('인바운드').length}건 / 아웃바운드 ${byTeam('아웃바운드').length}건`);
+
+  // 인바운드 필드(FS) — 견적 단계 raw, 마지막 Task '생성일' 오래된 순 (후속 필터 없음, age<=90·TEST제외)
+  const fsQuote = [];
+  for (const o of opps) {
+    if (o.FieldUser__r?.Department !== '인바운드세일즈') continue; // 인바운드 한정
+    if (!FS_TEAM.includes(o.FieldUser__r?.Team__c)) continue;
+    if (/TEST/i.test(o.Account?.Name || o.Name)) continue;
+    if ((o.AgeInDays ?? 999) > 90) continue;
+    const tlist = (tasksByOpp[o.Id] || []);
+    // 마지막 Task 생성일 = 가장 최근 생성된 Task의 CreatedDate
+    const lastCreated = tlist.reduce((mx, tk) => { const c = (tk.CreatedDate || '').slice(0, 10); return (c && c > mx) ? c : mx; }, '');
+    const dsc = lastCreated ? Math.round((today - new Date(lastCreated + 'T00:00:00+09:00')) / 86400000) : ((o.AgeInDays ?? 999));
+    fsQuote.push({
+      store: o.Account?.Name || o.Name, branch: o.Account?.BranchName__c || '',
+      stage: o.StageName, tablets: o.TotalNumberofEveryTablet__c || 0, stageAge: o.LastStageChangeInDays, age: o.AgeInDays,
+      field: o.FieldUser__r?.Name || '-', fieldTeam: o.FieldUser__r?.Team__c || '-', bo: o.BOUser__r?.Name || '-',
+      lastTaskCreated: lastCreated || null, daysSinceTaskCreated: dsc,
+      link: `https://torder.lightning.force.com/lightning/r/Opportunity/${o.Id}/view`,
+    });
+  }
+  // 마지막 Task 생성일 오래된 순 (Task 전무 = lastTaskCreated null → 최상단)
+  fsQuote.sort((a, b) => (b.daysSinceTaskCreated - a.daysSinceTaskCreated) || (b.tablets - a.tablets));
+
+  fs.writeFileSync('data/stalled-quotes.json', JSON.stringify({ generatedAt: new Date().toISOString(), criteria: '견적/재견적·영업중·후속과업없음·7일+방치·최근90일·TEST제외 (FieldUser 부서 기준)', inbound: byTeam('인바운드'), outbound: byTeam('아웃바운드'), fsQuote }, null, 2));
+  console.log(`방치 견적 — 인바운드 ${byTeam('인바운드').length}건 / 아웃바운드 ${byTeam('아웃바운드').length}건 / FS 견적 ${fsQuote.length}건`);
   console.log('저장: data/stalled-quotes.json');
 })().catch(e => { console.error('ERR', e.response?.data || e.message); process.exit(1); });
