@@ -64,7 +64,29 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
   atRisk.forEach(o => { o.risk = (o.stageAge || 0) + (o.daysSinceTask != null ? o.daysSinceTask : 30) * 0.5 + Math.min(o.tablets, 30) * 0.3; });
   atRisk.sort((a, b) => b.risk - a.risk);
 
+  // ---- KPI 레버: 본부 KPI 실값 → 어느 퍼널을 끌어올려야 목표 달성하나 ----
+  let kpiLevers = [];
+  try {
+    const K = JSON.parse(fs.readFileSync(`data/kpi-extract-${D.period}.json`, 'utf8'));
+    const is = K.inbound.insideSales, fsK = K.inbound.fieldSales, boK = K.inbound.backOffice;
+    const am = K.channel.am, tm = K.channel.tm, ae = K.channel.ae, cbo = K.channel.backOffice;
+    const frtRate = is.frt?.totalWithTask ? +(is.frt.frtOk / is.frt.totalWithTask * 100).toFixed(1) : null;
+    const k = (name, cur, target, ok, unit) => ({ name, cur, target, ok, unit: unit || '' });
+    kpiLevers = [
+      { seg: '인바운드 (IBS)', gap: seg.IBS.target - seg.IBS.projected,
+        kpis: [k('IS SQL전환율', is.sqlConversionRate, 90, is.sqlConversionRate >= 90, '%'), k('IS FRT 준수율', frtRate, 90, frtRate >= 90, '%'), k('IB BO SQL 7일+잔량', boK.sqlBacklog?.totalOver7, 10, (boK.sqlBacklog?.totalOver7 ?? 99) <= 10, '건')],
+        lever: 'SQL전환은 달성 → FRT 준수율↑(응대속도)·IB BO 잔량 소진이 견적 진입·마감 가속의 핵심' },
+      { seg: '아웃바운드 (OBS)', gap: seg.OBS.target - seg.OBS.projected,
+        kpis: [k('OBS Lead 생산', fsK.obsLeadCount?.total, 200, (fsK.obsLeadCount?.total ?? 0) >= 200, '건')],
+        lever: '발굴 모수(OBS Lead) 자체가 부족 — 아웃바운드 활동량 확대가 1순위' },
+      { seg: '채널 (FR·PT)', gap: (seg.FR.target + seg.PT.target) - (seg.FR.projected + seg.PT.projected),
+        kpis: [k('AM Lead 일평균', am.dailyLeadCount?.avgDaily, 20, (am.dailyLeadCount?.avgDaily ?? 0) >= 20, '건'), k('MOU 안착률', am.onboardingRate?.rate, 80, (am.onboardingRate?.rate ?? 0) >= 80, '%'), k('TM MQL 미전환', tm.unconvertedMQL?.count, 0, (tm.unconvertedMQL?.count ?? 9) === 0, '건')],
+        lever: 'AM Lead 발굴량↑ + MOU 안착률↑(33→80%)이 채널 모수·전환의 두 축. 견적 정체 해소 병행' },
+    ];
+  } catch (e) { console.log('  ⚠️ KPI 레버 스킵:', e.message); }
+
   const out = {
+    kpiLevers,
     period: D.period, asOf: D.asOf, bizElapsed: D.bizDaysElapsed, bizTotal: D.bizDaysTotal,
     total: { target: totTarget, actual: totActual, projected: totProj, gap: totProj - totTarget, attainment: +(totProj / totTarget * 100).toFixed(1), paceNow: +(totActual / D.teams.IBS.cumTargetToday).toFixed(2) },
     segments: seg, stageCompare,

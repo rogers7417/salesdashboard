@@ -53,6 +53,12 @@ const risk = A.atRisk.slice(0, 20).map(o => {
     <td class="task">${o.lastTaskSubject ? `${esc(o.lastTaskSubject)}: ${esc(o.lastTaskDesc)}` : '<span class="muted">활동 없음</span>'}</td></tr>`;
 }).join('');
 
+// KPI → 퍼널 레버
+const kpiSec = (A.kpiLevers || []).map(l => {
+  const rows = l.kpis.map(kp => `<div class="kpirow"><span class="kpi-sig ${kp.ok ? 'g' : 'b'}"></span><span class="kpi-name">${kp.name}</span><span class="kpi-val ${kp.ok ? 'good' : 'bad'}">${kp.cur ?? '-'}${kp.unit}</span><span class="kpi-tgt">목표 ${kp.target}${kp.unit}</span></div>`).join('');
+  return `<div class="lever"><div class="lever-h"><b>${l.seg}</b> <span class="muted">· 잔여 갭 ${n(l.gap)}대</span></div>${rows}<div class="lever-txt">▸ ${l.lever}</div></div>`;
+}).join('');
+
 const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>6월 태블릿 페이스 분석 — 목표 5,500대</title>
 <style>
@@ -100,6 +106,12 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 .col li:before{content:'';position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:3px}
 .col.gd li:before{background:#34D399}.col.bd li:before{background:#F0556C}
 .legend{font-size:11px;color:#7E96B5;margin-top:10px}
+.lever{background:#0B1A30;border:1px solid #1A3052;border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.lever-h{font-size:14px;margin-bottom:8px}
+.kpirow{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0}
+.kpi-sig{width:8px;height:8px;border-radius:4px;flex-shrink:0}.kpi-sig.g{background:#34D399}.kpi-sig.b{background:#F0556C}
+.kpi-name{color:#C5D5E8;min-width:130px}.kpi-val{font-weight:700}.kpi-tgt{color:#7E96B5;font-size:11.5px}
+.lever-txt{font-size:12px;color:#A8BDD8;margin-top:8px;padding-top:8px;border-top:1px solid #14253F}
 .foot{text-align:center;color:#5A7193;font-size:11.5px;margin-top:14px}
 @media(max-width:720px){.two{grid-template-columns:1fr}.task{display:none}}
 </style></head><body><div class="wrap">
@@ -141,14 +153,21 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 </section>
 
 <section>
-  <h2>③ 퍼널 개선 — 견적 단계가 생사를 가른다</h2>
+  <h2>③ KPI → 퍼널 레버 — 무엇을 끌어올려야 5,500에 닿나</h2>
+  <div class="desc">본부 KPI 실값(6월 누적). <span class="bad">⚠️</span>=목표 미달. 갭을 메우려면 미달 KPI를 끌어올려 퍼널 모수·전환을 늘려야 함.</div>
+  ${kpiSec}
+  <div class="legend"><b>공통 병목</b>: 견적 단계 정체(CL의 70~86%가 견적 이탈)가 전 세그먼트 마감을 막음 — <b>KPI 개선 + 견적 후속 가속</b>이 5,500 달성의 두 축.</div>
+</section>
+
+<section>
+  <h2>④ 퍼널 개선 — 견적 단계가 생사를 가른다</h2>
   <div class="desc">단계별 체류기간 중앙값: 마감(CW) vs 현재 계류 vs 이탈(CL). 견적에서 갈립니다.</div>
   <table><thead><tr><th>단계</th><th>CW(마감) 통과</th><th>계류(현재) 정체</th><th>CL(이탈) 정체</th></tr></thead><tbody>${funnel}</tbody></table>
   <div class="legend">🟢 마감되는 건은 견적을 1~2일에 통과 · 🟠 지금 계류건은 견적에서 10~28일 정체 · 🔴 이탈건은 견적에서 평균 15일 묶이다 죽음(전체 CL의 70~86%가 견적 이탈). <b>→ 견적 단계 후속 속도(견적 N일+ 자동 에스컬레이션·재견적 차단)가 목표 달성의 최대 레버.</b></div>
 </section>
 
 <section>
-  <h2>④ KANBAN — 지금 안 챙기면 새는 영업기회 <span class="muted" style="font-size:13px">(Task까지 확인)</span></h2>
+  <h2>⑤ KANBAN — 지금 안 챙기면 새는 영업기회 <span class="muted" style="font-size:13px">(Task까지 확인)</span></h2>
   <div class="desc">마감 단계(견적·계약진행 등) · 태블릿 보유 · 최근 생성(좀비 제외) 중 정체+Task 방치 상위. 총 ${n(A.atRiskSummary.total)}건 · ${n(A.atRiskSummary.tabletsAtRisk)}대 위험 (Task 14일+ 방치 ${A.atRiskSummary.stale14}건).</div>
   <table><thead><tr><th>매장</th><th>세그먼트</th><th>단계</th><th>태블릿</th><th>단계경과</th><th>마지막 Task</th><th>최근 활동 내용</th></tr></thead><tbody>${risk}</tbody></table>
   <div class="legend">단계경과·Task 방치일이 클수록 CL 위험. 빨강 = 14일+ 방치. 견적 단계 고가치건의 즉시 재컨택이 CW율 방어의 핵심.</div>
