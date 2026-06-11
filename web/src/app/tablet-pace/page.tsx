@@ -273,7 +273,7 @@ export default function TabletPacePage() {
       </div>
       <p style={{ fontSize: 12.5, color: C.muted, margin: '6px 0 18px' }}>
         월 목표를 영업일로 소분한 누적 목표(빨간 선) 대비 마감 실적, 그리고 잔여 목표를 채울 계류 영업기회를 영업단계별로 트래킹합니다.
-        실적은 ‘Closed Won’ 단계변경일 기준 · 태블릿 수량은 견적 단계부터 채워집니다.
+        실적(CW)은 계약시작일 + Closed Won 기준 (사내 /contracts API와 동일) · 퍼널/체류 분석은 영업기회 단계변경 기준.
       </p>
 
       {/* 팀 탭 — 선택한 팀만 표시 */}

@@ -136,6 +136,12 @@ function channelSplit(team, leadSource, frHQ) {
   if (team !== 'CHS') return team;
   return (frHQ || leadSource === '프랜차이즈소개') ? 'FR' : 'PT';
 }
+// 계약-CW 실적 분류 — 사내 /contracts API 기준: opp 소유부서(Owner_Department__c) → 팀, 채널은 FR/PT 분할 (FieldUser·B+C 미적용)
+function classifyContract(dept, frHQ, leadSource) {
+  const team = DEPT_TEAM[dept] || '기타';
+  if (team === 'CHS') return (frHQ || leadSource === '프랜차이즈소개') ? 'FR' : 'PT';
+  return team;
+}
 // 국내(한국) 판별 — 원화(KRW) 기준. 해외 영업기회는 USD/CAD 등으로 통화가 찍힘 (CurrencyIsoCode 는 항상 채워짐).
 function isDomestic(o) { return o.currency ? o.currency === 'KRW' : true; }
 function lightning(id) { return `https://torder.lightning.force.com/lightning/r/Opportunity/${id}/view`; }
@@ -289,6 +295,30 @@ async function main() {
   const bizElapsed = bizDaysElapsed(month, today);
   const weeks = weeklyBuckets(month);
 
+  // ---- 실적: 계약-CW 기준 (사내 /contracts API 정의와 일치) ----
+  // 계약시작일(ContractDateStart) 당월 + opp Closed Won + 신규/추가설치 + KRW + 특정 계약RT 제외
+  const contractRows = await soqlAll(instanceUrl, accessToken, `
+    SELECT Id, ContractDateStart__c, Opportunity__r.Id, Opportunity__r.Owner_Department__c,
+           Opportunity__r.TotalNumberofEveryTablet__c, Opportunity__r.LeadSource,
+           Opportunity__r.Account.Name, Account__r.fm_FRHQ__c
+    FROM Contract__c
+    WHERE Opportunity__c != NULL
+      AND ContractDateStart__c >= ${start} AND ContractDateStart__c < ${next}
+      AND (ContractStatus__c = '계약서명완료' OR ContractStatus__c = '계약서명대기')
+      AND RecordTypeId != '012TJ000002eJu1YAE'
+      AND Opportunity__r.StageName = 'Closed Won'
+      AND (Opportunity__r.RecordType.Name = '1. 테이블오더 (신규)' OR Opportunity__r.RecordType.Name = '3. 테이블오더 (추가설치)')
+      AND CurrencyIsoCode = 'KRW'`);
+  const cwByTeam = {};
+  let cwEtc = 0;
+  contractRows.forEach(r => {
+    const o = r.Opportunity__r || {};
+    const team = classifyContract(o.Owner_Department__c, r.Account__r?.fm_FRHQ__c, o.LeadSource);
+    if (team === '기타') { cwEtc++; return; }
+    (cwByTeam[team] = cwByTeam[team] || []).push({ tablets: o.TotalNumberofEveryTablet__c || 0, date: r.ContractDateStart__c, account: o.Account?.Name || '', oppId: o.Id });
+  });
+  console.log(`  📑 계약-CW 실적: ${contractRows.length}건 → ` + TEAMS.map(t => `${t} ${(cwByTeam[t] || []).reduce((s, c) => s + c.tablets, 0)}대`).join(' / ') + (cwEtc ? ` (기타 ${cwEtc}건 제외)` : ' (기타 0)'));
+
   // ---- 팀별 집계 ----
   const result = { period: month, asOf: today, extractedAt: new Date().toISOString(), bizDaysTotal: bizTotal, bizDaysElapsed: bizElapsed, teams: {} };
 
@@ -297,19 +327,19 @@ async function main() {
     const dailyQuota = bizTotal > 0 ? +(target / bizTotal).toFixed(1) : 0;
     const cumTargetToday = Math.round(dailyQuota * bizElapsed);
 
-    const cwTeam = cw.filter(o => o.team === team);
+    const cwTeam = cwByTeam[team] || []; // 계약-CW 실적 (계약시작일 기준)
     const actualMTD = cwTeam.reduce((s, o) => s + o.tablets, 0);
     const actualCount = cwTeam.length;
 
-    // 일별 실적 시리즈 (CW 단계변경일 기준)
+    // 일별 실적 시리즈 (계약시작일 기준)
     const byDay = {};
-    cwTeam.forEach(o => { const d = o.wonDate; if (!d) return; byDay[d] = byDay[d] || { date: d, tablets: 0, count: 0 }; byDay[d].tablets += o.tablets; byDay[d].count++; });
+    cwTeam.forEach(o => { const d = o.date; if (!d) return; byDay[d] = byDay[d] || { date: d, tablets: 0, count: 0 }; byDay[d].tablets += o.tablets; byDay[d].count++; });
     const dailySeries = Object.values(byDay).sort((a, b) => a.date.localeCompare(b.date));
 
     // 주별 할당 + 실적 (주 마지막 영업일까지 포함하도록 주말 경계로 비교)
     const weekly = weeks.map(w => {
       const wEnd = w.days[w.days.length - 1];
-      const wActual = cwTeam.filter(o => o.wonDate && o.wonDate >= w.days[0] && o.wonDate <= wEnd);
+      const wActual = cwTeam.filter(o => o.date && o.date >= w.days[0] && o.date <= wEnd);
       return { weekStart: w.weekStart, bizDays: w.bizDays, quota: Math.round(dailyQuota * w.bizDays), actual: wActual.reduce((s, o) => s + o.tablets, 0), count: wActual.length };
     });
 
@@ -340,13 +370,14 @@ async function main() {
     const pipelineCount = openTeam.length;
     const coverage = remaining > 0 ? +(pipelineTablets / remaining * 100).toFixed(1) : null; // 잔여목표 대비 파이프라인 태블릿 커버리지
 
-    // CW 단계별 체류기간 (중앙값) — 당월 마감된 이 팀 opp 들의 단계 체류일 분포
+    // CW 단계별 체류기간 (중앙값) — 단계변경(Closed Won) 기준 opp 의 단계 체류일 분포 (퍼널 진단용, 실적과 별개 기준)
+    const cwStageTeam = cw.filter(o => o.team === team);
     const cwStageDwell = STAGE_ORDER.map(st => {
-      const vals = cwTeam.map(o => dwellByOpp[o.id]?.[st]).filter(v => v != null && v >= 0);
+      const vals = cwStageTeam.map(o => dwellByOpp[o.id]?.[st]).filter(v => v != null && v >= 0);
       return { stage: st, count: vals.length, median: vals.length ? +median(vals).toFixed(1) : 0 };
     }).filter(s => s.count > 0);
     const leadTimeMedian = (() => {
-      const totals = cwTeam.map(o => { const dw = dwellByOpp[o.id]; if (!dw) return null; return STAGE_ORDER.reduce((s, st) => s + (dw[st] || 0), 0); }).filter(v => v != null && v > 0);
+      const totals = cwStageTeam.map(o => { const dw = dwellByOpp[o.id]; if (!dw) return null; return STAGE_ORDER.reduce((s, st) => s + (dw[st] || 0), 0); }).filter(v => v != null && v > 0);
       return totals.length ? +median(totals).toFixed(1) : null;
     })();
 
@@ -367,7 +398,7 @@ async function main() {
       dailySeries, weekly, cwStageDwell, leadTimeMedian,
       cl: { total: clTeam.length, stageDist: clStageDist },
       // opp별 원본 (페이지에서 기간 필터 재계산용) — created=생성일
-      cwDwellOpps: cwTeam.map(o => ({ created: o.createdDate, dwell: dwellByOpp[o.id] || {} })),
+      cwDwellOpps: cwStageTeam.map(o => ({ created: o.createdDate, dwell: dwellByOpp[o.id] || {} })),
       clDwellOpps: clTeam.map(o => ({ created: o.createdDate, dwell: dwellByOpp[o.id] || {} })),
       pipeline: { count: pipelineCount, tablets: pipelineTablets, coverage, stages },
     };
