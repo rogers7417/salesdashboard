@@ -46,6 +46,14 @@ const storeOf = (s) => s === '영업중' ? '운영중' : (/오픈전/.test(s || 
     });
   }
 
+  // 실제 방문일: Visit__c(상담 시작 ConselStart__c) — 가장 최근 방문
+  const lastVisit = {};
+  for (let i = 0; i < ids.length; i += 200) {
+    const chunk = ids.slice(i, i + 200).map(x => `'${x}'`).join(',');
+    const vs = await q(`SELECT Opportunity__c, ConselStart__c, IsVisitComplete__c, Visit_Status__c FROM Visit__c WHERE Opportunity__c IN (${chunk}) ORDER BY ConselStart__c DESC NULLS LAST`);
+    vs.forEach(v => { const cs = (v.ConselStart__c || '').slice(0, 10); if (cs && (!lastVisit[v.Opportunity__c] || cs > lastVisit[v.Opportunity__c].date)) lastVisit[v.Opportunity__c] = { date: cs, status: v.Visit_Status__c || '', done: !!v.IsVisitComplete__c }; });
+  }
+
   const today10 = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10); // KST 날짜(YYYY-MM-DD)
   const today = new Date(today10 + 'T00:00:00+09:00');
   const rows = opps
@@ -58,11 +66,13 @@ const storeOf = (s) => s === '영업중' ? '운영중' : (/오픈전/.test(s || 
       const stale = dsl != null && dsl >= STALE_DAYS;
       const absent = /부재|미응답|연락안/.test(last?.subject || '');
       const reasons = [noOpen ? '오픈과업 없음' : null, stale ? `마지막 Task ${dsl}일 경과` : null, absent ? '부재중' : null].filter(Boolean);
+      const visit = lastVisit[o.Id] || null;
+      const dsv = visit ? Math.round((today - new Date(visit.date + 'T00:00:00+09:00')) / 86400000) : null;
       return {
         store: o.Account?.Name || o.Name, addr: o.fm_Address__c || '', sido: o.fm_sido__c || '(미입력)', sigungun: o.fm_Sigugun__c || '',
         phone: o.Account?.Phone || '', tablets: o.TotalNumberofEveryTablet__c || 0, stage: o.StageName, source: o.LeadSource,
         storeStatus: storeOf(o.fm_CompanyStatus__c), stageAge: o.LastStageChangeInDays, age: o.AgeInDays,
-        field: o.FieldUser__r?.Name || '-', last, dsl, openTasks: openCnt[o.Id] || 0,
+        field: o.FieldUser__r?.Name || '-', last, dsl, openTasks: openCnt[o.Id] || 0, visit, dsv,
         priority: noOpen || stale || absent, reasons, absent,
         link: `https://torder.lightning.force.com/lightning/r/Opportunity/${o.Id}/view`,
       };
@@ -90,12 +100,13 @@ const storeOf = (s) => s === '영업중' ? '운영중' : (/오픈전/.test(s || 
       <td class="store">${r.priority ? '<span class="fire">🔥</span>' : ''}${esc(r.store)} ${statusBadge(r.storeStatus)}<div class="src">${esc(r.source)} · ${esc(r.stage)}${r.stageAge != null ? ` · 단계 ${r.stageAge}일` : ''}</div>${r.reasons.length ? `<div class="rsn">▶ ${r.reasons.map(esc).join(' · ')}</div>` : ''}</td>
       <td class="addr">${esc(r.addr)}${r.phone ? `<div class="ph">☎ ${esc(r.phone)}</div>` : ''}</td>
       <td class="num">${r.tablets ? r.tablets + '대' : '-'}</td>
+      <td class="vd">${r.visit ? `${r.visit.date}<div class="td">${r.dsv}일 전${r.visit.status ? ' · ' + esc(r.visit.status) : ''}</div>` : '<span class="muted">기록 없음</span>'}</td>
       <td>${esc(r.field)}</td>
       <td class="task">${r.last ? `${esc(r.last.subject || '')}<div class="td">${r.last.date || ''}${r.dsl != null ? ` (${r.dsl}일 전)` : ''} · 오픈과업 ${r.openTasks}</div>` : '<span class="muted">활동 없음</span>'}</td>
       <td class="lk"><a href="${r.link}" target="_blank">열기</a></td>
     </tr>`).join('');
     return `<section class="region"><h2>${esc(s)} <span class="rc">${list.length}건 · ${n(tab)}대 · 🔥${list.filter(r => r.priority).length}</span></h2>
-      <table><thead><tr><th></th><th>매장 (상태·출처·단계)</th><th>주소 / 연락처</th><th class="num">태블릿</th><th>담당</th><th>최근 활동</th><th></th></tr></thead><tbody>${trs}</tbody></table></section>`;
+      <table><thead><tr><th></th><th>매장 (상태·출처·단계)</th><th>주소 / 연락처</th><th class="num">태블릿</th><th>실제 방문일</th><th>담당</th><th>최근 활동</th><th></th></tr></thead><tbody>${trs}</tbody></table></section>`;
   }).join('');
 
   const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -133,6 +144,7 @@ tr.pri td{background:#FFF7F2}
 .addr{color:#33485F;min-width:200px}
 .ph{font-size:11px;color:#5C7088;margin-top:2px}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
+.vd{font-size:12px;color:#1B2A3D;font-weight:600;white-space:nowrap}
 .task{font-size:11.5px;color:#5C7088;max-width:200px}
 .td{font-size:10.5px;color:#9DB0C6}
 .muted{color:#A6B4C6}
