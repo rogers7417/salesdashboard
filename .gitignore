@@ -54,3 +54,6 @@ test-*.js
 *.md
 !README.md
 !QUICKSTART.md
+
+# 카카오 JS키 임베드된 지도 HTML (커밋 제외)
+reports/inbound-quote-visit-map-*.html
