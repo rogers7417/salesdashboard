@@ -8,7 +8,7 @@ type Pt = {
   lat: number; lng: number; store: string; addr: string; phone: string;
   tablets: number; stage: string; stageAge: number | null; status: string;
   field: string; visit: string | null; visitStatus: string;
-  daysSinceVisit: number | null; category: string; channelType: string | null; daysInStage: number; link: string;
+  daysSinceVisit: number | null; category: string; channelType: string | null; daysInStage: number; created: string; link: string;
 };
 
 declare global { interface Window { kakao: any } }
@@ -70,16 +70,19 @@ export default function VisitRoundPage() {
   const activeIdRef = useRef<string>('');
   const routeModeRef = useRef(false);
   const idCounter = useRef(0);
-  const drawingManager = useRef<any>(null);
   const assignAreaRef = useRef<(b: any) => void>(() => { });
   const areaModeRef = useRef(false);
   const shownRef = useRef<Pt[]>([]);
+  const cornerA = useRef<any>(null);   // 첫 번째 꼭짓점
+  const cornerDot = useRef<any>(null); // 첫 꼭짓점 표시
+  const previewRect = useRef<any>(null); // 드래그 미리보기 사각형
   const [pts, setPts] = useState<Pt[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [asOf, setAsOf] = useState('');
   const [ready, setReady] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [catF, setCatF] = useState<'all' | '인바운드' | '채널'>('all');
+  const [createdFrom, setCreatedFrom] = useState('2026-05-01');
   const [statusF, setStatusF] = useState<'all' | '운영중' | '오픈전'>('all');
   const [fieldF, setFieldF] = useState('');
   const [routeMode, setRouteMode] = useState(false);
@@ -157,12 +160,14 @@ export default function VisitRoundPage() {
   }, [redrawRoutes]);
   useEffect(() => { assignAreaRef.current = assignArea; }, [assignArea]);
 
-  // 영역 할당 모드 on/off → DrawingManager 사각형 그리기 시작/중단
+  // 영역 할당 모드 off → 진행중인 사각형/꼭짓점 정리
   useEffect(() => {
     areaModeRef.current = areaMode;
-    const dm = drawingManager.current; if (!dm || !window.kakao?.maps?.drawing) return;
-    if (areaMode) dm.select(window.kakao.maps.drawing.OverlayType.RECTANGLE);
-    else dm.cancel();
+    if (!areaMode) {
+      cornerA.current = null;
+      if (cornerDot.current) { cornerDot.current.setMap(null); cornerDot.current = null; }
+      if (previewRect.current) { previewRect.current.setMap(null); previewRect.current = null; }
+    }
   }, [areaMode]);
 
   // 지도 + 데이터 로드
@@ -175,24 +180,30 @@ export default function VisitRoundPage() {
         // 초기 중심: 서울 구로구 (구로구청 기준)
         map.current = new window.kakao.maps.Map(mapRef.current, { center: new window.kakao.maps.LatLng(37.49542, 126.88765), level: 6 });
         iw.current = new window.kakao.maps.InfoWindow({ removable: true });
-        // 사각형 영역 선택용 DrawingManager
-        if (window.kakao.maps.drawing) {
-          const dm = new window.kakao.maps.drawing.DrawingManager({
-            map: map.current,
-            drawingMode: [window.kakao.maps.drawing.OverlayType.RECTANGLE],
-            rectangleOptions: { draggable: false, removable: false, editable: false, strokeWeight: 2, strokeColor: '#1E40AF', strokeOpacity: 0.9, fillColor: '#1E40AF', fillOpacity: 0.12 },
-          });
-          window.kakao.maps.event.addListener(dm, 'drawend', (data: any) => {
-            if (data.overlayType === window.kakao.maps.drawing.OverlayType.RECTANGLE) {
-              const bounds = data.target.getBounds();
-              if (data.target.setMap) data.target.setMap(null); // 선택 사각형은 임시 — 제거
-              assignAreaRef.current(bounds);
-              dm.cancel();
-              if (areaModeRef.current) dm.select(window.kakao.maps.drawing.OverlayType.RECTANGLE);
-            }
-          });
-          drawingManager.current = dm;
-        }
+        const K = window.kakao.maps;
+        // 영역 할당: 빈 지도 클릭 2번(꼭짓점) → 사각형 영역 내 매장 일괄 배정 (라이브러리 의존 X)
+        K.event.addListener(map.current, 'click', (e: any) => {
+          if (!areaModeRef.current || !activeIdRef.current) return;
+          const ll = e.latLng;
+          if (!cornerA.current) {
+            cornerA.current = ll;
+            cornerDot.current = new K.CustomOverlay({ position: ll, content: '<div style="width:14px;height:14px;border-radius:7px;background:#1E40AF;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>', map: map.current, zIndex: 20 });
+          } else {
+            const bounds = new K.LatLngBounds(cornerA.current, ll);
+            assignAreaRef.current(bounds);
+            cornerA.current = null;
+            if (cornerDot.current) { cornerDot.current.setMap(null); cornerDot.current = null; }
+            if (previewRect.current) { previewRect.current.setMap(null); previewRect.current = null; }
+          }
+        });
+        // 첫 꼭짓점 이후 마우스 따라 미리보기 사각형
+        K.event.addListener(map.current, 'mousemove', (e: any) => {
+          if (!areaModeRef.current || !cornerA.current) return;
+          const b = new K.LatLngBounds(cornerA.current, e.latLng);
+          if (!previewRect.current) previewRect.current = new K.Rectangle({ bounds: b, strokeWeight: 2, strokeColor: '#1E40AF', strokeOpacity: 0.9, strokeStyle: 'shortdash', fillColor: '#1E40AF', fillOpacity: 0.12 });
+          else previewRect.current.setBounds(b);
+          previewRect.current.setMap(map.current);
+        });
         const res = await fetch('/inbound-quote-round.json', { cache: 'no-store' });
         const data = await res.json();
         setPts(data.points || []);
@@ -206,7 +217,7 @@ export default function VisitRoundPage() {
   // 필터 변경 → 마커 재렌더
   useEffect(() => {
     if (!ready || !map.current) return;
-    const list = pts.filter(p => (catF === 'all' || p.category === catF) && (statusF === 'all' || p.status === statusF) && (!fieldF || p.field === fieldF));
+    const list = pts.filter(p => (catF === 'all' || p.category === catF) && (p.created >= createdFrom) && (statusF === 'all' || p.status === statusF) && (!fieldF || p.field === fieldF));
     shownRef.current = list;
     markersRef.current.forEach(m => m.setMap(null));
     markersRef.current = list.map(p => {
@@ -215,18 +226,18 @@ export default function VisitRoundPage() {
       return mk;
     });
     // 초기/필터 시 자동 전체맞춤 안 함 — 구로구 중심 유지 (전국 보기는 ⤢ 버튼)
-  }, [ready, pts, catF, statusF, fieldF, onMarkerClick]);
+  }, [ready, pts, catF, createdFrom, statusF, fieldF, onMarkerClick]);
 
   // 줌 컨트롤
   const zoomOut = useCallback(() => { if (map.current) map.current.setLevel(map.current.getLevel() + 1); }, []);
   const zoomIn = useCallback(() => { if (map.current) map.current.setLevel(Math.max(1, map.current.getLevel() - 1)); }, []);
   const fitAll = useCallback(() => {
-    const list = pts.filter(p => (catF === 'all' || p.category === catF) && (statusF === 'all' || p.status === statusF) && (!fieldF || p.field === fieldF));
+    const list = pts.filter(p => (catF === 'all' || p.category === catF) && (p.created >= createdFrom) && (statusF === 'all' || p.status === statusF) && (!fieldF || p.field === fieldF));
     if (!map.current || !list.length) return;
     const b = new window.kakao.maps.LatLngBounds(); list.forEach(p => b.extend(new window.kakao.maps.LatLng(p.lat, p.lng))); map.current.setBounds(b);
-  }, [pts, catF, statusF, fieldF]);
+  }, [pts, catF, createdFrom, statusF, fieldF]);
 
-  const shown = pts.filter(p => (catF === 'all' || p.category === catF) && (statusF === 'all' || p.status === statusF) && (!fieldF || p.field === fieldF)).length;
+  const shown = pts.filter(p => (catF === 'all' || p.category === catF) && (p.created >= createdFrom) && (statusF === 'all' || p.status === statusF) && (!fieldF || p.field === fieldF)).length;
   const routeKmOf = (pp: Pt[]) => pp.reduce((s, p, i) => i ? s + haversineKm(pp[i - 1], p) : 0, 0);
   const activeRoute = routes.find(r => r.id === activeId) || null;
   const naverUrl = (p: Pt) => 'https://map.naver.com/v5/search/' + encodeURIComponent((p.store + ' ' + (p.addr || '')).trim());
@@ -237,10 +248,10 @@ export default function VisitRoundPage() {
   const totalAssigned = routes.reduce((s, r) => s + r.points.length, 0);
   const csvCell = (v: unknown) => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
   const downloadCsv = () => {
-    const header = ['담당자', '순번', '구분', '채널유형', '매장명', '매장상태', '단계', '단계경과(일)', '태블릿', '담당(필드)', '방문일', '방문경과(일)', '견적체류(일)', '주소', '연락처', 'Salesforce', '네이버지도'];
+    const header = ['담당자', '순번', '구분', '채널유형', '매장명', '매장상태', '단계', '단계경과(일)', '태블릿', '담당(필드)', '방문일', '방문경과(일)', '견적체류(일)', '생성일', '주소', '연락처', 'Salesforce', '네이버지도'];
     const rows = [header.join(',')];
     routes.forEach(r => r.points.forEach((p, i) => {
-      rows.push([r.name, i + 1, p.category, p.channelType ?? '', p.store, p.status, p.stage, p.stageAge ?? '', p.tablets || 0, p.field, p.visit ?? '', p.daysSinceVisit ?? '', p.daysInStage ?? '', p.addr, p.phone, p.link, naverUrl(p)].map(csvCell).join(','));
+      rows.push([r.name, i + 1, p.category, p.channelType ?? '', p.store, p.status, p.stage, p.stageAge ?? '', p.tablets || 0, p.field, p.visit ?? '', p.daysSinceVisit ?? '', p.daysInStage ?? '', p.created ?? '', p.addr, p.phone, p.link, naverUrl(p)].map(csvCell).join(','));
     }));
     const blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -272,13 +283,23 @@ export default function VisitRoundPage() {
           <Toggle on={catF === '인바운드'} onClick={() => setCatF('인바운드')}>🟢 인바운드</Toggle>
           <Toggle on={catF === '채널'} onClick={() => setCatF('채널')}>🔵 채널</Toggle>
         </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, fontSize: 11.5, color: '#5C7088' }}>
+          <span>생성일</span>
+          <select value={createdFrom} onChange={e => setCreatedFrom(e.target.value)} style={{ border: '1px solid #CBD5E1', borderRadius: 6, padding: '4px 7px', fontSize: 11.5, fontWeight: 700, color: '#1B2A3D' }}>
+            <option value="2026-05-01">2026-05</option>
+            <option value="2026-04-01">2026-04</option>
+            <option value="2026-03-01">2026-03</option>
+            <option value="2026-01-01">2026-01(전체)</option>
+          </select>
+          <span>이후 생성분만</span>
+        </div>
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #E0E6EF' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             <Toggle on={routeMode} onClick={() => { setRouteMode(v => !v); setAreaMode(false); }}>🧭 클릭 할당</Toggle>
             <Toggle on={areaMode} onClick={() => { setAreaMode(v => !v); setRouteMode(false); }}>⬚ 영역 할당</Toggle>
           </div>
           <div style={{ fontSize: 11, color: areaMode ? '#1E40AF' : '#5C7088', marginTop: 5 }}>
-            {areaMode ? (activeRoute ? `지도에 사각형을 드래그 → 영역 내 매장이 ${activeRoute.name}에 배정` : '⚠ 담당자 추가/선택 먼저') : routeMode ? (activeRoute ? `마커 클릭 → ${activeRoute.name}에 배정` : '담당자 추가/선택 먼저') : '마커 클릭 = 상세보기'}
+            {areaMode ? (activeRoute ? `빈 지도 ①②  두 꼭짓점 클릭 → 영역 내 매장이 ${activeRoute.name}에 배정` : '⚠ 담당자 추가/선택 먼저') : routeMode ? (activeRoute ? `마커 클릭 → ${activeRoute.name}에 배정` : '담당자 추가/선택 먼저') : '마커 클릭 = 상세보기'}
           </div>
           <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
             <input value={newName} onChange={e => setNewName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addPerson(newName); }} placeholder="담당자 이름 (예: 김팀장)" style={inp} />
@@ -305,7 +326,7 @@ export default function VisitRoundPage() {
           )}
         </div>
         <div style={{ marginTop: 10, fontSize: 11, color: '#33485F', lineHeight: 1.7 }}>
-          <Dot c="#15803D" />인바 운영중 · <Dot c="#F59E0B" />인바 오픈전 · <Dot c="#2563EB" />채널 파트너사 · <Dot c="#7C3AED" />채널 프랜차이즈<br />⬚ 영역 할당 = 사각형 드래그로 구역 일괄 배정
+          <Dot c="#15803D" />인바 운영중 · <Dot c="#F59E0B" />인바 오픈전 · <Dot c="#2563EB" />채널 파트너사 · <Dot c="#7C3AED" />채널 프랜차이즈<br />⬚ 영역 할당 = 빈 지도 두 꼭짓점 클릭으로 구역 일괄 배정
         </div>
         {err && <div style={{ marginTop: 8, fontSize: 11, color: '#B91C1C' }}>⚠️ {err}</div>}
         {!ready && !err && <div style={{ marginTop: 8, fontSize: 11, color: '#5C7088' }}>지도 로딩 중…</div>}

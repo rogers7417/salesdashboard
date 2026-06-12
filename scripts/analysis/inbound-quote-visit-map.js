@@ -10,6 +10,7 @@ const CHANNEL_SOURCES = ['파트너사 소개', '프랜차이즈소개']; // 채
 const STAGES = ['견적', '재견적'];
 const VISIT_MIN = 3;   // 인바운드: 실제 방문 후 N일+ 경과
 const CH_STAGE_MIN = 3; // 채널: 견적 단계 N일+ 체류
+const CREATED_FROM = '2026-01-01'; // 생성일 하한 (옛 24년 DB 제외) — 페이지에서 더 좁힐 수 있음(기본 2026-05)
 const MAP_KEY = process.env.KAKAO_MAP_KEY;
 const REST_KEY = process.env.KAKAO_REST_KEY || process.env.KAKAO_REST_API_KEY;
 const CACHE = 'data/opp-geocode.json';
@@ -33,11 +34,12 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   const opps = await q(`
     SELECT Id, Name, Account.Name, fm_Address__c, fm_sido__c, fm_Sigugun__c, Account.Phone,
            TotalNumberofEveryTablet__c, StageName, LeadSource, fm_CompanyStatus__c,
-           LastStageChangeInDays, AgeInDays, FieldUser__r.Name
+           LastStageChangeInDays, AgeInDays, CreatedDate, FieldUser__r.Name
     FROM Opportunity
     WHERE IsClosed=false AND CurrencyIsoCode='KRW'
       AND (RecordType.Name='1. 테이블오더 (신규)' OR RecordType.Name='3. 테이블오더 (추가설치)')
-      AND StageName IN (${stgIn}) AND LeadSource IN (${srcIn})`)
+      AND StageName IN (${stgIn}) AND LeadSource IN (${srcIn})
+      AND CreatedDate >= ${CREATED_FROM}T00:00:00Z`)
     .then(rs => rs.filter(o => !/TEST/i.test(o.Account?.Name || o.Name)));
 
   const ids = opps.map(o => o.Id);
@@ -72,6 +74,7 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     lat: g.lat, lng: g.lng, store: o.Account?.Name || o.Name, addr: o.fm_Address__c || '', phone: o.Account?.Phone || '',
     tablets: o.TotalNumberofEveryTablet__c || 0, stage: o.StageName, stageAge: o.LastStageChangeInDays,
     status: storeOf(o.fm_CompanyStatus__c), field: o.FieldUser__r?.Name || '-', daysInStage: o.LastStageChangeInDays,
+    created: (o.CreatedDate || '').slice(0, 10),
     link: `https://torder.lightning.force.com/lightning/r/Opportunity/${o.Id}/view`,
   });
   const pts = [];
@@ -90,12 +93,13 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   const chOpps = (await q(`
     SELECT Id, Name, Account.Name, fm_Address__c, fm_sido__c, fm_Sigugun__c, Account.Phone,
            TotalNumberofEveryTablet__c, StageName, LeadSource, fm_CompanyStatus__c,
-           LastStageChangeInDays, AgeInDays, FieldUser__r.Name
+           LastStageChangeInDays, AgeInDays, CreatedDate, FieldUser__r.Name
     FROM Opportunity
     WHERE IsClosed=false AND CurrencyIsoCode='KRW'
       AND (RecordType.Name='1. 테이블오더 (신규)' OR RecordType.Name='3. 테이블오더 (추가설치)')
       AND StageName IN (${stgIn}) AND fm_CompanyStatus__c='영업중'
-      AND LeadSource IN (${chSrc})`)).filter(o => !/TEST/i.test(o.Account?.Name || o.Name) && (o.LastStageChangeInDays ?? 0) >= CH_STAGE_MIN);
+      AND LeadSource IN (${chSrc})
+      AND CreatedDate >= ${CREATED_FROM}T00:00:00Z`)).filter(o => !/TEST/i.test(o.Account?.Name || o.Name) && (o.LastStageChangeInDays ?? 0) >= CH_STAGE_MIN);
   for (const o of chOpps) {
     const g = await coordOf(o); if (!g) continue;
     pts.push({ category: '채널', channelType: o.LeadSource === '프랜차이즈소개' ? '프랜차이즈' : '파트너사', ...ptBase(o, g), visit: null, visitStatus: '', daysSinceVisit: null });
