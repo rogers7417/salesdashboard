@@ -6,9 +6,10 @@ const axios = require('axios'); axios.defaults.adapter = 'fetch';
 const fs = require('fs');
 
 const INBOUND_SOURCES = ['홈페이지', '전화', '카카오채널', '사장님 앱'];
+const CHANNEL_SOURCES = ['파트너사 소개', '프랜차이즈소개']; // 채널세일즈 — 파트너사 인입·프랜차이즈 제휴
 const STAGES = ['견적', '재견적'];
-const MAX_AGE = 60;
-const STALE_DAYS = 4;
+const VISIT_MIN = 3;   // 인바운드: 실제 방문 후 N일+ 경과
+const CH_STAGE_MIN = 3; // 채널: 견적 단계 N일+ 체류
 const MAP_KEY = process.env.KAKAO_MAP_KEY;
 const REST_KEY = process.env.KAKAO_REST_KEY || process.env.KAKAO_REST_API_KEY;
 const CACHE = 'data/opp-geocode.json';
@@ -37,16 +38,9 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     WHERE IsClosed=false AND CurrencyIsoCode='KRW'
       AND (RecordType.Name='1. 테이블오더 (신규)' OR RecordType.Name='3. 테이블오더 (추가설치)')
       AND StageName IN (${stgIn}) AND LeadSource IN (${srcIn})`)
-    .then(rs => rs.filter(o => !/TEST/i.test(o.Account?.Name || o.Name)).filter(o => (o.AgeInDays ?? 999) <= MAX_AGE));
+    .then(rs => rs.filter(o => !/TEST/i.test(o.Account?.Name || o.Name)));
 
   const ids = opps.map(o => o.Id);
-  // Task: 오픈 과업 + 마지막 활동
-  const lastTask = {}, openCnt = {};
-  for (let i = 0; i < ids.length; i += 200) {
-    const chunk = ids.slice(i, i + 200).map(x => `'${x}'`).join(',');
-    const tasks = await q(`SELECT WhatId, Status, Subject, ActivityDate, CreatedDate FROM Task WHERE WhatId IN (${chunk}) ORDER BY ActivityDate DESC NULLS LAST, CreatedDate DESC`);
-    tasks.forEach(t => { if (!lastTask[t.WhatId]) lastTask[t.WhatId] = { subject: t.Subject, date: t.ActivityDate || (t.CreatedDate || '').slice(0, 10) }; if (t.Status !== 'Completed' && t.Status !== 'Closed') openCnt[t.WhatId] = (openCnt[t.WhatId] || 0) + 1; });
-  }
   // 실제 방문일
   const lastVisit = {};
   for (let i = 0; i < ids.length; i += 200) {
@@ -64,34 +58,57 @@ const sleep = (ms) => new Promise(r => setTimeout(r, ms));
   };
   const today10 = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
   const today = new Date(today10 + 'T00:00:00+09:00');
-  let fromCache = 0, geocoded = 0, failed = 0, newCache = 0;
-  const pts = [];
-  for (const o of opps) {
-    let lat = null, lng = null;
+  const cnt = { fromCache: 0, geocoded: 0, failed: 0, newCache: 0 };
+  const coordOf = async (o) => {
     const c = cache[o.Id];
-    if (c && c.lat && c.lng) { lat = c.lat; lng = c.lng; fromCache++; }
-    else if (o.fm_Address__c?.trim()) {
-      const g = await geocode(o.fm_Address__c.trim());
-      await sleep(60);
-      if (g) { lat = g.lat; lng = g.lng; geocoded++; cache[o.Id] = { ...(cache[o.Id] || {}), lat: g.lat, lng: g.lng, addressName: o.fm_Address__c, account: o.Account?.Name }; newCache++; }
-      else { failed++; continue; }
-    } else { failed++; continue; }
+    if (c && c.lat && c.lng) { cnt.fromCache++; return { lat: c.lat, lng: c.lng }; }
+    if (o.fm_Address__c?.trim()) {
+      const g = await geocode(o.fm_Address__c.trim()); await sleep(60);
+      if (g) { cnt.geocoded++; cache[o.Id] = { ...(cache[o.Id] || {}), lat: g.lat, lng: g.lng, addressName: o.fm_Address__c, account: o.Account?.Name }; cnt.newCache++; return g; }
+    }
+    cnt.failed++; return null;
+  };
+  const ptBase = (o, g) => ({
+    lat: g.lat, lng: g.lng, store: o.Account?.Name || o.Name, addr: o.fm_Address__c || '', phone: o.Account?.Phone || '',
+    tablets: o.TotalNumberofEveryTablet__c || 0, stage: o.StageName, stageAge: o.LastStageChangeInDays,
+    status: storeOf(o.fm_CompanyStatus__c), field: o.FieldUser__r?.Name || '-', daysInStage: o.LastStageChangeInDays,
+    link: `https://torder.lightning.force.com/lightning/r/Opportunity/${o.Id}/view`,
+  });
+  const pts = [];
 
-    const last = lastTask[o.Id] || null;
-    const dsl = last?.date ? Math.round((today - new Date(last.date + 'T00:00:00+09:00')) / 86400000) : null;
-    const noOpen = !openCnt[o.Id]; const stale = dsl != null && dsl >= STALE_DAYS; const absent = /부재|미응답|연락안/.test(last?.subject || '');
+  // ① 인바운드: 실제 방문 후 3일+ 경과
+  for (const o of opps) {
     const v = lastVisit[o.Id] || null;
-    const reasons = [noOpen ? '오픈과업 없음' : null, stale ? `마지막 Task ${dsl}일 경과` : null, absent ? '부재중' : null].filter(Boolean);
-    pts.push({
-      lat, lng, store: o.Account?.Name || o.Name, addr: o.fm_Address__c || '', phone: o.Account?.Phone || '',
-      tablets: o.TotalNumberofEveryTablet__c || 0, stage: o.StageName, stageAge: o.LastStageChangeInDays,
-      status: storeOf(o.fm_CompanyStatus__c), field: o.FieldUser__r?.Name || '-', visit: v ? v.date : null, visitStatus: v ? v.status : '',
-      priority: noOpen || stale || absent, reasons, link: `https://torder.lightning.force.com/lightning/r/Opportunity/${o.Id}/view`,
-    });
+    const dsv = v ? Math.round((today - new Date(v.date + 'T00:00:00+09:00')) / 86400000) : null;
+    if (!v || dsv < VISIT_MIN) continue;
+    const g = await coordOf(o); if (!g) continue;
+    pts.push({ category: '인바운드', channelType: null, ...ptBase(o, g), visit: v.date, visitStatus: v.status, daysSinceVisit: dsv });
   }
+
+  // ② 채널(파트너사/프랜차이즈): 견적 단계 3일+ 체류
+  const chSrc = CHANNEL_SOURCES.map(s => `'${s}'`).join(',');
+  const chOpps = (await q(`
+    SELECT Id, Name, Account.Name, fm_Address__c, fm_sido__c, fm_Sigugun__c, Account.Phone,
+           TotalNumberofEveryTablet__c, StageName, LeadSource, fm_CompanyStatus__c,
+           LastStageChangeInDays, AgeInDays, FieldUser__r.Name
+    FROM Opportunity
+    WHERE IsClosed=false AND CurrencyIsoCode='KRW'
+      AND (RecordType.Name='1. 테이블오더 (신규)' OR RecordType.Name='3. 테이블오더 (추가설치)')
+      AND StageName IN (${stgIn}) AND fm_CompanyStatus__c='영업중'
+      AND LeadSource IN (${chSrc})`)).filter(o => !/TEST/i.test(o.Account?.Name || o.Name) && (o.LastStageChangeInDays ?? 0) >= CH_STAGE_MIN);
+  for (const o of chOpps) {
+    const g = await coordOf(o); if (!g) continue;
+    pts.push({ category: '채널', channelType: o.LeadSource === '프랜차이즈소개' ? '프랜차이즈' : '파트너사', ...ptBase(o, g), visit: null, visitStatus: '', daysSinceVisit: null });
+  }
+
+  const metricOf = (p) => p.category === '채널' ? (p.daysInStage || 0) : (p.daysSinceVisit || 0);
+  pts.sort((a, b) => metricOf(b) - metricOf(a));
+  const fromCache = cnt.fromCache, geocoded = cnt.geocoded, failed = cnt.failed, newCache = cnt.newCache;
   if (newCache) { fs.writeFileSync(CACHE, JSON.stringify(cache, null, 2)); }
 
-  const cOper = pts.filter(p => p.status === '운영중').length, cPre = pts.filter(p => p.status === '오픈전').length, cPri = pts.filter(p => p.priority).length;
+  const inb = pts.filter(p => p.category === '인바운드'), chn = pts.filter(p => p.category === '채널');
+  const cOper = pts.filter(p => p.status === '운영중').length, cPre = pts.filter(p => p.status === '오픈전').length;
+  const avgDsv = inb.length ? Math.round(inb.reduce((s, p) => s + p.daysSinceVisit, 0) / inb.length) : 0;
   const totTab = pts.reduce((s, p) => s + p.tablets, 0);
 
   const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -119,16 +136,16 @@ html,body{height:100%;font-family:'Pretendard',-apple-system,'Apple SD Gothic Ne
 </style></head><body>
 <div id="map"></div>
 <div class="panel">
-  <h1>📍 인바운드 견적 순회 지도</h1>
-  <div class="sub">${today10} · ${INBOUND_SOURCES.join('·')} · 견적/재견적 · 최근 ${MAX_AGE}일 · 운영중+오픈전</div>
+  <h1>📍 견적 순회 지도</h1>
+  <div class="sub">${today10} · <b>인바운드</b>(방문후 ${VISIT_MIN}일+) + <b>채널</b>(견적 ${CH_STAGE_MIN}일+ 체류·파트너사/프랜차이즈)</div>
   <div class="stat">
     <div class="s"><b>${n(pts.length)}</b>순회</div>
-    <div class="s r"><b>${n(cPri)}</b>🔥돌방</div>
-    <div class="s g"><b>${n(cOper)}</b>운영중</div>
-    <div class="s a"><b>${n(cPre)}</b>오픈전</div>
+    <div class="s g"><b>${n(inb.length)}</b>인바운드</div>
+    <div class="s" style="background:#2563EB"><b>${n(chn.length)}</b>채널</div>
+    <div class="s a"><b>${avgDsv}</b>인바 평균방문경과(일)</div>
     <div class="s"><b>${n(totTab)}</b>태블릿</div>
   </div>
-  <div class="leg"><span class="dot" style="background:#15803D"></span>운영중 · <span class="dot" style="background:#F59E0B"></span>오픈전 · <span class="dot" style="background:#B91C1C"></span>🔥돌방우선(외곽 빨강)<br>마커 클릭 = 상세 · 묶음 클릭 = 확대</div>
+  <div class="leg"><span class="dot" style="background:#15803D"></span>인바운드 운영중 · <span class="dot" style="background:#F59E0B"></span>인바운드 오픈전 · <span class="dot" style="background:#2563EB"></span>채널 파트너사 · <span class="dot" style="background:#7C3AED"></span>채널 프랜차이즈<br>마커 클릭 = 상세 · 묶음 클릭 = 확대</div>
 </div>
 <script>const PTS=${JSON.stringify(pts)};</script>
 <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${MAP_KEY}&libraries=clusterer&autoload=false"></script>
@@ -136,10 +153,9 @@ html,body{height:100%;font-family:'Pretendard',-apple-system,'Apple SD Gothic Ne
 kakao.maps.load(function(){
   var map=new kakao.maps.Map(document.getElementById('map'),{center:new kakao.maps.LatLng(36.5,127.8),level:13});
   function pin(p){
-    var fill=p.status==='운영중'?'#15803D':(p.status==='오픈전'?'#F59E0B':'#64748B');
-    var ring=p.priority?'#B91C1C':'#ffffff';
+    var fill=p.category==='채널'?(p.channelType==='프랜차이즈'?'#7C3AED':'#2563EB'):(p.status==='운영중'?'#15803D':(p.status==='오픈전'?'#F59E0B':'#64748B'));
     var svg='<svg xmlns="http://www.w3.org/2000/svg" width="26" height="34" viewBox="0 0 26 34">'
-      +'<path d="M13 0C6 0 .5 5.4 .5 12.2.5 21 13 34 13 34s12.5-13 12.5-21.8C25.5 5.4 20 0 13 0z" fill="'+fill+'" stroke="'+ring+'" stroke-width="'+(p.priority?3:1.5)+'"/>'
+      +'<path d="M13 0C6 0 .5 5.4 .5 12.2.5 21 13 34 13 34s12.5-13 12.5-21.8C25.5 5.4 20 0 13 0z" fill="'+fill+'" stroke="#ffffff" stroke-width="1.5"/>'
       +'<circle cx="13" cy="12" r="4.5" fill="#fff"/></svg>';
     return new kakao.maps.MarkerImage('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg),new kakao.maps.Size(26,34),{offset:new kakao.maps.Point(13,34)});
   }
@@ -149,11 +165,10 @@ kakao.maps.load(function(){
     var mk=new kakao.maps.Marker({position:pos,image:pin(p),title:p.store});
     kakao.maps.event.addListener(mk,'click',function(){
       var sb=p.status==='운영중'?'<span class="badge oper">운영중</span>':(p.status==='오픈전'?'<span class="badge pre">오픈전</span>':'');
-      var html='<div class="iw"><b>'+(p.priority?'🔥 ':'')+p.store+'</b>'+sb
+      var html='<div class="iw"><b>'+p.store+'</b>'+sb
         +'<div class="row">'+p.stage+(p.stageAge!=null?' · 단계 '+p.stageAge+'일':'')+' · '+(p.tablets||0)+'대 · 담당 '+p.field+'</div>'
         +'<div class="row">📍 '+(p.addr||'-')+(p.phone?'<br>☎ '+p.phone:'')+'</div>'
-        +'<div class="row">🚶 실제 방문일: '+(p.visit?p.visit+(p.visitStatus?' ('+p.visitStatus+')':''):'기록 없음')+'</div>'
-        +(p.reasons&&p.reasons.length?'<div class="row fire">▶ '+p.reasons.join(' · ')+'</div>':'')
+        +(p.category==='채널'?'<div class="row fire">📋 견적 '+p.daysInStage+'일 체류 · '+p.channelType+'</div>':'<div class="row fire">🚶 방문 '+p.daysSinceVisit+'일 경과 ('+p.visit+(p.visitStatus?' · '+p.visitStatus:'')+')</div>')
         +'<div class="row"><a href="'+p.link+'" target="_blank">Salesforce 열기 ›</a></div></div>';
       iw.setContent(html); iw.open(map,mk);
     });
@@ -167,7 +182,17 @@ kakao.maps.load(function(){
 
   const out = `reports/inbound-quote-visit-map-${today10}.html`;
   fs.writeFileSync(out, html);
+
+  // 대시보드(Next.js)용 데이터셋 — web/public 에서 정적 서빙
+  const dataset = {
+    generatedAt: new Date().toISOString(), asOf: today10,
+    criteria: { sources: INBOUND_SOURCES, stages: STAGES, visitMinDays: VISIT_MIN },
+    stats: { total: pts.length, inbound: inb.length, channel: chn.length, partner: chn.filter(p => p.channelType === '파트너사').length, franchise: chn.filter(p => p.channelType === '프랜차이즈').length, oper: cOper, pre: cPre, avgDaysSinceVisit: avgDsv, tablets: totTab, failedGeocode: failed },
+    points: pts,
+  };
+  try { fs.mkdirSync('web/public', { recursive: true }); fs.writeFileSync('web/public/inbound-quote-round.json', JSON.stringify(dataset)); console.log('대시보드 데이터: web/public/inbound-quote-round.json'); } catch (e) { console.log('  ⚠️ 대시보드 데이터 쓰기 실패:', e.message); }
+
   console.log(`지도 마커: ${pts.length}곳 (캐시 ${fromCache} · 신규지오코딩 ${geocoded} · 실패 ${failed})`);
-  console.log(`돌방우선 ${cPri} · 운영중 ${cOper} · 오픈전 ${cPre} · 태블릿 ${n(totTab)}`);
+  console.log(`인바운드 ${inb.length}(방문${VISIT_MIN}일+) · 채널 ${chn.length}(견적${CH_STAGE_MIN}일+: 파트너사 ${chn.filter(p => p.channelType === '파트너사').length}·프랜차이즈 ${chn.filter(p => p.channelType === '프랜차이즈').length}) · 태블릿 ${n(totTab)}`);
   console.log(`생성: ${out} (${html.length} bytes)`);
 })().catch(e => { console.error('ERR', e.response?.data || e.message); process.exit(1); });
