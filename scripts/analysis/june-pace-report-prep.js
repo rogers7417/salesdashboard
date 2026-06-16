@@ -94,7 +94,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
     const pct = (a, b) => (b ? Math.round(a / b * 100) : 0);
     const cd = (a) => (D.bizDaysElapsed ? +(a / D.bizDaysElapsed).toFixed(1) : 0); // 현재 일평균 계약대수
     const k = (name, cur, target, ok, unit, affects, action) => ({ name, cur, target, ok, unit: unit || '', affects, action });
-    const chReq = +(D.teams.FR.requiredDaily + D.teams.PT.requiredDaily).toFixed(1);
+    const chReq = seg.FR.requiredDaily + seg.PT.requiredDaily; // 예상실적 기준 (갭/남은영업일)
     // 전환 실패/이탈 raw 사례
     const LEAD = (id) => id ? `https://torder.lightning.force.com/lightning/r/Lead/${id}/view` : null;
     const OPP = (id) => id ? `https://torder.lightning.force.com/lightning/r/Opportunity/${id}/view` : null;
@@ -106,7 +106,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
     const sAmMiss = (am.settlementTimeline || []).filter(s => s.isSettled === false).slice(0, 5).map(s => ({ store: s.partnerName, reason: `MOU ${(s.mouContractDate || '').slice(0, 10)} 후 미안착`, link: null }));
 
     kpiLevers = [
-      { hq: '인바운드세일즈', target: seg.IBS.target, gap: Math.round(seg.IBS.target - seg.IBS.projected), requiredDaily: D.teams.IBS.requiredDaily, currentDaily: cd(seg.IBS.actual),
+      { hq: '인바운드세일즈', target: seg.IBS.target, gap: Math.round(seg.IBS.target - seg.IBS.projected), requiredDaily: seg.IBS.requiredDaily, currentDaily: cd(seg.IBS.actual),
         funnel: `Lead ${is.lead} → MQL ${is.mql}(${pct(is.mql, is.lead)}%) → SQL ${is.sql}(${pct(is.sql, is.mql)}%) → 방문 ${is.visitCount} → 계약`,
         parts: [
           { part: '인사이드세일즈 (IS)',
@@ -119,7 +119,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
             kpis: [k('SQL 7일+ 잔량', boK.sqlBacklog?.totalOver7, 10, (boK.sqlBacklog?.totalOver7 ?? 99) <= 10, '건', 'SQL→계약 처리', '7일+ 적체 우선 소진'), k('일평균 마감 인원', (boK.dailyClose?.byUser || []).length, 3, true, '명', '처리 캐파', '마감 처리량 유지')],
             loss: null },
         ] },
-      { hq: '아웃바운드세일즈', target: seg.OBS.target, gap: Math.round(seg.OBS.target - seg.OBS.projected), requiredDaily: D.teams.OBS.requiredDaily, currentDaily: cd(seg.OBS.actual),
+      { hq: '아웃바운드세일즈', target: seg.OBS.target, gap: Math.round(seg.OBS.target - seg.OBS.projected), requiredDaily: seg.OBS.requiredDaily, currentDaily: cd(seg.OBS.actual),
         funnel: `OBS Lead ${fsK.obsLeadCount?.total} / 목표 200 → 방문 → 계약`,
         parts: [
           { part: '아웃바운드 (OBS)',

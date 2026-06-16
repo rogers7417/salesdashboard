@@ -264,7 +264,7 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
 
 <div class="panel">
   <div class="phead"><span class="pnum">2</span><h2>잘되는 부분 / 안되는 부분</h2></div>
-  <div class="desc">CW 기준 진단.</div>
+  <div class="desc">예상실적 기준 진단 (실적 + 선납금 이후 파이프라인 · 최근 1개월).</div>
   <div class="two">
     <div class="col gd"><h3>🟢 상대적으로 나은 부분</h3><ul>
       <li><b>${best.name} ${best.att}% 예상</b> — 4세그먼트 중 예상실적 가장 앞섬(그래도 목표 미달)</li>
@@ -273,8 +273,8 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
     </ul></div>
     <div class="col bd"><h3>🔴 안되고 있음</h3><ul>
       <li><b>${worst.name} ${worst.att}% 예상</b> — 예상실적 최저, 절대량·전환 모두 부족</li>
-      <li><b>인바운드 ${Math.round(A.segments.IBS.projected / A.segments.IBS.target * 100)}% CW</b> — 최대 목표(2,410)인데 미달, 갭 절대값 최대</li>
-      <li><b>전사 ${overall}% CW 전망</b> — 이대로면 ${n(-t.gap)}대 미달. 잔여 영업일 ${A.bizTotal - A.bizElapsed}일 내 일일 페이스 대폭 상향 필요</li>
+      <li><b>인바운드 ${Math.round(A.segments.IBS.projected / A.segments.IBS.target * 100)}% 예상</b> — 최대 목표(2,410)인데 미달, 갭 절대값 최대</li>
+      <li><b>전사 ${overall}% 예상실적</b> — 이대로면 ${n(-t.gap)}대 미달. 잔여 영업일 ${A.bizTotal - A.bizElapsed}일 내 일일 페이스 대폭 상향 필요</li>
     </ul></div>
   </div>
 </div>
