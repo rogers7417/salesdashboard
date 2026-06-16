@@ -55,6 +55,10 @@ function TeamCard({ t, maxAge }: { t: any; maxAge: number | null }) {
   const postContract = (t.pipeline?.stages || []).filter((s: any) => EXPECTED_STAGES.includes(s.stage))
     .reduce((a: number, s: any) => a + (s.opps || []).filter((o: any) => maxAge == null || (o.age ?? 0) <= maxAge).reduce((b: number, o: any) => b + (o.tablets || 0), 0), 0);
   const expected = t.actualMTD + postContract;
+  // 예상실적 기준 4지표
+  const expAtt = t.target > 0 ? Math.round((expected / t.target) * 100) : 0;
+  const expRemain = Math.max(0, t.target - expected);
+  const expDaily = t.remainingBizDays > 0 ? Math.round(expRemain / t.remainingBizDays) : expRemain;
   const behind = t.gap < 0;
   return (
     <CardWrap>
@@ -76,10 +80,10 @@ function TeamCard({ t, maxAge }: { t: any; maxAge: number | null }) {
         <span style={{ color: C.muted }}>· 선납금 이후 +{fmt(postContract)}대</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginTop: 14 }}>
-        <Mini label="월 달성률" value={`${t.attainment}%`} />
-        <Mini label="예상 마감" value={`${fmt(t.projected)}대`} valueColor={t.projected >= t.target ? C.green : C.red} />
-        <Mini label="잔여" value={`${fmt(t.remaining)}대`} />
-        <Mini label="필요 일일" value={`${fmt(t.requiredDaily)}대/일`} sub={`남은 ${t.remainingBizDays}영업일`} />
+        <Mini label="예상 달성률" value={`${expAtt}%`} valueColor={expAtt >= 100 ? C.green : C.text} sub={`실적 ${t.attainment}%`} />
+        <Mini label="예상 마감" value={`${fmt(expected)}대`} valueColor={expected >= t.target ? C.green : C.red} sub="선납금 이후 포함" />
+        <Mini label="예상 잔여" value={`${fmt(expRemain)}대`} sub="목표 − 예상실적" />
+        <Mini label="필요 일일" value={`${fmt(expDaily)}대/일`} sub={`남은 ${t.remainingBizDays}영업일`} />
       </div>
     </CardWrap>
   );
