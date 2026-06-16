@@ -102,7 +102,9 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
     const fsAvgCW = (() => { const u = fsK.cwConversionRate?.byUser || []; return u.length ? +(u.reduce((s, x) => s + (x.cwRate || 0), 0) / u.length).toFixed(1) : null; })();
     const sMQL = (is.rawData?.unconvertedMQL || []).slice(0, 5).map(r => ({ store: r.company || r.name, reason: (r.lossReasonSub && r.lossReasonSub !== '-') ? r.lossReasonSub : (r.lastTaskSubject || '미입력'), link: LEAD(r.leadId) }));
     const sNoVisit = (is.rawData?.noVisitSQL || []).slice(0, 3).map(r => ({ store: r.company || r.name, reason: (r.lossReasonSub && r.lossReasonSub !== '-') ? r.lossReasonSub : '방문 전 취소', link: LEAD(r.leadId) }));
-    const sStale = (fsK.staleVisit?.opps || []).slice(0, 5).map(o => ({ store: o.name, reason: `${o.ageInDays ?? o.daysSinceVisit ?? ''}일 방치 · 마지막 ${o.lastTaskSubject || '-'}`, link: OPP(o.oppId) }));
+    // 방문후 방치 = 견적 이전~견적 단계만 (계약진행 이후는 진행 중이라 방치 아님 → 제외)
+    const fsStaleOpps = (fsK.staleVisit?.opps || []).filter(o => !['선납금', '계약진행', '출고진행', '설치진행'].includes(o.stageName));
+    const sStale = fsStaleOpps.slice(0, 5).map(o => ({ store: o.name, reason: `${o.ageInDays ?? o.daysSinceVisit ?? ''}일 방치 · ${o.stageName} · 마지막 ${o.lastTaskSubject || '-'}`, link: OPP(o.oppId) }));
     const sAmMiss = (am.settlementTimeline || []).filter(s => s.isSettled === false).slice(0, 5).map(s => ({ store: s.partnerName, reason: `MOU ${(s.mouContractDate || '').slice(0, 10)} 후 미안착`, link: null }));
 
     kpiLevers = [
@@ -114,7 +116,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
             loss: { label: 'MQL 미전환 + 방문 전 취소', count: (is.rawData?.unconvertedMQL?.length || 0) + (is.rawData?.noVisitSQL?.length || 0), dist: '미전환 ' + distOf(is.rawData?.unconvertedMQL, 'lossReasonSub'), samples: [...sMQL, ...sNoVisit] } },
           { part: '인바운드 필드 (FS)',
             kpis: [k('SQL→CW 전환율', fsAvgCW, 60, (fsAvgCW ?? 0) >= 60, '%', '방문→계약', '견적·계약 단계 후속 가속'), k('골든타임 8일+ 정체', fsK.goldenTime?.stale8plus, 0, (fsK.goldenTime?.stale8plus ?? 9) === 0, '건', '견적 정체', '견적 8일+ 즉시 리터치'), k('방문후 14일+ 방치', fsK.staleVisit?.over14, 0, (fsK.staleVisit?.over14 ?? 9) === 0, '건', '방문후 이탈', '후속 과업 없는 방치건 일괄 재컨택')],
-            loss: { label: '방문후 방치(후속 과업 없음)', count: fsK.staleVisit?.opps?.length || 0, dist: null, samples: sStale } },
+            loss: { label: '방문후 방치(후속 과업 없음)', count: fsStaleOpps.length, dist: null, samples: sStale } },
           { part: '인바운드 BO (IB BO)',
             kpis: [k('SQL 7일+ 잔량', boK.sqlBacklog?.totalOver7, 10, (boK.sqlBacklog?.totalOver7 ?? 99) <= 10, '건', 'SQL→계약 처리', '7일+ 적체 우선 소진'), k('일평균 마감 인원', (boK.dailyClose?.byUser || []).length, 3, true, '명', '처리 캐파', '마감 처리량 유지')],
             loss: null },
