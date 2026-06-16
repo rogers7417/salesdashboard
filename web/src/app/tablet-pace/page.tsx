@@ -267,7 +267,7 @@ export default function TabletPacePage() {
   const [error, setError] = useState<string | null>(null);
   const [team, setTeam] = useState<string>('IBS');
   const [onlyTablet, setOnlyTablet] = useState(false);
-  const [maxAge, setMaxAge] = useState<number | null>(90); // 생성 경과일 컷오프 (기본: 최근 3개월)
+  const [maxAge, setMaxAge] = useState<number | null>(30); // 생성 경과일 컷오프 (기본: 최근 1개월)
 
   useEffect(() => {
     setLoading(true);
