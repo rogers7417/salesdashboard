@@ -22,7 +22,7 @@ const teamOf = (dept) => INB.includes(dept) ? '인바운드' : (OBS.includes(dep
     WHERE IsClosed=false AND CurrencyIsoCode='KRW'
       AND (RecordType.Name='1. 테이블오더 (신규)' OR RecordType.Name='3. 테이블오더 (추가설치)')
       AND FieldUser__r.Department IN (${deptList})
-      AND StageName IN ('견적','재견적') AND fm_CompanyStatus__c='영업중'`);
+      AND StageName IN ('견적','재견적','방문배정','방문상담') AND fm_CompanyStatus__c='영업중'`);
 
   const ids = opps.map(o => o.Id);
   const tasksByOpp = {}, openByOpp = {};
@@ -37,6 +37,7 @@ const teamOf = (dept) => INB.includes(dept) ? '인바운드' : (OBS.includes(dep
   const today = new Date(new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10) + 'T00:00:00+09:00');
   const out = [];
   for (const o of opps) {
+    if (!['견적', '재견적'].includes(o.StageName)) continue; // 방치(out)는 견적 단계만
     if (/TEST/i.test(o.Account?.Name || o.Name)) continue;
     if ((o.AgeInDays ?? 999) > 90) continue;
     if (openByOpp[o.Id]) continue; // 후속 과업 있음 → 제외
@@ -56,7 +57,7 @@ const teamOf = (dept) => INB.includes(dept) ? '인바운드' : (OBS.includes(dep
   out.sort((a, b) => (b.daysSinceTask - a.daysSinceTask) || (b.tablets - a.tablets));
   const byTeam = (tm) => out.filter(o => o.team === tm);
 
-  // 인바운드 필드(FS) — 견적 단계 raw, 마지막 Task '생성일' 오래된 순 (후속 필터 없음, age<=90·TEST제외)
+  // 인바운드 필드(FS) — 견적 + 견적 이전 단계(방문배정·방문상담) raw, 마지막 Task '생성일' 오래된 순 (age<=90·TEST제외)
   const fsQuote = [];
   for (const o of opps) {
     if (o.FieldUser__r?.Department !== '인바운드세일즈') continue; // 인바운드 한정

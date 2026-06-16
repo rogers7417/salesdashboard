@@ -18,7 +18,7 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
   for (const t of TEAMS) {
     const x = D.teams[t];
     const expected = expectedOf(x);
-    seg[t] = { name: SEG[t], target: x.target, actual: x.actualMTD, count: x.actualCount, cumTarget: x.cumTargetToday, paceAtt: x.paceAttainment, projected: expected, pacePrjct: x.projected, remaining: Math.max(0, x.target - expected), requiredDaily: x.remainingBizDays > 0 ? Math.round(Math.max(0, x.target - expected) / x.remainingBizDays) : 0, pipelineTab: x.pipeline.tablets, coverage: x.pipeline.coverage, leadTimeMedian: median((x.cwDwellOpps || []).map(o => Object.values(o.dwell || {}).reduce((s, v) => s + v, 0)).filter(v => v > 0)) };
+    seg[t] = { name: SEG[t], target: x.target, actual: x.actualMTD, count: x.actualCount, cumTarget: x.cumTargetToday, paceAtt: x.paceAttainment, projected: expected, pacePrjct: x.projected, remaining: Math.max(0, x.target - expected), requiredDaily: x.remainingBizDays > 0 ? Math.round(Math.max(0, x.target - expected) / x.remainingBizDays) : 0, pipelineTab: x.pipeline.tablets, coverage: x.pipeline.coverage, leadTimeMedian: +median((x.cwDwellOpps || []).map(o => Object.values(o.dwell || {}).reduce((s, v) => s + v, 0)).filter(v => v > 0)).toFixed(1) };
     totTarget += x.target; totActual += x.actualMTD; totProj += expected;
   }
 

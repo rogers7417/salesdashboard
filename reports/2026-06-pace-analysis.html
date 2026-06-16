@@ -32,12 +32,13 @@ a{color:#5FB0FF;text-decoration:none}a:hover{text-decoration:underline}
 .mtile{border-radius:4px;padding:17px 19px;color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.07) inset}
 .mt-lbl{font-size:14.5px;font-weight:700;opacity:.95;margin-bottom:11px;display:flex;align-items:center;gap:7px}
 .mt-key{font-size:10px;font-weight:700;background:rgba(255,255,255,.22);padding:1px 7px;border-radius:4px;letter-spacing:.5px}
+.mt-tag{font-size:10px;font-weight:800;background:rgba(255,255,255,.92);color:#1B2A3D;padding:1px 7px;border-radius:4px;margin-left:auto}
 .mt-big{font-size:36px;font-weight:800;line-height:1;letter-spacing:-1px}
 .mt-slash{font-size:14px;font-weight:600;opacity:.8;margin-left:7px}
 .mt-cw{font-size:13px;opacity:.95;margin-top:9px}
-.mt-bar{position:relative;height:8px;background:rgba(255,255,255,.25);border-radius:4px;margin:11px 0 9px}
-.mt-fill{height:100%;background:#fff;border-radius:4px}
-.mt-proj{position:absolute;top:-3px;bottom:-3px;width:3px;background:#070F1C;border-radius:2px}
+.mt-bar{position:relative;height:10px;background:rgba(255,255,255,.22);border-radius:5px;margin:11px 0 9px;overflow:hidden}
+.mt-exp{position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.5);border-radius:5px}
+.mt-fill{position:absolute;left:0;top:0;bottom:0;background:#fff;border-radius:5px}
 .mt-status{font-size:12.5px;font-weight:700}
 .mt-foot{font-size:11px;opacity:.82;margin-top:5px}
 
@@ -127,33 +128,33 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
   <div class="phead"><span class="pnum">1</span><h2>예상실적 — 세그먼트별 (계약 진행분 포함)</h2></div>
   <div class="desc">예상실적 = 실적(CW) + 선납금 이후 단계(선납금·계약진행·출고진행·설치진행) 파이프라인 · 최근 1개월(좀비 제외). 흰 막대 = 현재 실적 / 검은 선 = 예상실적 위치(목표 대비).</div>
   <div class="mtiles"><div class="mtile" style="background:#2563EB">
-    <div class="mt-lbl">인바운드 <span class="mt-key">IBS</span></div>
-    <div class="mt-big">635<span class="mt-slash">/ 2,410대</span></div>
-    <div class="mt-cw">예상실적 <b>1,329</b> · <b>55%</b></div>
-    <div class="mt-bar"><div class="mt-fill" style="width:26.348547717842326%"></div><div class="mt-proj" style="left:55%"></div></div>
-    <div class="mt-status">▼ 미달 · 필요 일 108대</div>
-    <div class="mt-foot">파이프라인 1,590대(커버 89.6%) · 리드타임 12.321331018518517일</div>
+    <div class="mt-lbl">인바운드 <span class="mt-key">IBS</span> <span class="mt-tag">예상실적</span></div>
+    <div class="mt-big">1,329<span class="mt-slash">/ 2,410대 · 55%</span></div>
+    <div class="mt-cw">현재 CW <b>635</b> + 예상 추가 <b>694</b></div>
+    <div class="mt-bar"><div class="mt-exp" style="width:55.14522821576764%"></div><div class="mt-fill" style="width:26.348547717842326%"></div></div>
+    <div class="mt-status">▼ 미달 · 예상 잔여 1,081대 · 필요 일 108대</div>
+    <div class="mt-foot">현재 CW 635 · 선납금 이후 +694 · 리드타임 12.3일</div>
   </div><div class="mtile" style="background:#7C5CE0">
-    <div class="mt-lbl">아웃바운드 <span class="mt-key">OBS</span></div>
-    <div class="mt-big">140<span class="mt-slash">/ 480대</span></div>
-    <div class="mt-cw">예상실적 <b>306</b> · <b>64%</b></div>
-    <div class="mt-bar"><div class="mt-fill" style="width:29.166666666666668%"></div><div class="mt-proj" style="left:64%"></div></div>
-    <div class="mt-status">▼ 미달 · 필요 일 17대</div>
-    <div class="mt-foot">파이프라인 311대(커버 91.5%) · 리드타임 7.164282407407407일</div>
+    <div class="mt-lbl">아웃바운드 <span class="mt-key">OBS</span> <span class="mt-tag">예상실적</span></div>
+    <div class="mt-big">306<span class="mt-slash">/ 480대 · 64%</span></div>
+    <div class="mt-cw">현재 CW <b>140</b> + 예상 추가 <b>166</b></div>
+    <div class="mt-bar"><div class="mt-exp" style="width:63.74999999999999%"></div><div class="mt-fill" style="width:29.166666666666668%"></div></div>
+    <div class="mt-status">▼ 미달 · 예상 잔여 174대 · 필요 일 17대</div>
+    <div class="mt-foot">현재 CW 140 · 선납금 이후 +166 · 리드타임 7.2일</div>
   </div><div class="mtile" style="background:#0E8FA3">
-    <div class="mt-lbl">프랜차이즈 <span class="mt-key">FR</span></div>
-    <div class="mt-big">279<span class="mt-slash">/ 1,305대</span></div>
-    <div class="mt-cw">예상실적 <b>575</b> · <b>44%</b></div>
-    <div class="mt-bar"><div class="mt-fill" style="width:21.379310344827587%"></div><div class="mt-proj" style="left:44%"></div></div>
-    <div class="mt-status">▼ 미달 · 필요 일 73대</div>
-    <div class="mt-foot">파이프라인 431대(커버 42%) · 리드타임 14.407997685185183일</div>
+    <div class="mt-lbl">프랜차이즈 <span class="mt-key">FR</span> <span class="mt-tag">예상실적</span></div>
+    <div class="mt-big">575<span class="mt-slash">/ 1,305대 · 44%</span></div>
+    <div class="mt-cw">현재 CW <b>279</b> + 예상 추가 <b>296</b></div>
+    <div class="mt-bar"><div class="mt-exp" style="width:44.06130268199234%"></div><div class="mt-fill" style="width:21.379310344827587%"></div></div>
+    <div class="mt-status">▼ 미달 · 예상 잔여 730대 · 필요 일 73대</div>
+    <div class="mt-foot">현재 CW 279 · 선납금 이후 +296 · 리드타임 14.4일</div>
   </div><div class="mtile" style="background:#15976F">
-    <div class="mt-lbl">파트너스 <span class="mt-key">PT</span></div>
-    <div class="mt-big">508<span class="mt-slash">/ 1,305대</span></div>
-    <div class="mt-cw">예상실적 <b>992</b> · <b>76%</b></div>
-    <div class="mt-bar"><div class="mt-fill" style="width:38.927203065134094%"></div><div class="mt-proj" style="left:76%"></div></div>
-    <div class="mt-status">▼ 미달 · 필요 일 31대</div>
-    <div class="mt-foot">파이프라인 1,853대(커버 232.5%) · 리드타임 12.057210648148148일</div>
+    <div class="mt-lbl">파트너스 <span class="mt-key">PT</span> <span class="mt-tag">예상실적</span></div>
+    <div class="mt-big">992<span class="mt-slash">/ 1,305대 · 76%</span></div>
+    <div class="mt-cw">현재 CW <b>508</b> + 예상 추가 <b>484</b></div>
+    <div class="mt-bar"><div class="mt-exp" style="width:76.01532567049809%"></div><div class="mt-fill" style="width:38.927203065134094%"></div></div>
+    <div class="mt-status">▼ 미달 · 예상 잔여 313대 · 필요 일 31대</div>
+    <div class="mt-foot">현재 CW 508 · 선납금 이후 +484 · 리드타임 12.1일</div>
   </div></div>
   <div class="legend">예상실적 기준 <b>전 세그먼트 목표 미달</b> — 파트너스 76%가 상대 최선, 프랜차이즈 44% 최저.</div>
 </div>
@@ -165,7 +166,7 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
     <div class="col gd"><h3>🟢 상대적으로 나은 부분</h3><ul>
       <li><b>파트너스 76% 예상</b> — 4세그먼트 중 예상실적 가장 앞섬(그래도 목표 미달)</li>
       <li><b>파트너스 파이프라인 1,853대(커버 232.5%)</b> — 잔여목표 대비 후보 충분, 전환만 되면 회복 여지</li>
-      <li>마감(CW)건 리드타임 중앙값 7.164282407407407~14.407997685185183일 — 닫히는 건은 빠르게 통과(생성→CW)</li>
+      <li>마감(CW)건 리드타임 중앙값 7.2~14.4일 — 닫히는 건은 빠르게 통과(생성→CW)</li>
     </ul></div>
     <div class="col bd"><h3>🔴 안되고 있음</h3><ul>
       <li><b>프랜차이즈 44% 예상</b> — 예상실적 최저, 절대량·전환 모두 부족</li>
@@ -205,7 +206,7 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
     </div><div class="loss">
       <div class="loss-h">⚠️ 전환 실패/이탈 35건</div>
       <div class="loss-item"><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000rrk7pYAA/view" target="_blank">김부장양꼬치(반달섬점)_테이블오더 (신규)</a> <span class="muted">— 15일 방치 · 마지막 0612</span></div><div class="loss-item"><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000rquQzYAI/view" target="_blank">노맥(김해장유점)_테이블오더 (신규)</a> <span class="muted">— 15일 방치 · 마지막 260616</span></div><div class="loss-item"><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000rvy2XYAQ/view" target="_blank">초가집(경남창원점)_테이블오더 (신규)</a> <span class="muted">— 14일 방치 · 마지막 방문상담 만족도 조사 알림톡 발송</span></div><div class="loss-item"><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000rw3WrYAI/view" target="_blank">대패집(부산거제점)_테이블오더 (신규)</a> <span class="muted">— 14일 방치 · 마지막 부재중</span></div><div class="loss-item"><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000ryITNYA2/view" target="_blank">차오면관(수원고색점)_테이블오더 (신규)</a> <span class="muted">— 14일 방치 · 마지막 통화</span></div>
-    </div><div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📋 견적 단계 raw — 마지막 Task 생성일 오래된 순 <span class="muted">(상위 15 / 총 88건)</span></div><table><thead><tr><th>매장</th><th>단계</th><th class="num">태블릿</th><th>마지막 Task 생성일</th><th class="num">단계경과</th><th>담당</th></tr></thead><tbody><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nJ0heYAC/view" target="_blank">대상해 공덕점</a></td><td>견적</td><td class="num">19</td><td class="task"><span class="num r">2026-03-25</span> <span class="muted">(83일전)</span></td><td class="num">83일</td><td>이경호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000o6ZXlYAM/view" target="_blank">공주칼국수 김포점</a></td><td>견적</td><td class="num">11</td><td class="task"><span class="num r">2026-04-17</span> <span class="muted">(60일전)</span></td><td class="num">60일</td><td>이경호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000ooWEPYA2/view" target="_blank">포옹남 목동본점</a></td><td>견적</td><td class="num">11</td><td class="task"><span class="num r">2026-04-23</span> <span class="muted">(54일전)</span></td><td class="num">60일</td><td>한용우</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pb76rYAA/view" target="_blank">청천국수 검암점</a></td><td>견적</td><td class="num">9</td><td class="task"><span class="num r">2026-05-04</span> <span class="muted">(43일전)</span></td><td class="num">43일</td><td>최준일</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pkh9RYAQ/view" target="_blank">79대포 서산대산점</a></td><td>재견적</td><td class="num">11</td><td class="task"><span class="num r">2026-05-14</span> <span class="muted">(33일전)</span></td><td class="num">33일</td><td>김영호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nS9QjYAK/view" target="_blank">타카이 진주혁신도시점</a></td><td>견적</td><td class="num">11</td><td class="task"><span class="num o">2026-05-19</span> <span class="muted">(28일전)</span></td><td class="num">81일</td><td>변상훈</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000qlFs6YAE/view" target="_blank">대부도맛집풍경 본점</a></td><td>견적</td><td class="num">35</td><td class="task"><span class="num o">2026-05-20</span> <span class="muted">(27일전)</span></td><td class="num">27일</td><td>최옥환</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000q0xi5YAA/view" target="_blank">우화정 경산하양점</a></td><td>견적</td><td class="num">14</td><td class="task"><span class="num o">2026-05-22</span> <span class="muted">(25일전)</span></td><td class="num">40일</td><td>최옥환</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oeGCXYA2/view" target="_blank">더맛있는족발보쌈 분당점</a></td><td>견적</td><td class="num">-</td><td class="task"><span class="num o">2026-05-27</span> <span class="muted">(20일전)</span></td><td class="num">62일</td><td>이경호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000rFQ8YYAW/view" target="_blank">솥고집 광교점</a></td><td>견적</td><td class="num">-</td><td class="task"><span class="num o">2026-05-29</span> <span class="muted">(18일전)</span></td><td class="num">18일</td><td>최준일</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000niRjUYAU/view" target="_blank">조가네갑오징어 중대물빛공원점</a></td><td>견적</td><td class="num">-</td><td class="task"><span class="num o">2026-06-01</span> <span class="muted">(15일전)</span></td><td class="num">76일</td><td>최옥환</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000rSes1YAC/view" target="_blank">커피프렌즈 창원점</a></td><td>견적</td><td class="num">-</td><td class="task"><span class="num o">2026-06-01</span> <span class="muted">(15일전)</span></td><td class="num">20일</td><td>변상훈</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000po4azYAA/view" target="_blank">수저가짬뽕 팽성점</a></td><td>견적</td><td class="num">14</td><td class="task"><span class="num o">2026-06-04</span> <span class="muted">(12일전)</span></td><td class="num">41일</td><td>김영호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000r6uVdYAI/view" target="_blank">계양깐 남천점</a></td><td>견적</td><td class="num">7</td><td class="task"><span class="num o">2026-06-04</span> <span class="muted">(12일전)</span></td><td class="num">20일</td><td>변상훈</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000rSXddYAG/view" target="_blank">영덕오션뷰식육식당 영덕점</a></td><td>견적</td><td class="num">-</td><td class="task"><span class="num o">2026-06-08</span> <span class="muted">(8일전)</span></td><td class="num">11일</td><td>최준일</td></tr></tbody></table><div class="legend">기준: FieldUser=인바운드·필드(Team) · 견적/재견적 · 영업중 · 최근90일 · TEST제외. 오래 방치될수록 상단 — 우선 재컨택 대상.</div></div></div><div class="part"><div class="part-h">인바운드 BO (IB BO)</div><div class="kpirow2">
+    </div><div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📋 견적·견적 이전 단계 raw — 마지막 Task 생성일 오래된 순 <span class="muted">(상위 15 / 총 126건)</span></div><table><thead><tr><th>매장</th><th>단계</th><th class="num">태블릿</th><th>마지막 Task 생성일</th><th class="num">단계경과</th><th>담당</th></tr></thead><tbody><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nJ0heYAC/view" target="_blank">대상해 공덕점</a></td><td>견적</td><td class="num">19</td><td class="task"><span class="num r">2026-03-25</span> <span class="muted">(83일전)</span></td><td class="num">83일</td><td>이경호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nSsu7YAC/view" target="_blank">니네집 강서본점</a></td><td>방문배정</td><td class="num">-</td><td class="task"><span class="num r">2026-04-09</span> <span class="muted">(68일전)</span></td><td class="num">83일</td><td>김영호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oEYbJYAW/view" target="_blank">서민막국수 춘천점</a></td><td>방문배정</td><td class="num">-</td><td class="task"><span class="num r">2026-04-13</span> <span class="muted">(64일전)</span></td><td class="num">71일</td><td>한용우</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000odyabYAA/view" target="_blank">우군닭발 감삼점</a></td><td>방문배정</td><td class="num">-</td><td class="task"><span class="num r">2026-04-14</span> <span class="muted">(63일전)</span></td><td class="num">64일</td><td>김영호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oWlF7YAK/view" target="_blank">한판쭈꾸미 경북포항점</a></td><td>방문배정</td><td class="num">-</td><td class="task"><span class="num r">2026-04-15</span> <span class="muted">(62일전)</span></td><td class="num">67일</td><td>김영호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000ohsGTYAY/view" target="_blank">손가네아구찜 부산진구점</a></td><td>방문배정</td><td class="num">-</td><td class="task"><span class="num r">2026-04-16</span> <span class="muted">(61일전)</span></td><td class="num">63일</td><td>변상훈</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000o6ZXlYAM/view" target="_blank">공주칼국수 김포점</a></td><td>견적</td><td class="num">11</td><td class="task"><span class="num r">2026-04-17</span> <span class="muted">(60일전)</span></td><td class="num">60일</td><td>이경호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000oqJHuYAM/view" target="_blank">동네막국수 경기여주점</a></td><td>방문배정</td><td class="num">-</td><td class="task"><span class="num r">2026-04-22</span> <span class="muted">(55일전)</span></td><td class="num">62일</td><td>한용우</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000ooWEPYA2/view" target="_blank">포옹남 목동본점</a></td><td>견적</td><td class="num">11</td><td class="task"><span class="num r">2026-04-23</span> <span class="muted">(54일전)</span></td><td class="num">60일</td><td>한용우</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pKuIQYA0/view" target="_blank">홍익주점 상왕십리역점</a></td><td>방문배정</td><td class="num">-</td><td class="task"><span class="num r">2026-04-27</span> <span class="muted">(50일전)</span></td><td class="num">54일</td><td>최옥환</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000p4mqJYAQ/view" target="_blank">송담우동 경기평택점</a></td><td>방문배정</td><td class="num">-</td><td class="task"><span class="num r">2026-04-29</span> <span class="muted">(48일전)</span></td><td class="num">57일</td><td>김영호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pb76rYAA/view" target="_blank">청천국수 검암점</a></td><td>견적</td><td class="num">9</td><td class="task"><span class="num r">2026-05-04</span> <span class="muted">(43일전)</span></td><td class="num">43일</td><td>최준일</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pK1SRYA0/view" target="_blank">와쿠와쿠 하남미사점</a></td><td>방문배정</td><td class="num">-</td><td class="task"><span class="num r">2026-05-07</span> <span class="muted">(40일전)</span></td><td class="num">54일</td><td>한용우</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000pkh9RYAQ/view" target="_blank">79대포 서산대산점</a></td><td>재견적</td><td class="num">11</td><td class="task"><span class="num r">2026-05-14</span> <span class="muted">(33일전)</span></td><td class="num">33일</td><td>김영호</td></tr><tr><td><a href="https://torder.lightning.force.com/lightning/r/Opportunity/006TJ00000nS9QjYAK/view" target="_blank">타카이 진주혁신도시점</a></td><td>견적</td><td class="num">11</td><td class="task"><span class="num o">2026-05-19</span> <span class="muted">(28일전)</span></td><td class="num">81일</td><td>변상훈</td></tr></tbody></table><div class="legend">기준: FieldUser=인바운드·필드(Team) · 견적/재견적 + 방문배정/방문상담 · 영업중 · 최근90일 · TEST제외. 오래 방치될수록 상단 — 우선 재컨택 대상.</div></div></div><div class="part"><div class="part-h">인바운드 BO (IB BO)</div><div class="kpirow2">
       <div class="kpi-top"><span class="kpi-sig b"></span><span class="kpi-name">SQL 7일+ 잔량</span><span class="kpi-val bad">75건</span><span class="kpi-tgt">/ 목표 10건</span><span class="kpi-aff">SQL→계약 처리</span></div>
       <div class="kpi-act">↳ 7일+ 적체 우선 소진</div>
     </div><div class="kpirow2">

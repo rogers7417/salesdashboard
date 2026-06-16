@@ -18,16 +18,18 @@ const bestCov = [...segArr].sort((a, b) => b.cov - a.cov)[0];
 // 세그먼트 메트로 타일
 const segTiles = SEGS.map(k => {
   const s = A.segments[k];
-  const pct = Math.min(100, s.actual / s.target * 100);
+  const aPctT = Math.min(100, s.actual / s.target * 100);   // 현재 CW 위치
+  const ePctT = Math.min(100, s.projected / s.target * 100); // 예상실적 위치
   const projAtt = Math.round(s.projected / s.target * 100);
   const ok = projAtt >= 100;
+  const addOn = Math.max(0, s.projected - s.actual);
   return `<div class="mtile" style="background:${TILEC[k]}">
-    <div class="mt-lbl">${esc(s.name)} <span class="mt-key">${k}</span></div>
-    <div class="mt-big">${n(s.actual)}<span class="mt-slash">/ ${n(s.target)}대</span></div>
-    <div class="mt-cw">예상실적 <b>${n(s.projected)}</b> · <b>${projAtt}%</b></div>
-    <div class="mt-bar"><div class="mt-fill" style="width:${pct}%"></div><div class="mt-proj" style="left:${Math.min(100, projAtt)}%"></div></div>
-    <div class="mt-status">${ok ? '▲ 페이스 충족' : '▼ 미달'} · 필요 일 ${s.requiredDaily}대</div>
-    <div class="mt-foot">파이프라인 ${n(s.pipelineTab)}대(커버 ${s.coverage ?? '-'}%) · 리드타임 ${s.leadTimeMedian}일</div>
+    <div class="mt-lbl">${esc(s.name)} <span class="mt-key">${k}</span> <span class="mt-tag">예상실적</span></div>
+    <div class="mt-big">${n(s.projected)}<span class="mt-slash">/ ${n(s.target)}대 · ${projAtt}%</span></div>
+    <div class="mt-cw">현재 CW <b>${n(s.actual)}</b> + 예상 추가 <b>${n(addOn)}</b></div>
+    <div class="mt-bar"><div class="mt-exp" style="width:${ePctT}%"></div><div class="mt-fill" style="width:${aPctT}%"></div></div>
+    <div class="mt-status">${ok ? '▲ 목표 달성 예상' : '▼ 미달'} · 예상 잔여 ${n(Math.max(0, s.target - s.projected))}대 · 필요 일 ${s.requiredDaily}대</div>
+    <div class="mt-foot">현재 CW ${n(s.actual)} · 선납금 이후 +${n(addOn)} · 리드타임 ${s.leadTimeMedian}일</div>
   </div>`;
 }).join('');
 
@@ -90,7 +92,7 @@ const kpiSec = (A.kpiLevers || []).map(hq => {
     // 파트별 raw 데이터 삽입: FS=견적 raw / IB BO=방치 계류건 + 후속조치
     let extra = '';
     if ((p.part || '').includes('FS') && (A.stalled?.fsQuote || []).length) {
-      extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📋 견적 단계 raw — 마지막 Task 생성일 오래된 순 <span class="muted">(상위 15 / 총 ${n(A.stalled.fsQuote.length)}건)</span></div>${fsQuoteTbl(A.stalled.fsQuote, 15)}<div class="legend">기준: FieldUser=인바운드·필드(Team) · 견적/재견적 · 영업중 · 최근90일 · TEST제외. 오래 방치될수록 상단 — 우선 재컨택 대상.</div></div>`;
+      extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📋 견적·견적 이전 단계 raw — 마지막 Task 생성일 오래된 순 <span class="muted">(상위 15 / 총 ${n(A.stalled.fsQuote.length)}건)</span></div>${fsQuoteTbl(A.stalled.fsQuote, 15)}<div class="legend">기준: FieldUser=인바운드·필드(Team) · 견적/재견적 + 방문배정/방문상담 · 영업중 · 최근90일 · TEST제외. 오래 방치될수록 상단 — 우선 재컨택 대상.</div></div>`;
     } else if ((p.part || '').includes('IB BO') && stalledRich) {
       extra = `<div style="margin-top:10px"><div class="loss-h" style="color:#9FC4E8;font-size:12px;margin-bottom:5px">📌 견적 방치 계류건 (후속 끊김 · Task 요약·후속조치)</div>${stalledRich}<div class="legend">기준: FieldUser=인바운드 · 견적/재견적 · 영업중 · 후속과업 없음 · 7일+ 방치. 후속조치는 Task 이력 분석 스냅샷.</div></div>`;
     } else if ((p.part || '').includes('AE') && A.channelRaw?.ae?.total) {
@@ -161,12 +163,13 @@ a{color:#5FB0FF;text-decoration:none}a:hover{text-decoration:underline}
 .mtile{border-radius:4px;padding:17px 19px;color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.07) inset}
 .mt-lbl{font-size:14.5px;font-weight:700;opacity:.95;margin-bottom:11px;display:flex;align-items:center;gap:7px}
 .mt-key{font-size:10px;font-weight:700;background:rgba(255,255,255,.22);padding:1px 7px;border-radius:4px;letter-spacing:.5px}
+.mt-tag{font-size:10px;font-weight:800;background:rgba(255,255,255,.92);color:#1B2A3D;padding:1px 7px;border-radius:4px;margin-left:auto}
 .mt-big{font-size:36px;font-weight:800;line-height:1;letter-spacing:-1px}
 .mt-slash{font-size:14px;font-weight:600;opacity:.8;margin-left:7px}
 .mt-cw{font-size:13px;opacity:.95;margin-top:9px}
-.mt-bar{position:relative;height:8px;background:rgba(255,255,255,.25);border-radius:4px;margin:11px 0 9px}
-.mt-fill{height:100%;background:#fff;border-radius:4px}
-.mt-proj{position:absolute;top:-3px;bottom:-3px;width:3px;background:#070F1C;border-radius:2px}
+.mt-bar{position:relative;height:10px;background:rgba(255,255,255,.22);border-radius:5px;margin:11px 0 9px;overflow:hidden}
+.mt-exp{position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.5);border-radius:5px}
+.mt-fill{position:absolute;left:0;top:0;bottom:0;background:#fff;border-radius:5px}
 .mt-status{font-size:12.5px;font-weight:700}
 .mt-foot{font-size:11px;opacity:.82;margin-top:5px}
 
