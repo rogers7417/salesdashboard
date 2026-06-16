@@ -401,7 +401,9 @@ async function main() {
     })();
 
     // 예상실적 = 실적(CW) + 선납금 이후 단계(선납금·계약진행·출고진행·설치진행) 파이프라인 태블릿
-    const expectedPipelineTablets = stages.filter(s => ['선납금', '계약진행', '출고진행', '설치진행'].includes(s.stage)).reduce((a, s) => a + (s.tablets || 0), 0);
+    // 좀비 레거시(365일+ 미정리) 제외: 최근 90일 생성건만 (페이지는 기간필터로 동적 재계산)
+    const expectedPipelineTablets = stages.filter(s => ['선납금', '계약진행', '출고진행', '설치진행'].includes(s.stage))
+      .reduce((a, s) => a + (s.opps || []).filter(o => (o.age ?? 999) <= 90).reduce((b, o) => b + (o.tablets || 0), 0), 0);
     const expectedActual = actualMTD + expectedPipelineTablets;
     result.teams[team] = {
       team, label: TEAM_LABEL[team], target, dailyQuota,

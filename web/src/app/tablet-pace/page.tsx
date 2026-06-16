@@ -48,11 +48,13 @@ function PaceBar({ actual, expected, paceTarget, monthTarget, color, expectedCol
   );
 }
 
-function TeamCard({ t }: { t: any }) {
+function TeamCard({ t, maxAge }: { t: any; maxAge: number | null }) {
   const color = TEAM_COLOR[t.team] || C.blue;
   const expectedColor = EXPECTED_COLOR[t.team] || C.orange;
-  const postContract = (t.pipeline?.stages || []).filter((s: any) => EXPECTED_STAGES.includes(s.stage)).reduce((a: number, s: any) => a + (s.tablets || 0), 0);
-  const expected = t.expectedActual ?? (t.actualMTD + postContract);
+  // 예상실적 파이프라인 = 선납금 이후 단계, 기간 필터(age<=maxAge) 적용 → 좀비 레거시 제외
+  const postContract = (t.pipeline?.stages || []).filter((s: any) => EXPECTED_STAGES.includes(s.stage))
+    .reduce((a: number, s: any) => a + (s.opps || []).filter((o: any) => maxAge == null || (o.age ?? 0) <= maxAge).reduce((b: number, o: any) => b + (o.tablets || 0), 0), 0);
+  const expected = t.actualMTD + postContract;
   const behind = t.gap < 0;
   return (
     <CardWrap>
@@ -304,7 +306,7 @@ export default function TabletPacePage() {
       {board && (
         <div style={{ display: 'flex', gap: 14, alignItems: 'stretch', flexWrap: 'wrap' }}>
           <div style={{ width: 440, maxWidth: '100%' }}>
-            <TeamCard t={board} />
+            <TeamCard t={board} maxAge={maxAge} />
           </div>
           <CwDwellPanel team={board} maxAge={maxAge} asOf={data.asOf} />
           <OpenDwellPanel team={board} maxAge={maxAge} />
@@ -319,6 +321,7 @@ export default function TabletPacePage() {
             기간(생성일)
             <select value={maxAge ?? ''} onChange={(e) => setMaxAge(e.target.value === '' ? null : Number(e.target.value))}
               style={{ padding: '6px 10px', borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 13, color: C.text, background: C.bg, cursor: 'pointer' }}>
+              <option value={Math.max(1, Math.round((new Date(data.asOf).getTime() - new Date(data.asOf.slice(0, 7) + '-01').getTime()) / 86400000))}>이번달</option>
               <option value="30">최근 1개월</option>
               <option value="90">최근 3개월</option>
               <option value="">전체 기간</option>
