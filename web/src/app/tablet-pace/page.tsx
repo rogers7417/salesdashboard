@@ -12,7 +12,7 @@ const C = {
 const TEAM_COLOR: Record<string, string> = { IBS: C.blue, OBS: C.purple, FR: C.teal, PT: C.green };
 // 예상실적 오버레이 보색 (팀색의 보색 계열)
 const EXPECTED_COLOR: Record<string, string> = { IBS: '#F59E0B', OBS: '#A3E635', FR: '#F97316', PT: '#EC4899' };
-const POST_CONTRACT_STAGES = ['계약진행', '출고진행', '설치진행']; // 계약진행 이후 = 예상실적에 포함
+const EXPECTED_STAGES = ['선납금', '계약진행', '출고진행', '설치진행']; // 선납금 이후 = 예상실적에 포함
 const TEAM_KEYS = ['IBS', 'OBS', 'FR', 'PT'];
 // 영업단계 색상 (흐름: 초기→후기)
 const STAGE_COLOR: Record<string, string> = {
@@ -51,7 +51,7 @@ function PaceBar({ actual, expected, paceTarget, monthTarget, color, expectedCol
 function TeamCard({ t }: { t: any }) {
   const color = TEAM_COLOR[t.team] || C.blue;
   const expectedColor = EXPECTED_COLOR[t.team] || C.orange;
-  const postContract = (t.pipeline?.stages || []).filter((s: any) => POST_CONTRACT_STAGES.includes(s.stage)).reduce((a: number, s: any) => a + (s.tablets || 0), 0);
+  const postContract = (t.pipeline?.stages || []).filter((s: any) => EXPECTED_STAGES.includes(s.stage)).reduce((a: number, s: any) => a + (s.tablets || 0), 0);
   const expected = t.expectedActual ?? (t.actualMTD + postContract);
   const behind = t.gap < 0;
   return (
@@ -71,7 +71,7 @@ function TeamCard({ t }: { t: any }) {
       <div style={{ fontSize: 11.5, color: C.secondary, marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
         <span style={{ width: 9, height: 9, borderRadius: 3, background: expectedColor, opacity: 0.6, display: 'inline-block' }} />
         예상실적 <b style={{ color: C.text }}>{fmt(expected)}대</b>
-        <span style={{ color: C.muted }}>· 계약진행 이후 +{fmt(postContract)}대</span>
+        <span style={{ color: C.muted }}>· 선납금 이후 +{fmt(postContract)}대</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginTop: 14 }}>
         <Mini label="월 달성률" value={`${t.attainment}%`} />
