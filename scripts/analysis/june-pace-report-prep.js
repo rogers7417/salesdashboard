@@ -10,11 +10,16 @@ const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) =>
 
 (async () => {
   // 1) 투영
+  // 예상실적 = 실적 + 선납금 이후 단계(선납금·계약진행·출고진행·설치진행) 파이프라인, 최근 1개월(age≤30) — 칸반과 동일
+  const EXP_AGE = 30;
+  const expectedOf = (x) => x.actualMTD + (x.pipeline?.stages || []).filter(s => ['선납금', '계약진행', '출고진행', '설치진행'].includes(s.stage))
+    .reduce((a, s) => a + (s.opps || []).filter(o => (o.age ?? 999) <= EXP_AGE).reduce((b, o) => b + (o.tablets || 0), 0), 0);
   const seg = {}; let totTarget = 0, totActual = 0, totProj = 0;
   for (const t of TEAMS) {
     const x = D.teams[t];
-    seg[t] = { name: SEG[t], target: x.target, actual: x.actualMTD, count: x.actualCount, cumTarget: x.cumTargetToday, paceAtt: x.paceAttainment, projected: x.projected, remaining: x.remaining, requiredDaily: x.requiredDaily, pipelineTab: x.pipeline.tablets, coverage: x.pipeline.coverage, leadTimeMedian: median((x.cwDwellOpps || []).map(o => Object.values(o.dwell || {}).reduce((s, v) => s + v, 0)).filter(v => v > 0)) };
-    totTarget += x.target; totActual += x.actualMTD; totProj += x.projected;
+    const expected = expectedOf(x);
+    seg[t] = { name: SEG[t], target: x.target, actual: x.actualMTD, count: x.actualCount, cumTarget: x.cumTargetToday, paceAtt: x.paceAttainment, projected: expected, pacePrjct: x.projected, remaining: Math.max(0, x.target - expected), requiredDaily: x.remainingBizDays > 0 ? Math.round(Math.max(0, x.target - expected) / x.remainingBizDays) : 0, pipelineTab: x.pipeline.tablets, coverage: x.pipeline.coverage, leadTimeMedian: median((x.cwDwellOpps || []).map(o => Object.values(o.dwell || {}).reduce((s, v) => s + v, 0)).filter(v => v > 0)) };
+    totTarget += x.target; totActual += x.actualMTD; totProj += expected;
   }
 
   // 2) 단계별 CW/CL/계류 체류 (전사) — 견적 누수 근거

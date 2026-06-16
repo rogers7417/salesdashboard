@@ -24,7 +24,7 @@ const segTiles = SEGS.map(k => {
   return `<div class="mtile" style="background:${TILEC[k]}">
     <div class="mt-lbl">${esc(s.name)} <span class="mt-key">${k}</span></div>
     <div class="mt-big">${n(s.actual)}<span class="mt-slash">/ ${n(s.target)}대</span></div>
-    <div class="mt-cw">예상 CW <b>${n(s.projected)}</b> · <b>${projAtt}%</b></div>
+    <div class="mt-cw">예상실적 <b>${n(s.projected)}</b> · <b>${projAtt}%</b></div>
     <div class="mt-bar"><div class="mt-fill" style="width:${pct}%"></div><div class="mt-proj" style="left:${Math.min(100, projAtt)}%"></div></div>
     <div class="mt-status">${ok ? '▲ 페이스 충족' : '▼ 미달'} · 필요 일 ${s.requiredDaily}대</div>
     <div class="mt-foot">파이프라인 ${n(s.pipelineTab)}대(커버 ${s.coverage ?? '-'}%) · 리드타임 ${s.leadTimeMedian}일</div>
@@ -245,18 +245,18 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
   <div class="sub">기준일 ${A.asOf} · 영업일 ${A.bizElapsed}/${A.bizTotal}일 경과 · 대상: 테이블오더 신규+추가설치 · 국내(KRW) · 재계약·양도양수·해외 제외</div>
   <div class="sub" style="margin-top:2px">CW = 당월 <b>계약시작일(ContractDateStart)</b> + 영업기회 <b>Closed Won</b> 태블릿 대수 합 (사내 /contracts API와 동일)</div>
   <div class="kpis">
-    <div class="ktile" style="background:${overall < 90 ? '#B45309' : '#15803D'}"><div class="kl">예상 CW (현재 페이스)</div><div class="kv">${n(t.projected)}<span class="ku">/ ${n(t.target)}대</span></div></div>
-    <div class="ktile" style="background:${overall < 90 ? '#B45309' : '#15803D'}"><div class="kl">목표 달성률 (CW)</div><div class="kv">${overall}<span class="ku">%</span></div></div>
+    <div class="ktile" style="background:${overall < 90 ? '#B45309' : '#15803D'}"><div class="kl">예상실적 (선납금 이후·최근1개월)</div><div class="kv">${n(t.projected)}<span class="ku">/ ${n(t.target)}대</span></div></div>
+    <div class="ktile" style="background:${overall < 90 ? '#B45309' : '#15803D'}"><div class="kl">예상 달성률 (예상실적/목표)</div><div class="kv">${overall}<span class="ku">%</span></div></div>
     <div class="ktile" style="background:#B91C1C"><div class="kl">예상 갭</div><div class="kv">${t.gap >= 0 ? '+' : ''}${n(t.gap)}<span class="ku">대</span></div></div>
     <div class="ktile" style="background:#1E3A8A"><div class="kl">현재 누적 실적</div><div class="kv">${n(t.actual)}<span class="ku">대</span></div></div>
   </div>
 </div>
 
 <div class="panel">
-  <div class="phead"><span class="pnum">1</span><h2>6월말 예상 CW — 세그먼트별</h2></div>
-  <div class="desc">현재 CW(계약시작일 기준) 페이스를 월말까지 단순 투영. 흰 막대 = 현재 실적 / 검은 선 = 예상 CW 위치(목표 대비).</div>
+  <div class="phead"><span class="pnum">1</span><h2>예상실적 — 세그먼트별 (계약 진행분 포함)</h2></div>
+  <div class="desc">예상실적 = 실적(CW) + 선납금 이후 단계(선납금·계약진행·출고진행·설치진행) 파이프라인 · 최근 1개월(좀비 제외). 흰 막대 = 현재 실적 / 검은 선 = 예상실적 위치(목표 대비).</div>
   <div class="mtiles">${segTiles}</div>
-  <div class="legend">현 페이스론 <b>전 세그먼트 목표 미달</b> — ${best.name} ${best.att}%가 상대 최선, ${worst.name} ${worst.att}% 최저.</div>
+  <div class="legend">예상실적 기준 <b>전 세그먼트 목표 미달</b> — ${best.name} ${best.att}%가 상대 최선, ${worst.name} ${worst.att}% 최저.</div>
 </div>
 
 <div class="panel">
@@ -264,12 +264,12 @@ tr.hot td{background:#2A1420}tr.hot .st{color:#F0556C;font-weight:700}
   <div class="desc">CW 기준 진단.</div>
   <div class="two">
     <div class="col gd"><h3>🟢 상대적으로 나은 부분</h3><ul>
-      <li><b>${best.name} ${best.att}% CW</b> — 4세그먼트 중 페이스 가장 앞섬(그래도 목표 미달)</li>
+      <li><b>${best.name} ${best.att}% 예상</b> — 4세그먼트 중 예상실적 가장 앞섬(그래도 목표 미달)</li>
       <li><b>${bestCov.name} 파이프라인 ${n(bestCov.pipe)}대(커버 ${bestCov.cov}%)</b> — 잔여목표 대비 후보 충분, 전환만 되면 회복 여지</li>
       <li>마감(CW)건 리드타임 중앙값 ${Math.min(...segArr.map(s => s.lead))}~${Math.max(...segArr.map(s => s.lead))}일 — 닫히는 건은 빠르게 통과(생성→CW)</li>
     </ul></div>
     <div class="col bd"><h3>🔴 안되고 있음</h3><ul>
-      <li><b>${worst.name} ${worst.att}% CW</b> — 페이스 최저, 절대량·전환 모두 부족</li>
+      <li><b>${worst.name} ${worst.att}% 예상</b> — 예상실적 최저, 절대량·전환 모두 부족</li>
       <li><b>인바운드 ${Math.round(A.segments.IBS.projected / A.segments.IBS.target * 100)}% CW</b> — 최대 목표(2,410)인데 미달, 갭 절대값 최대</li>
       <li><b>전사 ${overall}% CW 전망</b> — 이대로면 ${n(-t.gap)}대 미달. 잔여 영업일 ${A.bizTotal - A.bizElapsed}일 내 일일 페이스 대폭 상향 필요</li>
     </ul></div>
