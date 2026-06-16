@@ -33,17 +33,18 @@ function CardWrap({ children, style }: { children: React.ReactNode; style?: Reac
   return <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20, ...style }}>{children}</div>;
 }
 
-// 진행 바 (실적 + 예상실적 오버레이 vs 페이스목표 vs 월목표)
+// 진행 바 (현재 CW + 예상 추가분 2색 구간 vs 페이스목표 vs 월목표)
 function PaceBar({ actual, expected, paceTarget, monthTarget, color, expectedColor }: { actual: number; expected: number; paceTarget: number; monthTarget: number; color: string; expectedColor: string }) {
   const pct = (v: number) => monthTarget > 0 ? Math.min(100, (v / monthTarget) * 100) : 0;
+  const aPct = pct(actual), ePct = pct(expected);
   return (
-    <div style={{ position: 'relative', height: 14, background: C.bgSub, borderRadius: 8, overflow: 'hidden', marginTop: 8 }}>
-      {/* 예상실적(계약진행 이후 포함) — 보색, 뒤에 깔림 */}
-      <div title="예상실적 (계약진행 이후 단계 포함)" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct(expected)}%`, background: expectedColor, opacity: 0.5, borderRadius: 8, transition: 'width .3s' }} />
-      {/* 실적(CW) — 팀색, 위 */}
-      <div title="실적 (CW)" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct(actual)}%`, background: color, borderRadius: 8, transition: 'width .3s' }} />
+    <div style={{ position: 'relative', height: 18, background: C.bgSub, borderRadius: 9, overflow: 'hidden', marginTop: 10 }}>
+      {/* 예상 추가분 (현재 CW → 예상실적) — 보색 */}
+      <div title="예상 추가분 (선납금 이후 파이프라인)" style={{ position: 'absolute', left: `${aPct}%`, top: 0, bottom: 0, width: `${Math.max(0, ePct - aPct)}%`, background: expectedColor, opacity: 0.85, transition: 'all .3s' }} />
+      {/* 현재 CW — 팀색 */}
+      <div title="현재 CW (실적)" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${aPct}%`, background: color, borderRadius: ePct > aPct ? '9px 0 0 9px' : 9, transition: 'width .3s' }} />
       {/* 오늘 누적 목표(페이스) 마커 */}
-      <div title="오늘까지 누적 목표" style={{ position: 'absolute', left: `${pct(paceTarget)}%`, top: -2, bottom: -2, width: 2, background: C.red }} />
+      <div title="오늘까지 누적 목표" style={{ position: 'absolute', left: `${pct(paceTarget)}%`, top: -2, bottom: -2, width: 2, background: C.red, zIndex: 2 }} />
     </div>
   );
 }
@@ -67,17 +68,19 @@ function TeamCard({ t, maxAge }: { t: any; maxAge: number | null }) {
         <div style={{ fontSize: 12, color: C.muted }}>월 목표 {fmt(t.target)}대</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginTop: 10 }}>
-        <span style={{ fontSize: 30, fontWeight: 800, color: C.text }}>{fmt(t.actualMTD)}</span>
-        <span style={{ fontSize: 13, color: C.secondary }}>/ 오늘 누적목표 {fmt(t.cumTargetToday)}</span>
+        <span style={{ fontSize: 11.5, fontWeight: 800, color: expectedColor, background: `${expectedColor}1A`, padding: '2px 7px', borderRadius: 6 }}>예상실적</span>
+        <span style={{ fontSize: 36, fontWeight: 800, color }}>{fmt(expected)}</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: C.secondary }}>/ 목표 {fmt(t.target)}대</span>
       </div>
-      <div style={{ fontSize: 13, fontWeight: 700, color: behind ? C.red : C.green, marginTop: 2 }}>
-        {behind ? '▼ 페이스 미달 ' : '▲ 페이스 충족 '}{t.gap >= 0 ? '+' : ''}{fmt(t.gap)}대 · 페이스 달성률 {t.paceAttainment}%
+      <div style={{ fontSize: 13, color: C.secondary, marginTop: 3 }}>
+        현재 CW <b style={{ color: C.text, fontSize: 15 }}>{fmt(t.actualMTD)}</b>대 · 오늘 누적목표 {fmt(t.cumTargetToday)}
+        <span style={{ color: behind ? C.red : C.green, fontWeight: 700, marginLeft: 6 }}>{behind ? '▼' : '▲'}{t.gap >= 0 ? '+' : ''}{fmt(t.gap)}</span>
       </div>
       <PaceBar actual={t.actualMTD} expected={expected} paceTarget={t.cumTargetToday} monthTarget={t.target} color={color} expectedColor={expectedColor} />
-      <div style={{ fontSize: 11.5, color: C.secondary, marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ width: 9, height: 9, borderRadius: 3, background: expectedColor, opacity: 0.6, display: 'inline-block' }} />
-        예상실적 <b style={{ color: C.text }}>{fmt(expected)}대</b>
-        <span style={{ color: C.muted }}>· 선납금 이후 +{fmt(postContract)}대</span>
+      <div style={{ fontSize: 11.5, color: C.secondary, marginTop: 7, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: color, display: 'inline-block' }} />현재 CW {fmt(t.actualMTD)}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ width: 10, height: 10, borderRadius: 3, background: expectedColor, opacity: 0.85, display: 'inline-block' }} />예상 추가 +{fmt(postContract)}</span>
+        <span style={{ color: C.muted }}>= 예상실적 {fmt(expected)}대</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginTop: 14 }}>
         <Mini label="예상 달성률" value={`${expAtt}%`} valueColor={expAtt >= 100 ? C.green : C.text} sub={`실적 ${t.attainment}%`} />
