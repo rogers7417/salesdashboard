@@ -10,6 +10,9 @@ const C = {
   blue: '#3182F6', orange: '#F59E0B', teal: '#0EA5E9', purple: '#8B5CF6', gray: '#8B95A1',
 };
 const TEAM_COLOR: Record<string, string> = { IBS: C.blue, OBS: C.purple, FR: C.teal, PT: C.green };
+// 예상실적 오버레이 보색 (팀색의 보색 계열)
+const EXPECTED_COLOR: Record<string, string> = { IBS: '#F59E0B', OBS: '#A3E635', FR: '#F97316', PT: '#EC4899' };
+const POST_CONTRACT_STAGES = ['계약진행', '출고진행', '설치진행']; // 계약진행 이후 = 예상실적에 포함
 const TEAM_KEYS = ['IBS', 'OBS', 'FR', 'PT'];
 // 영업단계 색상 (흐름: 초기→후기)
 const STAGE_COLOR: Record<string, string> = {
@@ -30,12 +33,15 @@ function CardWrap({ children, style }: { children: React.ReactNode; style?: Reac
   return <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 16, padding: 20, ...style }}>{children}</div>;
 }
 
-// 진행 바 (실적 vs 페이스목표 vs 월목표)
-function PaceBar({ actual, paceTarget, monthTarget, color }: { actual: number; paceTarget: number; monthTarget: number; color: string }) {
+// 진행 바 (실적 + 예상실적 오버레이 vs 페이스목표 vs 월목표)
+function PaceBar({ actual, expected, paceTarget, monthTarget, color, expectedColor }: { actual: number; expected: number; paceTarget: number; monthTarget: number; color: string; expectedColor: string }) {
   const pct = (v: number) => monthTarget > 0 ? Math.min(100, (v / monthTarget) * 100) : 0;
   return (
     <div style={{ position: 'relative', height: 14, background: C.bgSub, borderRadius: 8, overflow: 'hidden', marginTop: 8 }}>
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct(actual)}%`, background: color, borderRadius: 8, transition: 'width .3s' }} />
+      {/* 예상실적(계약진행 이후 포함) — 보색, 뒤에 깔림 */}
+      <div title="예상실적 (계약진행 이후 단계 포함)" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct(expected)}%`, background: expectedColor, opacity: 0.5, borderRadius: 8, transition: 'width .3s' }} />
+      {/* 실적(CW) — 팀색, 위 */}
+      <div title="실적 (CW)" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${pct(actual)}%`, background: color, borderRadius: 8, transition: 'width .3s' }} />
       {/* 오늘 누적 목표(페이스) 마커 */}
       <div title="오늘까지 누적 목표" style={{ position: 'absolute', left: `${pct(paceTarget)}%`, top: -2, bottom: -2, width: 2, background: C.red }} />
     </div>
@@ -44,6 +50,9 @@ function PaceBar({ actual, paceTarget, monthTarget, color }: { actual: number; p
 
 function TeamCard({ t }: { t: any }) {
   const color = TEAM_COLOR[t.team] || C.blue;
+  const expectedColor = EXPECTED_COLOR[t.team] || C.orange;
+  const postContract = (t.pipeline?.stages || []).filter((s: any) => POST_CONTRACT_STAGES.includes(s.stage)).reduce((a: number, s: any) => a + (s.tablets || 0), 0);
+  const expected = t.expectedActual ?? (t.actualMTD + postContract);
   const behind = t.gap < 0;
   return (
     <CardWrap>
@@ -58,7 +67,12 @@ function TeamCard({ t }: { t: any }) {
       <div style={{ fontSize: 13, fontWeight: 700, color: behind ? C.red : C.green, marginTop: 2 }}>
         {behind ? '▼ 페이스 미달 ' : '▲ 페이스 충족 '}{t.gap >= 0 ? '+' : ''}{fmt(t.gap)}대 · 페이스 달성률 {t.paceAttainment}%
       </div>
-      <PaceBar actual={t.actualMTD} paceTarget={t.cumTargetToday} monthTarget={t.target} color={color} />
+      <PaceBar actual={t.actualMTD} expected={expected} paceTarget={t.cumTargetToday} monthTarget={t.target} color={color} expectedColor={expectedColor} />
+      <div style={{ fontSize: 11.5, color: C.secondary, marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+        <span style={{ width: 9, height: 9, borderRadius: 3, background: expectedColor, opacity: 0.6, display: 'inline-block' }} />
+        예상실적 <b style={{ color: C.text }}>{fmt(expected)}대</b>
+        <span style={{ color: C.muted }}>· 계약진행 이후 +{fmt(postContract)}대</span>
+      </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginTop: 14 }}>
         <Mini label="월 달성률" value={`${t.attainment}%`} />
         <Mini label="예상 마감" value={`${fmt(t.projected)}대`} valueColor={t.projected >= t.target ? C.green : C.red} />

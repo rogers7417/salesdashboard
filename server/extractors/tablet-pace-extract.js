@@ -400,9 +400,13 @@ async function main() {
         .sort((a, b) => { const ia = clOrder.indexOf(a.stage), ib = clOrder.indexOf(b.stage); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); });
     })();
 
+    // 예상실적 = 실적(CW) + 계약진행 이후 단계(계약진행·출고진행·설치진행) 파이프라인 태블릿
+    const postContractTablets = stages.filter(s => ['계약진행', '출고진행', '설치진행'].includes(s.stage)).reduce((a, s) => a + (s.tablets || 0), 0);
+    const expectedActual = actualMTD + postContractTablets;
     result.teams[team] = {
       team, label: TEAM_LABEL[team], target, dailyQuota,
       cumTargetToday, actualMTD, actualCount, gap, attainment, paceAttainment,
+      expectedActual, postContractTablets,
       projected, remaining, remainingBizDays, requiredDaily,
       dailySeries, weekly, cwStageDwell, leadTimeMedian,
       cl: { total: clTeam.length, stageDist: clStageDist },
