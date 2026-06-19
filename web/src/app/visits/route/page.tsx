@@ -204,6 +204,21 @@ export default function VisitRoutePage() {
   const [detail, setDetail] = useState<{ visits: VisitDetail[]; tasks: TaskDetail[] } | null>(null);
   const [ready, setReady] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [deptOptions, setDeptOptions] = useState<{ dept: string; open: number }[]>([]);
+
+  // 부서 드롭다운 목록 — 현재 로드된 팀과 무관하게 summary(전 부서)에서 채운다
+  useEffect(() => {
+    const url = S3_DATA_URL ? `${S3_DATA_URL}/visits/summary.json` : `${API}/api/visits/summary`;
+    fetch(url, { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then(j => setDeptOptions(
+        ((j.byDept || j.deptCount || []) as { dept: string; open: number }[])
+          .filter(d => DEPT_SLUG[d.dept] && d.open > 0)
+          .map(d => ({ dept: d.dept, open: d.open }))
+          .sort((a, b) => b.open - a.open)
+      ))
+      .catch(() => { /* 폴백: deptIndex 사용 */ });
+  }, []);
 
   // 지도 초기화
   useEffect(() => {
@@ -421,7 +436,7 @@ export default function VisitRoutePage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 6 }}>
             <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} style={selectStyle}>
               <option value="">전체 부서</option>
-              {deptIndex.map(d => <option key={d.dept} value={d.dept}>{d.dept} ({d.count})</option>)}
+              {(deptOptions.length ? deptOptions.map(d => ({ dept: d.dept, count: d.open })) : deptIndex).map(d => <option key={d.dept} value={d.dept}>{d.dept} ({d.count})</option>)}
             </select>
             <select value={ownerFilter} onChange={e => setOwnerFilter(e.target.value)} style={selectStyle} disabled={!currentMembers.length}>
               <option value="">{currentMembers.length ? '전체 담당자' : '(부서 선택)'}</option>
