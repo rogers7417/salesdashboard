@@ -197,9 +197,11 @@ export default function VisitRoutePage() {
   const [allRecords, setAllRecords] = useState<any[]>([]);
   const [deptFilter, setDeptFilter] = useState<string>('아웃바운드세일즈');
   const [ownerFilter, setOwnerFilter] = useState<string>('');
+  const [myOnly, setMyOnly] = useState(false);
   const [radius, setRadius] = useState<number>(2);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Pin | null>(null);
+  const [showTimeline, setShowTimeline] = useState(true);
   const [nearby, setNearby] = useState<NearbyItem[]>([]);
   const [detail, setDetail] = useState<{ visits: VisitDetail[]; tasks: TaskDetail[] } | null>(null);
   const [ready, setReady] = useState(false);
@@ -298,6 +300,13 @@ export default function VisitRoutePage() {
   const stuckCount = filteredList.filter(p => p.isStuck).length;
   const upcomingCount = filteredList.filter(p => p.hasUpcomingVisit).length;
 
+  // '내 매장만 보기' — 선택한 영업기회의 방문담당자 기준으로 주변 매장 필터
+  const myVisitor = selected?.visitor || '';
+  const visibleNearby = useMemo(
+    () => (myOnly && myVisitor) ? nearby.filter(n => n.visitor === myVisitor) : nearby,
+    [nearby, myOnly, myVisitor]
+  );
+
   // 지도 핀 렌더 (필터 결과 기준)
   useEffect(() => {
     if (!ready || !mapInstance.current) return;
@@ -335,7 +344,7 @@ export default function VisitRoutePage() {
     nearbyMarkersRef.current.forEach(m => m.setMap(null));
     nearbyMarkersRef.current = [];
     const inMain = new Set(filteredList.map(p => p.oppId));
-    for (const n of nearby) {
+    for (const n of visibleNearby) {
       if (inMain.has(n.oppId)) continue; // 메인 풀에 이미 있으면 스킵 (중복 방지)
       const color = n.isStuck ? '#f57c00' : (n.hasUpcomingVisit ? '#1565c0' : '#90a4ae');
       const marker = new window.kakao.maps.Marker({
@@ -354,12 +363,13 @@ export default function VisitRoutePage() {
       nearbyMarkersRef.current.push(marker);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, nearby, filteredList]);
+  }, [ready, visibleNearby, filteredList]);
 
   // 매장 선택 → 지도 이동, 반경, nearby
   const focusPin = useCallback((p: Pin) => {
     if (!mapInstance.current) return;
     setSelected(p);
+    setShowTimeline(true);
     const pos = new window.kakao.maps.LatLng(p.lat, p.lng);
     mapInstance.current.setCenter(pos);
     mapInstance.current.setLevel(6);
@@ -436,7 +446,7 @@ export default function VisitRoutePage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 6 }}>
             <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} style={selectStyle}>
               <option value="">전체 부서</option>
-              {(deptOptions.length ? deptOptions.map(d => ({ dept: d.dept, count: d.open })) : deptIndex).map(d => <option key={d.dept} value={d.dept}>{d.dept} ({d.count})</option>)}
+              {(deptOptions.length ? deptOptions.map(d => ({ dept: d.dept, count: d.open })) : deptIndex).map(d => <option key={d.dept} value={d.dept}>{d.dept}</option>)}
             </select>
             <select value={ownerFilter} onChange={e => setOwnerFilter(e.target.value)} style={selectStyle} disabled={!currentMembers.length}>
               <option value="">{currentMembers.length ? '전체 담당자' : '(부서 선택)'}</option>
@@ -478,6 +488,24 @@ export default function VisitRoutePage() {
           <span style={{ marginLeft: 12 }}><span style={dot('#2e7d32')}/>선택</span>
           <span style={{ marginLeft: 12, color: '#e53935' }}>───</span><span style={{ marginLeft: 4 }}>반경</span>
         </div>
+        {/* 선택 매장 방문·활동 이력 — 지도 위 플로팅 (좌하단) */}
+        {selected && detail && showTimeline && (
+          <div style={{ position: 'absolute', left: 12, bottom: 12, width: 330, maxHeight: '58%', background: 'rgba(255,255,255,0.97)', borderRadius: 8, border: '1px solid #e0e0e0', boxShadow: '0 2px 12px rgba(0,0,0,0.18)', display: 'flex', flexDirection: 'column', zIndex: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', borderBottom: '1px solid #eee' }}>
+              <span style={{ fontSize: '0.82em', fontWeight: 700, color: '#444' }}>
+                방문·활동 이력 <span style={{ color: '#999', fontWeight: 400 }}>{(detail.visits?.length || 0) + (detail.tasks?.length || 0)}건</span>
+              </span>
+              <button onClick={() => setShowTimeline(false)} title="닫기" style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontSize: '1.2em', color: '#999', lineHeight: 1, padding: '0 2px' }}>×</button>
+            </div>
+            <div style={{ padding: '10px 12px', overflow: 'auto' }}>
+              <div style={{ fontSize: '0.82em', fontWeight: 600, color: '#2e7d32', marginBottom: 8 }}>📍 {selected.name}</div>
+              <Timeline visits={detail.visits} tasks={detail.tasks} />
+            </div>
+          </div>
+        )}
+        {selected && detail && !showTimeline && (
+          <button onClick={() => setShowTimeline(true)} style={{ position: 'absolute', left: 12, bottom: 12, zIndex: 20, padding: '7px 13px', background: '#fff', border: '1px solid #e0e0e0', borderRadius: 6, boxShadow: '0 1px 5px rgba(0,0,0,0.14)', fontSize: '0.8em', fontWeight: 600, color: '#444', cursor: 'pointer' }}>📋 활동이력 보기</button>
+        )}
       </div>
 
       {/* 우측: 들렀다 가기 전용 패널 */}
@@ -516,30 +544,34 @@ export default function VisitRoutePage() {
               )}
               <a href={naverSearchUrl(selected.name)} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 6, padding: '4px 10px', background: '#03c75a', color: '#fff', textDecoration: 'none', borderRadius: 4, fontSize: '0.78em', fontWeight: 600 }}>N 지도 → {storeName(selected.name)}</a>
               <div style={{ fontSize: '0.78em', color: '#666', marginTop: 6, padding: '6px 8px', background: '#fff', borderRadius: 4 }}>
-                반경 <strong>{radius}km</strong> 안 <strong>{nearby.length}건</strong>
-                {nearby.length > 0 && <span style={{ color: '#ff9800', marginLeft: 4 }}>(정체 {nearby.filter(n => n.isStuck).length})</span>}
+                반경 <strong>{radius}km</strong> 안 <strong>{visibleNearby.length}건</strong>
+                {myOnly && myVisitor && <span style={{ color: '#2e7d32', marginLeft: 4, fontWeight: 600 }}>(내 매장)</span>}
+                {visibleNearby.length > 0 && <span style={{ color: '#ff9800', marginLeft: 4 }}>(정체 {visibleNearby.filter(n => n.isStuck).length})</span>}
               </div>
             </div>
-            {/* 타임라인 (visits + tasks 합산, 최신순) */}
-            {detail && (
-              <div style={{ padding: '12px 14px', background: '#fff', borderBottom: '1px solid #eee' }}>
-                <div style={{ fontSize: '0.82em', fontWeight: 700, color: '#444', marginBottom: 8, display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                  방문·활동 이력
-                  <span style={{ color: '#999', fontWeight: 400, fontSize: '0.92em' }}>{(detail.visits?.length || 0) + (detail.tasks?.length || 0)}건</span>
-                </div>
-                <Timeline visits={detail.visits} tasks={detail.tasks} />
-              </div>
-            )}
-
             <div style={{ padding: 12 }}>
-              <div style={{ fontSize: '0.82em', fontWeight: 700, color: '#444', marginBottom: 8 }}>주변 매장</div>
-              {!nearby.length && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ fontSize: '0.82em', fontWeight: 700, color: '#444' }}>주변 매장</span>
+                <label
+                  title={myVisitor ? '' : '방문담당이 없는 매장입니다'}
+                  style={{ fontSize: '0.76em', fontWeight: 600, color: myVisitor ? '#2e7d32' : '#bbb', display: 'flex', alignItems: 'center', gap: 4, cursor: myVisitor ? 'pointer' : 'not-allowed', userSelect: 'none' }}
+                >
+                  <input type="checkbox" checked={myOnly && !!myVisitor} disabled={!myVisitor} onChange={e => setMyOnly(e.target.checked)} style={{ cursor: 'inherit', margin: 0 }} />
+                  내 매장만{myVisitor ? ` · ${myVisitor}` : ''}
+                </label>
+              </div>
+              {!visibleNearby.length && (
                 <div style={{ padding: 30, textAlign: 'center', color: '#999', fontSize: '0.82em' }}>
-                  주변 {radius}km 안에 들릴 매장이 없습니다.<br />
-                  반경을 늘려보세요.
+                  {myOnly && myVisitor && nearby.length > 0 ? (
+                    <>반경 {radius}km 안에 <strong>{myVisitor}</strong> 담당 매장이 없습니다.<br />
+                    &lsquo;내 매장만&rsquo;을 끄면 {nearby.length}건이 보입니다.</>
+                  ) : (
+                    <>주변 {radius}km 안에 들릴 매장이 없습니다.<br />
+                    반경을 늘려보세요.</>
+                  )}
                 </div>
               )}
-              {nearby.map(n => <NearbyCard key={n.oppId} n={n} onSelect={() => focusPin(n as Pin)} />)}
+              {visibleNearby.map(n => <NearbyCard key={n.oppId} n={n} onSelect={() => focusPin(n as Pin)} />)}
             </div>
           </>
         )}
