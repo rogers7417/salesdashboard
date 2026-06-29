@@ -25,6 +25,9 @@ const START_DATE = process.env.VISIT_START_DATE || rolling3MonthsAgo();
 if (!KAKAO_KEY) { console.error('KAKAO_REST_KEY 없음'); process.exit(1); }
 
 async function sfAuth() {
+  if (process.env.SF_ACCESS_TOKEN && process.env.SF_INSTANCE_URL) {
+    return { token: process.env.SF_ACCESS_TOKEN, url: process.env.SF_INSTANCE_URL };
+  }
   const r = await axios.post(process.env.SF_LOGIN_URL + '/services/oauth2/token',
     new URLSearchParams({
       grant_type: 'password',

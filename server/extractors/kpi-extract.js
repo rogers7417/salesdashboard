@@ -1,11 +1,16 @@
 require('dotenv').config();
 const axios = require('axios');
+// Node 23 환경에서 기본 http 어댑터가 'socket hang up'으로 끊기는 문제 → fetch 어댑터 강제
+axios.defaults.adapter = 'fetch';
 const fs = require('fs');
 
 // ============================================
 // 공통 유틸리티
 // ============================================
 async function getSalesforceToken() {
+  if (process.env.SF_ACCESS_TOKEN && process.env.SF_INSTANCE_URL) {
+    return { accessToken: process.env.SF_ACCESS_TOKEN, instanceUrl: process.env.SF_INSTANCE_URL };
+  }
   const url = `${process.env.SF_LOGIN_URL}/services/oauth2/token`;
   const params = new URLSearchParams();
   params.append('grant_type', 'password');
@@ -85,6 +90,29 @@ function kstToUTC(kstDateStr, isStart = true) {
 function getMonthRange(targetMonth) {
   const now = new Date();
   const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const kstYear = kstNow.getUTCFullYear();
+  const kstMonth = kstNow.getUTCMonth() + 1;
+  const kstDate = kstNow.getUTCDate();
+
+  // 월 첫날 KST 실행 시 yesterday=0이 되어 endDate가 깨지는 문제를 회피.
+  // 자동 cron이 현재 월(2026-06)을 넘겨도 5월 최종본을 갱신하도록 이전 달로 fallback.
+  // 명시적으로 과거 월(예: 2026-04)을 넘긴 경우는 그대로 처리.
+  const isCurrentMonth = targetMonth
+    ? (parseInt(targetMonth.split('-')[0], 10) === kstYear && parseInt(targetMonth.split('-')[1], 10) === kstMonth)
+    : true;
+  if (kstDate === 1 && isCurrentMonth) {
+    const prev = new Date(kstYear, kstMonth - 1, 0);
+    const py = prev.getFullYear();
+    const pm = prev.getMonth() + 1;
+    const pd = prev.getDate();
+    const prevMonth = `${py}-${String(pm).padStart(2, '0')}`;
+    return {
+      startDate: `${prevMonth}-01`,
+      endDate: `${prevMonth}-${String(pd).padStart(2, '0')}`,
+      periodLabel: `${py}년 ${pm}월`,
+      targetMonth: prevMonth,
+    };
+  }
 
   let startDate, endDate, periodLabel;
   if (targetMonth) {
@@ -92,9 +120,6 @@ function getMonthRange(targetMonth) {
     startDate = `${targetMonth}-01`;
     // 어제 or 월말 중 작은 값
     const lastDay = new Date(year, month, 0).getDate();
-    const kstYear = kstNow.getUTCFullYear();
-    const kstMonth = kstNow.getUTCMonth() + 1;
-    const kstDate = kstNow.getUTCDate();
     if (year === kstYear && month === kstMonth) {
       // 이번달이면 어제까지
       const yesterday = kstDate - 1;
@@ -105,9 +130,6 @@ function getMonthRange(targetMonth) {
       periodLabel = `${year}년 ${month}월`;
     }
   } else {
-    const kstYear = kstNow.getUTCFullYear();
-    const kstMonth = kstNow.getUTCMonth() + 1;
-    const kstDate = kstNow.getUTCDate();
     const yesterday = kstDate - 1;
     const monthStr = `${kstYear}-${String(kstMonth).padStart(2, '0')}`;
     startDate = `${monthStr}-01`;
@@ -4000,12 +4022,42 @@ async function main() {
     console.log(`  ☁️  주간 ${weeksData.weeks.length}개 사전계산 + 업로드 완료`);
 
     // 4. 메타데이터 업로드
-    const allMonths = allFiles
+    // 로컬 파일이 있는 월 + 현재 KST 월(아직 파일이 없어도 셀렉터에 노출)
+    const collectedMonths = allFiles
       .filter(f => /^kpi-extract-\d{4}-\d{2}\.json$/.test(f))
-      .map(f => f.match(/kpi-extract-(\d{4}-\d{2})\.json/)[1])
-      .sort()
-      .reverse();
+      .map(f => f.match(/kpi-extract-(\d{4}-\d{2})\.json/)[1]);
+    const nowKst = new Date(Date.now() + 9 * 3600000);
+    const currentKstMonth = `${nowKst.getUTCFullYear()}-${String(nowKst.getUTCMonth() + 1).padStart(2, '0')}`;
+    const allMonths = [...new Set([...collectedMonths, currentKstMonth])].sort().reverse();
     await uploadJSON('kpi/months.json', { months: allMonths });
+
+    // 4-1. 현재 KST 월에 정상 데이터가 없으면 placeholder 업로드
+    // (이번 추출 결과 = result를 baseline으로 deepZero 적용)
+    // 프론트가 셀렉터에서 현재 월 선택 시 깊은 키 접근으로 깨지지 않게 구조만 유지
+    if (!collectedMonths.includes(currentKstMonth)) {
+      const deepZero = (v) => {
+        if (Array.isArray(v)) return [];
+        if (v === null) return null;
+        if (typeof v === 'object') {
+          const out = {};
+          for (const k of Object.keys(v)) out[k] = deepZero(v[k]);
+          return out;
+        }
+        if (typeof v === 'number') return 0;
+        if (typeof v === 'boolean') return false;
+        return v;
+      };
+      const placeholder = deepZero(result);
+      const [py, pm] = currentKstMonth.split('-').map(Number);
+      const lastDay = new Date(py, pm, 0).getDate();
+      placeholder.period = currentKstMonth;
+      placeholder.periodLabel = `${py}년 ${pm}월 (데이터 미수집)`;
+      placeholder.dateRange = { startDate: `${currentKstMonth}-01`, endDate: `${currentKstMonth}-${String(lastDay).padStart(2, '0')}` };
+      placeholder.extractedAt = new Date().toISOString();
+      placeholder.placeholder = true;
+      await uploadJSON(`kpi/monthly/${currentKstMonth}.json`, placeholder);
+      console.log(`  ☁️  placeholder 업로드: kpi/monthly/${currentKstMonth}.json (${currentKstMonth} 데이터 미수집)`);
+    }
     await uploadJSON(`kpi/dates/${targetMonth}.json`, { month: targetMonth, dates: dailyDates });
     await uploadJSON(`kpi/weeks/${targetMonth}.json`, weeksData);
 

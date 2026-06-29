@@ -44,6 +44,9 @@ async function geocode(addr) {
 }
 
 async function sfAuth() {
+  if (process.env.SF_ACCESS_TOKEN && process.env.SF_INSTANCE_URL) {
+    return { token: process.env.SF_ACCESS_TOKEN, url: process.env.SF_INSTANCE_URL };
+  }
   const r = await axios.post(process.env.SF_LOGIN_URL + '/services/oauth2/token', new URLSearchParams({
     grant_type: 'password',
     client_id: process.env.SF_CLIENT_ID,

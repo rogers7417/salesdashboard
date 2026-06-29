@@ -14,6 +14,9 @@ const DATA_DIR = path.join(__dirname, '..', '..', 'data');
 // Salesforce 유틸 (kpi-extract.js와 동일)
 // ============================================
 async function getSalesforceToken() {
+  if (process.env.SF_ACCESS_TOKEN && process.env.SF_INSTANCE_URL) {
+    return { accessToken: process.env.SF_ACCESS_TOKEN, instanceUrl: process.env.SF_INSTANCE_URL };
+  }
   const url = `${process.env.SF_LOGIN_URL}/services/oauth2/token`;
   const params = new URLSearchParams();
   params.append('grant_type', 'password');

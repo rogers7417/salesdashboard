@@ -38,6 +38,9 @@ const STAGE_ORDER = ['방문배정', '방문상담', '견적', '재견적', '선
 
 // ---- SF helpers ----
 async function getToken() {
+  if (process.env.SF_ACCESS_TOKEN && process.env.SF_INSTANCE_URL) {
+    return { accessToken: process.env.SF_ACCESS_TOKEN, instanceUrl: process.env.SF_INSTANCE_URL };
+  }
   const url = `${process.env.SF_LOGIN_URL}/services/oauth2/token`;
   const p = new URLSearchParams();
   p.append('grant_type', 'password');

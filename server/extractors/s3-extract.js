@@ -15,10 +15,31 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
 
 const { spawn } = require('child_process');
+const axios = require('axios');
 const { uploadJSON } = require('../shared/s3-upload');
 
 const EXTRACTORS_DIR = __dirname;
 const PROJECT_ROOT = path.join(__dirname, '..', '..');
+
+/**
+ * 전체 사이클에서 OAuth password grant를 1회만 호출해서 토큰을 공유.
+ * spawn 자식 + in-process 모듈 모두 SF_ACCESS_TOKEN / SF_INSTANCE_URL 가 있으면
+ * 그걸 재사용하도록 패치되어 있음. SF rate limit / 계정 잠금 방지가 목적.
+ */
+async function ensureSharedToken() {
+  if (process.env.SF_ACCESS_TOKEN && process.env.SF_INSTANCE_URL) return;
+  const url = `${process.env.SF_LOGIN_URL}/services/oauth2/token`;
+  const params = new URLSearchParams();
+  params.append('grant_type', 'password');
+  params.append('client_id', process.env.SF_CLIENT_ID);
+  params.append('client_secret', process.env.SF_CLIENT_SECRET);
+  params.append('username', process.env.SF_USERNAME);
+  params.append('password', decodeURIComponent(process.env.SF_PASSWORD));
+  const res = await axios.post(url, params);
+  process.env.SF_ACCESS_TOKEN = res.data.access_token;
+  process.env.SF_INSTANCE_URL = res.data.instance_url;
+  console.log('🔑 공유 SF 토큰 발급 (OAuth 1회) — 모든 자식 추출이 재사용');
+}
 
 function getCurrentMonth() {
   const now = new Date();
@@ -154,6 +175,9 @@ async function main() {
   console.log('☁️  S3 데이터 추출 오케스트레이터');
   console.log(`📅 ${getCurrentMonth()} | ${new Date().toISOString()}`);
   console.log('============================================');
+
+  // 부모에서 OAuth 한 번만 발급 → spawn env로 자식 전부 공유
+  await ensureSharedToken();
 
   const results = {};
 

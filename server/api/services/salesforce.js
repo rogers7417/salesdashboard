@@ -8,6 +8,11 @@ let tokenExpiry = null;
 
 // Salesforce 인증 (토큰 캐싱)
 async function getToken() {
+  // 부모 프로세스에서 주입된 공유 토큰 우선 사용 (s3-extract 오케스트레이션)
+  if (process.env.SF_ACCESS_TOKEN && process.env.SF_INSTANCE_URL) {
+    return { accessToken: process.env.SF_ACCESS_TOKEN, instanceUrl: process.env.SF_INSTANCE_URL };
+  }
+
   // 토큰이 있고 만료되지 않았으면 재사용
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
     return cachedToken;
