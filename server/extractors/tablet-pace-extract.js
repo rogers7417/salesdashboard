@@ -12,7 +12,6 @@ require('dotenv').config();
 const axios = require('axios');
 axios.defaults.adapter = 'fetch'; // Node 23 기본 어댑터 socket hang up 회피
 const fs = require('fs');
-const { getTargets } = require('../../scripts/lib/targets');
 
 // ---- 월별 목표 폴백 (data/targets/{month}.json 이 단일 소스; 이 하드코딩은 파일 없는 월 폴백) ----
 // 채널(CHS) 합계를 프랜차이즈(FR)·파트너스(PT) 50:50 으로 분할 — 월별 정확 분할 확정 시 갱신
@@ -34,8 +33,15 @@ const DEPT_TEAM = {
 };
 const TEAMS = ['IBS', 'OBS', 'FR', 'PT'];
 const TEAM_LABEL = { IBS: '인바운드 (IBS)', OBS: '아웃바운드 (OBS)', FR: '프랜차이즈', PT: '파트너스' };
-// data/targets/{month}.json(getTargets) 부서키 → 팀 매핑 (단일 소스)
+// data/targets/{month}.json 부서키 → 팀 매핑 (단일 소스)
 const TEAM_TO_DEPT = { IBS: '인바운드세일즈', OBS: '아웃바운드세일즈', FR: '채널-프랜차이즈', PT: '채널-파트너스' };
+// data/targets/{month}.json 인라인 로더 (scripts/lib 의존 제거 — 서버 배포 트리 이슈 회피). 실패 시 null → 하드코딩 폴백
+function loadTargetsFile(month) {
+  try {
+    const p = require('path').join(__dirname, '..', '..', 'data', 'targets', `${month}.json`);
+    return JSON.parse(fs.readFileSync(p, 'utf8')).targets;
+  } catch { return null; }
+}
 // 영업단계 정렬 순서 (파이프라인 흐름)
 const STAGE_ORDER = ['방문배정', '방문상담', '견적', '재견적', '선납금', '계약진행', '출고진행', '설치진행'];
 
@@ -337,9 +343,8 @@ async function main() {
   // ---- 팀별 집계 ----
   const result = { period: month, asOf: today, extractedAt: new Date().toISOString(), bizDaysTotal: bizTotal, bizDaysElapsed: bizElapsed, teams: {} };
 
-  let fileTargets = null;
-  try { fileTargets = getTargets(month); }
-  catch { console.log(`  ⚠️ data/targets/${month}.json 없음 → 하드코딩 목표 폴백`); }
+  const fileTargets = loadTargetsFile(month);
+  if (!fileTargets) console.log(`  ⚠️ data/targets/${month}.json 없음 → 하드코딩 목표 폴백`);
 
   for (const team of TEAMS) {
     // 단일 소스: data/targets/{month}.json 우선, 없으면 하드코딩 폴백
