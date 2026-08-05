@@ -633,12 +633,48 @@ async function collectInboundData(instanceUrl, accessToken, startDate, endDate) 
     fbUsersResult.records.forEach(u => { userNameMap[u.Id] = u.Name; });
   }
 
+  // 3-1. 이월 오픈 Opp (전월 생성분) — 방문 후 경과일 지표 전용
+  //      staleVisit은 "현재 열려있는 건이 방문 후 며칠 방치됐나"를 보는 잔량 지표라
+  //      이번 달 Lead 코호트로 자르면 월초에 7일 경과 자체가 성립하지 않아 구조적으로 0건이 된다.
+  //      전월 1일부터의 오픈 Opp를 별도 풀로 확보해 staleVisit에서만 합산한다.
+  //      (코호트 지표 — FRT/전환율/CW율 — 는 기존 월 스코프를 그대로 유지)
+  const [pYear, pMonth] = startDate.split('-').map(Number);
+  const prevMonthStart = pMonth === 1 ? `${pYear - 1}-12-01` : `${pYear}-${String(pMonth - 1).padStart(2, '0')}-01`;
+  const carryoverOpenQuery = `
+    SELECT Id, Name, StageName, FieldUser__c, BOUser__c, AgeInDays, CreatedDate, CloseDate,
+           InstallHopeDate__c, AdvancePaymentDate__c, fm_CompanyStatus__c,
+           (SELECT Id FROM ContractOpportunities__r)
+    FROM Opportunity
+    WHERE StageName NOT IN ('Closed Won', 'Closed Lost')
+      AND FieldUser__c != NULL
+      AND CreatedDate >= ${kstToUTC(prevMonthStart, true)}
+  `.replace(/\s+/g, ' ').trim();
+  const carryoverOpenRaw = await soqlQueryAll(instanceUrl, accessToken, carryoverOpenQuery);
+  const cohortOppIdSet = new Set(convertedOppIds);
+  const carryoverOpenOpps = carryoverOpenRaw.filter(o => !cohortOppIdSet.has(o.Id));
+  console.log(`  🔁 이월 오픈 Opp (${prevMonthStart}~, 코호트 외): ${carryoverOpenOpps.length}건`);
+
+  // 이월 Opp의 Field/BO User 이름 매핑
+  const coUserIds = new Set();
+  carryoverOpenOpps.forEach(o => {
+    if (o.FieldUser__c && !userNameMap[o.FieldUser__c]) coUserIds.add(o.FieldUser__c);
+    if (o.BOUser__c && !userNameMap[o.BOUser__c]) coUserIds.add(o.BOUser__c);
+  });
+  if (coUserIds.size > 0) {
+    const ids = [...coUserIds].map(id => `'${id}'`).join(',');
+    const r = await soqlQuery(instanceUrl, accessToken, `SELECT Id, Name FROM User WHERE Id IN (${ids})`);
+    r.records.forEach(u => { userNameMap[u.Id] = u.Name; });
+  }
+
+  // Quote/Task/Visit 조회 대상 = 이번 달 코호트 + 이월 오픈 Opp
+  const enrichOppIds = [...convertedOppIds, ...carryoverOpenOpps.map(o => o.Id)];
+
   // 4. Quote 조회
   let quotes = [];
-  if (convertedOppIds.length > 0) {
+  if (enrichOppIds.length > 0) {
     const chunkSize = 100;
-    for (let i = 0; i < convertedOppIds.length; i += chunkSize) {
-      const chunk = convertedOppIds.slice(i, i + chunkSize);
+    for (let i = 0; i < enrichOppIds.length; i += chunkSize) {
+      const chunk = enrichOppIds.slice(i, i + chunkSize);
       const oppIds = chunk.map(id => `'${id}'`).join(',');
       const quoteQuery = `SELECT Id, OpportunityId, CreatedDate FROM Quote WHERE OpportunityId IN (${oppIds}) ORDER BY OpportunityId, CreatedDate DESC`;
       const quoteResult = await soqlQuery(instanceUrl, accessToken, quoteQuery);
@@ -668,10 +704,10 @@ async function collectInboundData(instanceUrl, accessToken, startDate, endDate) 
 
   // 7. Opportunity별 Task 조회 (리터치 분석)
   let oppTasks = [];
-  if (convertedOppIds.length > 0) {
+  if (enrichOppIds.length > 0) {
     const chunkSize = 100;
-    for (let i = 0; i < convertedOppIds.length; i += chunkSize) {
-      const chunk = convertedOppIds.slice(i, i + chunkSize);
+    for (let i = 0; i < enrichOppIds.length; i += chunkSize) {
+      const chunk = enrichOppIds.slice(i, i + chunkSize);
       const oppIds = chunk.map(id => `'${id}'`).join(',');
       const oppTaskQuery = `SELECT Id, WhatId, Subject, Description, Status, ActivityDate, CreatedDate FROM Task WHERE WhatId IN (${oppIds}) ORDER BY WhatId, CreatedDate`;
       const oppTaskResult = await soqlQuery(instanceUrl, accessToken, oppTaskQuery);
@@ -760,10 +796,10 @@ async function collectInboundData(instanceUrl, accessToken, startDate, endDate) 
 
   // 11. Visit__c 조회 (진행중 Opp의 방문 여부/일자)
   let visits = [];
-  if (convertedOppIds.length > 0) {
+  if (enrichOppIds.length > 0) {
     const chunkSize = 200;
-    for (let i = 0; i < convertedOppIds.length; i += chunkSize) {
-      const chunk = convertedOppIds.slice(i, i + chunkSize);
+    for (let i = 0; i < enrichOppIds.length; i += chunkSize) {
+      const chunk = enrichOppIds.slice(i, i + chunkSize);
       const oppIds = chunk.map(id => `'${id}'`).join(',');
       const visitQuery = `SELECT Id, Opportunity__c, Visit_Status__c, LocalInviteDate__c, ConselStart__c, ConselEnd__c, Realtime__c, VisitAssignmentDate__c, IsVisitComplete__c FROM Visit__c WHERE Opportunity__c IN (${oppIds}) ORDER BY Opportunity__c, ConselStart__c DESC`;
       const visitResult = await soqlQuery(instanceUrl, accessToken, visitQuery);
@@ -798,7 +834,7 @@ async function collectInboundData(instanceUrl, accessToken, startDate, endDate) 
   });
   console.log(`  💰 인바운드 AdvancePaymentDate History: ${ibPaymentHistory.length}건 (최초입력 ${Object.keys(ibAdvPaymentEnteredMap).length}건)`);
 
-  return { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, userTeamMap, fieldUserIds, carryoverOpps, allClosedOpps: cwOppsResult, contracts, visits, teamMembers, ibAdvPaymentEnteredMap };
+  return { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, userTeamMap, fieldUserIds, carryoverOpps, carryoverOpenOpps, allClosedOpps: cwOppsResult, contracts, visits, teamMembers, ibAdvPaymentEnteredMap };
 }
 
 // ============================================
@@ -1260,7 +1296,7 @@ async function collectChannelData(instanceUrl, accessToken, startDate, endDate, 
 // 인바운드 KPI 계산
 // ============================================
 function calculateInboundKPIs(data, startDate, endDate) {
-  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, userTeamMap = {}, fieldUserIds, carryoverOpps, allClosedOpps, contracts, visits = [], stageChangeHistory = [], teamMembers = { 인사이드세일즈: [], 필드세일즈: [], 백오피스: [], 기타: [] }, ibAdvPaymentEnteredMap = {} } = data;
+  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, userTeamMap = {}, fieldUserIds, carryoverOpps, carryoverOpenOpps = [], allClosedOpps, contracts, visits = [], stageChangeHistory = [], teamMembers = { 인사이드세일즈: [], 필드세일즈: [], 백오피스: [], 기타: [] }, ibAdvPaymentEnteredMap = {} } = data;
 
   // Lead별 Task 매핑 (전체 + 첫/마지막 Task + 미완료 Task)
   const allTasksByLead = {};
@@ -1293,8 +1329,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
   });
 
   // Opp 데이터 매핑
-  const oppDataMap = {};
-  opportunities.forEach(opp => {
+  const buildOppData = (opp) => {
     const isOpen = opp.StageName !== 'Closed Won' && opp.StageName !== 'Closed Lost';
     const quote = latestQuoteByOpp[opp.Id];
     const tasks = tasksByOpp[opp.Id] || [];
@@ -1320,7 +1355,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
       ? openTasks.sort((a, b) => (a.ActivityDate || '9999').localeCompare(b.ActivityDate || '9999'))[0]
       : null;
 
-    oppDataMap[opp.Id] = {
+    return {
       stageName: opp.StageName,
       companyStatus: opp.fm_CompanyStatus__c || null,
       lossReason: opp.Loss_Reason__c,
@@ -1361,7 +1396,15 @@ function calculateInboundKPIs(data, startDate, endDate) {
         createdDate: utcToKSTDateStr(t.CreatedDate),
       })),
     };
-  });
+  };
+
+  const oppDataMap = {};
+  opportunities.forEach(opp => { oppDataMap[opp.Id] = buildOppData(opp); });
+
+  // 이월 오픈 Opp(전월 생성분)는 별도 맵으로 유지 — staleVisit에서만 사용하고
+  // 코호트 지표(전환율/FRT/CW율/aging/goldenTime)는 oppDataMap만 보게 해서 영향 없음
+  const carryoverOppDataMap = {};
+  (carryoverOpenOpps || []).forEach(opp => { carryoverOppDataMap[opp.Id] = buildOppData(opp); });
 
   // Lead 데이터 가공
   const leadData = leads.map(lead => {
@@ -1732,6 +1775,9 @@ function calculateInboundKPIs(data, startDate, endDate) {
   opportunities.forEach(opp => {
     oppDetailMap[opp.Id] = { name: opp.Name, createdDate: utcToKSTDateStr(opp.CreatedDate) };
   });
+  (carryoverOpenOpps || []).forEach(opp => {
+    if (!oppDetailMap[opp.Id]) oppDetailMap[opp.Id] = { name: opp.Name, createdDate: utcToKSTDateStr(opp.CreatedDate) };
+  });
 
   const visitByOpp = {};
   (visits || []).forEach(v => {
@@ -1855,9 +1901,7 @@ function calculateInboundKPIs(data, startDate, endDate) {
     .sort((a, b) => b.daysSinceLastTask - a.daysSinceLastTask);
 
   // ===== Field Sales: rawOpenOpps =====
-  const fsRawOpenOpps = Object.entries(oppDataMap)
-    .filter(([_, opp]) => opp.isOpen && opp.fieldUserId)
-    .map(([oppId, opp]) => {
+  const buildFsOpenRow = (oppId, opp) => {
       const vi = visitByOpp[oppId];
       return {
         oppId,
@@ -1899,11 +1943,22 @@ function calculateInboundKPIs(data, startDate, endDate) {
           return diff >= 0 ? diff : 0;
         })(),
       };
-    })
+  };
+
+  const fsRawOpenOpps = Object.entries(oppDataMap)
+    .filter(([_, opp]) => opp.isOpen && opp.fieldUserId)
+    .map(([oppId, opp]) => buildFsOpenRow(oppId, opp))
     .sort((a, b) => b.ageInDays - a.ageInDays);
 
   // ===== Field Sales: 방문후 7일+ 경과 =====
-  const staleVisitOpps = fsRawOpenOpps
+  // 이번 달 코호트(oppDataMap)만 보면 월초에는 방문 후 7일 경과가 산술적으로 불가능해
+  // 구조적으로 0건이 된다. 방문 후 방치는 유입월과 무관한 잔량이므로
+  // 전월 생성 이월 오픈 Opp를 합쳐서 계산한다. (이 지표에서만 사용)
+  const fsCarryoverOpenOpps = Object.entries(carryoverOppDataMap)
+    .filter(([_, opp]) => opp.isOpen && opp.fieldUserId)
+    .map(([oppId, opp]) => buildFsOpenRow(oppId, opp));
+
+  const staleVisitOpps = [...fsRawOpenOpps, ...fsCarryoverOpenOpps]
     .filter(o => o.daysSinceVisit !== null && o.daysSinceVisit >= 7)
     .sort((a, b) => b.daysSinceVisit - a.daysSinceVisit);
 
@@ -2004,7 +2059,10 @@ function calculateInboundKPIs(data, startDate, endDate) {
     staleVisit: {
       total: staleVisitOpps.length,
       over14: staleVisitOpps.filter(o => o.daysSinceVisit >= 14).length,
+      over30: staleVisitOpps.filter(o => o.daysSinceVisit >= 30).length,
+      carryover: staleVisitOpps.filter(o => carryoverOppDataMap[o.oppId]).length,
       opps: staleVisitOpps,
+      note: '현재 오픈 상태인 Opp 중 방문완료 후 7일+ 경과 (전월 생성 이월분 포함, 유입월 무관)',
     },
     rawData: {
       rawOpenOpps: fsRawOpenOpps,
@@ -3548,7 +3606,7 @@ function calculateChannelKPIs(data, startDate, endDate) {
 // 일별 데이터 필터 함수
 // ============================================
 function filterInboundDataForDay(data, dayDate) {
-  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, fieldUserIds, carryoverOpps, allClosedOpps, contracts, visits = [] } = data;
+  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, fieldUserIds, carryoverOpps, carryoverOpenOpps = [], allClosedOpps, contracts, visits = [] } = data;
 
   // Lead: CreatedTime__c (KST) 또는 utcToKSTDateStr(CreatedDate)로 해당일 필터
   const filteredLeads = leads.filter(l => {
@@ -3561,20 +3619,24 @@ function filterInboundDataForDay(data, dayDate) {
 
   const filteredLeadIds = new Set(filteredLeads.map(l => l.Id));
   const filteredOppIds = new Set(filteredLeads.filter(l => l.ConvertedOpportunityId).map(l => l.ConvertedOpportunityId));
+  // 이월 오픈 Opp의 견적/과업은 staleVisit 상세 컬럼(마지막 Task, Task후 경과 등)에 필요하므로 함께 유지
+  const carryoverOpenIds = new Set((carryoverOpenOpps || []).map(o => o.Id));
+  const keepOppId = (id) => filteredOppIds.has(id) || carryoverOpenIds.has(id);
 
   return {
     leads: filteredLeads,
     opportunities: opportunities.filter(o => filteredOppIds.has(o.Id)),
-    quotes: quotes.filter(q => filteredOppIds.has(q.OpportunityId)),
+    quotes: quotes.filter(q => keepOppId(q.OpportunityId)),
     leadTasks: leadTasks.filter(t => filteredLeadIds.has(t.Lead__c)),
     dailyTasks: dailyTasks.filter(t => utcToKSTDateStr(t.CreatedDate) === dayDate),
-    oppTasks: oppTasks.filter(t => filteredOppIds.has(t.WhatId)),
+    oppTasks: oppTasks.filter(t => keepOppId(t.WhatId)),
     obsLeads: obsLeads.filter(l => utcToKSTDateStr(l.CreatedDate) === dayDate),
     users, userNameMap, fieldUserIds,
     carryoverOpps: carryoverOpps.filter(o => o.CloseDate === dayDate),
     allClosedOpps: allClosedOpps.filter(o => o.CloseDate === dayDate),
     contracts: (contracts || []).filter(c => c.contractStart === dayDate),
     visits,  // 방문은 Opp별 매핑이므로 전체 전달
+    carryoverOpenOpps,  // 방문후 경과일(staleVisit)은 특정일 유입이 아닌 현재 잔량이므로 전체 전달
     stageChangeHistory: (data.stageChangeHistory || []).filter(h => h.changeDate === dayDate),
   };
 }
@@ -3608,7 +3670,7 @@ function filterChannelDataForDay(data, dayDate) {
  * 인바운드 데이터를 날짜 범위로 필터 (월초~당일 누적용)
  */
 function filterInboundDataForRange(data, rangeStart, rangeEnd) {
-  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, fieldUserIds, carryoverOpps, allClosedOpps, contracts, visits = [] } = data;
+  const { leads, opportunities, quotes, leadTasks, dailyTasks, oppTasks, obsLeads, users, userNameMap, fieldUserIds, carryoverOpps, carryoverOpenOpps = [], allClosedOpps, contracts, visits = [] } = data;
 
   const filteredLeads = leads.filter(l => {
     let dateStr;
@@ -3622,17 +3684,20 @@ function filterInboundDataForRange(data, rangeStart, rangeEnd) {
 
   const filteredLeadIds = new Set(filteredLeads.map(l => l.Id));
   const filteredOppIds = new Set(filteredLeads.filter(l => l.ConvertedOpportunityId).map(l => l.ConvertedOpportunityId));
+  // 이월 오픈 Opp의 견적/과업은 staleVisit 상세 컬럼(마지막 Task, Task후 경과 등)에 필요하므로 함께 유지
+  const carryoverOpenIds = new Set((carryoverOpenOpps || []).map(o => o.Id));
+  const keepOppId = (id) => filteredOppIds.has(id) || carryoverOpenIds.has(id);
 
   return {
     leads: filteredLeads,
     opportunities: opportunities.filter(o => filteredOppIds.has(o.Id)),
-    quotes: quotes.filter(q => filteredOppIds.has(q.OpportunityId)),
+    quotes: quotes.filter(q => keepOppId(q.OpportunityId)),
     leadTasks: leadTasks.filter(t => filteredLeadIds.has(t.Lead__c)),
     dailyTasks: dailyTasks.filter(t => {
       const d = utcToKSTDateStr(t.CreatedDate);
       return d >= rangeStart && d <= rangeEnd;
     }),
-    oppTasks: oppTasks.filter(t => filteredOppIds.has(t.WhatId)),
+    oppTasks: oppTasks.filter(t => keepOppId(t.WhatId)),
     obsLeads: obsLeads.filter(l => {
       const d = utcToKSTDateStr(l.CreatedDate);
       return d >= rangeStart && d <= rangeEnd;
@@ -3642,6 +3707,7 @@ function filterInboundDataForRange(data, rangeStart, rangeEnd) {
     allClosedOpps: allClosedOpps.filter(o => o.CloseDate >= rangeStart && o.CloseDate <= rangeEnd),
     contracts: (contracts || []).filter(c => c.contractStart >= rangeStart && c.contractStart <= rangeEnd),
     visits,
+    carryoverOpenOpps,  // 방문후 경과일(staleVisit)은 기간 유입이 아닌 현재 잔량이므로 전체 전달
     stageChangeHistory: (data.stageChangeHistory || []).filter(h => h.changeDate >= rangeStart && h.changeDate <= rangeEnd),
   };
 }
