@@ -171,6 +171,7 @@ const cleanStr = s => {
       visitName: v.Name,
       visitorId: v.User__c,
       visitor: v.User__r?.Name,
+      visitorDept: v.User__c ? (ownerDept[v.User__c]?.dept || null) : null,
       visitDate: v.LocalInviteDate__c ? utcToKstDateStr(v.LocalInviteDate__c) : null,
       visitDateTime: v.LocalInviteDate__c ? utcToKstDateTime(v.LocalInviteDate__c) : null,
       conselStart: v.ConselStart__c ? utcToKstDateTime(v.ConselStart__c) : null,
@@ -356,11 +357,42 @@ const cleanStr = s => {
   if (!fs.existsSync(splitDir)) fs.mkdirSync(splitDir, { recursive: true });
 
   // 팀별 파일 (진행중만, 전체 detail)
+  // 부서 귀속은 "마지막 완료 방문자" 기준이라, 예정 방문자가 다른 팀이면
+  // 그 팀 화면에서 자기 방문 일정이 통째로 안 보인다.
+  // → 예정 방문자 팀 파일에도 사본을 넣고, 사본은 그 팀 관점의 담당자를
+  //   lastVisitor/lastVisitorDept 자리에 실어 부서·담당자 필터에 걸리게 한다.
+  //   (프론트 toPin이 이 두 필드를 그대로 쓰므로 화면 수정 불필요)
   const byDept = {};
-  for (const r of openRecords) {
-    const dept = r.lastVisitorDept || r.dept || '미지정';
+  const pushTo = (dept, rec) => {
     if (!byDept[dept]) byDept[dept] = [];
-    byDept[dept].push(r);
+    byDept[dept].push(rec);
+  };
+  let upcomingCopies = 0;
+  for (const r of openRecords) {
+    const homeDept = r.lastVisitorDept || r.dept || '미지정';
+    pushTo(homeDept, r);
+
+    const nv = r.nextScheduledVisit;
+    const nvDept = nv?.visitorDept || null;
+    if (nvDept && nvDept !== homeDept) {
+      pushTo(nvDept, {
+        ...r,
+        // 이 팀 관점의 담당자 = 예정 방문자
+        lastVisitor: nv.visitor || r.lastVisitor,
+        lastVisitorDept: nvDept,
+        lastVisitDate: nv.visitDate,
+        owner: nv.visitor || r.owner,
+        dept: nvDept,
+        // 사본 표식 + 원래 귀속 (디버깅/추후 UI용)
+        isUpcomingCopy: true,
+        homeVisitor: r.lastVisitor,
+        homeVisitorDept: homeDept,
+      });
+      upcomingCopies++;
+    }
+  }
+  if (upcomingCopies > 0) {
+    console.log(`   예정 방문자 타팀 사본: ${upcomingCopies}건`);
   }
   for (const [dept, recs] of Object.entries(byDept)) {
     const slug = DEPT_SLUG[dept] || dept.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
