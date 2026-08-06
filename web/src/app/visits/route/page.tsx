@@ -207,6 +207,17 @@ export default function VisitRoutePage() {
   const [ready, setReady] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [deptOptions, setDeptOptions] = useState<{ dept: string; open: number }[]>([]);
+  // 들렀다 가기 후보 풀 — 부서 무관 전 팀 (팀 파일과 별개로 1회 로드)
+  const [poolRecords, setPoolRecords] = useState<any[]>([]);
+
+  // 후보 풀 로드 — deptFilter와 무관하게 마운트 시 1회
+  useEffect(() => {
+    if (!S3_DATA_URL) return; // 로컬 dev는 /api/visits/all이 이미 전체라 allRecords로 폴백
+    fetch(`${S3_DATA_URL}/visits/nearby-pool.json`, { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then(j => setPoolRecords(j.records || []))
+      .catch(() => { /* 폴백: allRecords(선택 팀)로 계산 */ });
+  }, []);
 
   // 부서 드롭다운 목록 — 현재 로드된 팀과 무관하게 summary(전 부서)에서 채운다
   useEffect(() => {
@@ -407,7 +418,9 @@ export default function VisitRoutePage() {
     openInfoWindow.current = iw;
 
     // nearby — 클라이언트 사이드 거리 계산 (들렀다 가기는 풀 전체, 부서 무관)
-    const nearbyItems: NearbyItem[] = allRecords
+    // nearby-pool.json = 전 부서 후보. 로드 실패/로컬 dev면 선택 팀(allRecords)으로 폴백
+    const nearbySource = poolRecords.length > 0 ? poolRecords : allRecords;
+    const nearbyItems: NearbyItem[] = nearbySource
       .filter(inPool)
       .filter(r => r.oppId !== p.oppId)
       .map(r => {
@@ -422,13 +435,13 @@ export default function VisitRoutePage() {
     const rec = allRecords.find(r => r.oppId === p.oppId);
     if (rec) setDetail({ visits: rec.visits || [], tasks: rec.tasks || [] });
     else setDetail(null);
-  }, [radius, deptFilter, allRecords]);
+  }, [radius, deptFilter, allRecords, poolRecords]);
 
-  // 반경/부서/데이터 바뀌면 nearby 재계산
+  // 반경/부서/데이터 바뀌면 nearby 재계산 (후보 풀 뒤늦게 도착해도 갱신)
   useEffect(() => {
     if (selected) focusPin(selected);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [radius, deptFilter, allRecords]);
+  }, [radius, deptFilter, allRecords, poolRecords]);
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '400px 1fr 360px', height: 'calc(100vh - 56px)' }}>

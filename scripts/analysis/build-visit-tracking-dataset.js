@@ -410,6 +410,33 @@ const cleanStr = s => {
     console.log(`   → team-${slug}.json (${recs.length}건 / ${(fs.statSync(teamPath).size / 1024 / 1024).toFixed(2)} MB) — ${dept}`);
   }
 
+  // ── 들렀다 가기 후보 풀 (부서 무관 전 팀) ──
+  // 페이지는 선택한 팀 파일 하나만 로드하므로, 주변 매장 후보까지 그 팀으로 갇힌다.
+  // (프론트 nearby 계산은 부서 필터를 안 걸지만 원본 풀 자체가 한 팀뿐)
+  // → 전 팀을 담은 슬림 풀을 따로 만든다. tasks[]/visits[] 같은 큰 배열은 빼서
+  //   상세 조회는 기존 팀 파일이 담당하고, 이 파일은 주변 카드 렌더에만 쓴다.
+  const inNearbyPool = r => !!r.lat && !!r.lng && (!!r.isStuck || r.stage === '견적' || !!r.hasUpcomingVisit);
+  const POOL_FIELDS = [
+    'oppId', 'name', 'account', 'stage', 'lat', 'lng', 'sido', 'sigugun', 'roadAddress', 'rawAddress',
+    'lastVisitor', 'lastVisitorDept', 'owner', 'dept', 'lastVisitDate', 'firstVisit',
+    'oppOwner', 'oppOwnerDept', 'lastTaskDate', 'daysSinceLastTask', 'lastTaskSubject',
+    'hasOpenTask', 'isStuck', 'contact', 'naverMapUrl', 'naverPlaceUrl',
+    'nextScheduledVisit', 'hasUpcomingVisit', 'visitsCount', 'lastTask',
+  ];
+  // openRecords는 사본 생성 전 원본이라 oppId 중복이 없다
+  const poolRecords = openRecords.filter(inNearbyPool).map(r => {
+    const o = {};
+    for (const k of POOL_FIELDS) if (r[k] !== undefined) o[k] = r[k];
+    return o;
+  });
+  const poolPath = path.join(splitDir, 'nearby-pool.json');
+  fs.writeFileSync(poolPath, JSON.stringify({
+    generatedAt: out.generatedAt,
+    total: poolRecords.length,
+    records: poolRecords,
+  }, null, 1), 'utf8');
+  console.log(`   → nearby-pool.json (${poolRecords.length}건 / ${(fs.statSync(poolPath).size / 1024 / 1024).toFixed(2)} MB) — 전 부서 후보 풀`);
+
   // summary 파일 (전사 통계 + 정체 리스트만)
   const stageCount = {};
   const deptCount = {};
